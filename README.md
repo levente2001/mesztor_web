@@ -61,6 +61,5 @@ A repo gyökerében ekkor legalább ezeknek a fájloknak kell látszódniuk:
 
 ## 4. **Node.js + Vite** segítségével a következő módon tudod lokálisan futtatni
 
-- `npm run dev` → localhost dev szerver
 - `npm run dev:index` → `index.html` automatikus megnyitása
 - `npm run dev:admin` → `admin.html` automatikus megnyitása
