@@ -1,4 +1,4 @@
-# MeszTor Web – Lokális fejlesztői környezet
+# MeszTor Web
 
 Ez a repository egy statikus weboldalt tartalmaz (`index.html` és `admin.html`).  
 
