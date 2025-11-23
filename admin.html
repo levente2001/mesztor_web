@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mesztor Admin</title>
+  <!-- Chart.js (globálisan, nem modul) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --headerH: 64px;
+      --sidebarW: 260px;
+      --bg: #f6f8fb;
+      --panel: #fff;
+      --txt: #0f172a;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --primary:#2563eb;
+      --primary-50:#e8f0ff;
+      --success:#16a34a;
+      --danger:#dc2626;
+      --shadow: 0 6px 18px rgba(0,0,0,.06);
+      --radius: 14px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--txt);
+      font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    header.appbar{
+      position:sticky; top:0; z-index:50;
+      height:var(--headerH); display:flex; align-items:center; gap:12px;
+      background:#fff; border-bottom:1px solid var(--border); padding:0 16px;
+    }
+    header .brand{font-weight:700}
+    .badge{
+      margin-left:auto; font-size:12px; padding:.35rem .6rem; border-radius:999px;
+      border:1px solid var(--border); background:#fff;
+    }
+    .badge .dot{display:inline-block;width:.5rem;height:.5rem;border-radius:50%;margin-right:.35rem;background:#a3a3a3;vertical-align:middle}
+    .badge.ok .dot{background:#16a34a}
+
+    /* shell */
+    .admin-shell{ display:block }
+    .container{ padding: 18px }
+
+    /* Sidebar (desktop: fix bal oldalt) */
+    .sidebar{
+      position:fixed; left:0; top:var(--headerH); bottom:0; width:var(--sidebarW);
+      background:#fff; border-right:1px solid var(--border); box-shadow:var(--shadow);
+      overflow:auto; z-index:30;
+    }
+    .side-head{padding:14px 14px 6px; font-weight:700; color:#111827}
+    .side-nav{padding:8px}
+    .side-link{
+      display:flex; align-items:center; gap:.55rem; width:100%;
+      margin-bottom:8px; padding:.65rem .8rem; border-radius:10px;
+      background:#f8fafc; border:1px solid var(--border); cursor:pointer;
+    }
+    .side-link.active{background:var(--primary); color:#fff; border-color:var(--primary)}
+    .side-link .emoji{width:1.2rem;text-align:center}
+
+    /* Főtartalom a sidebar mellett */
+    .main{ margin-left: var(--sidebarW) }
+
+    /* Hamburger (mobil) */
+    .hamburger{
+      display:none; border:1px solid var(--border); background:#fff; border-radius:10px;
+      padding:.5rem .7rem; cursor:pointer;
+    }
+    .overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:25 }
+
+    @media (max-width:900px){
+      .sidebar{
+        top:0; width:280px; transform:translateX(-100%); transition:transform .25s ease; border-right:none; border-radius:0;
+      }
+      .sidebar.open{ transform:translateX(0) }
+      .main{ margin-left:0 }
+      .hamburger{ display:inline-block }
+      .overlay.show{ display:block }
+      .container{ padding:14px }
+    }
+
+    /* Panelek, kártyák */
+    .panel{
+      background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .panel-head{ padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700 }
+    .panel-body{ padding:16px }
+    .grid{ display:grid; gap:14px }
+    .grid-2{ grid-template-columns:1fr 1fr }
+    .grid-3{ grid-template-columns:repeat(3,1fr) }
+    .kpi{ padding:14px; border:1px solid var(--border); border-radius:12px; background:#fff }
+    .kpi .label{color:var(--muted);font-size:12px}
+    .kpi .num{font-size:28px;font-weight:800;margin-top:6px}
+    .kpi .delta{font-size:12px;margin-top:4px;color:var(--success)}
+
+    .btn{
+      display:inline-flex; align-items:center; gap:.45rem;
+      padding:.55rem .8rem; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer
+    }
+    .btn.primary{ background:var(--primary); color:#fff; border-color:var(--primary) }
+    .btn.danger{ background:#fff; color:var(--danger); border-color:#f3d3d3 }
+    .btn.secondary{ background:#f8fafc }
+    .muted{ color:var(--muted) }
+    input[type="text"], input[type="email"]{
+      width:100%; padding:.6rem .7rem; border:1px solid var(--border); border-radius:10px; background:#fff
+    }
+
+    /* Tabs (pane-ek) */
+    .tab-pane{ display:none }
+    .tab-pane.active{ display:block }
+
+    /* Layout (Trello board) */
+    .board-wrap{ display:grid; grid-template-columns:repeat(3,minmax(260px,1fr)); gap:16px }
+    .list{
+      background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px; box-shadow: var(--shadow);
+      min-height:120px
+    }
+    .list-head{ display:flex; align-items:center; gap:8px; margin-bottom:10px }
+    .list-title{ flex:1; font-weight:700; background:#e6eefc; border:0; padding:.55rem .7rem; border-radius:10px }
+    .list-path{ flex:1; background:#e5f0ff; border:0; padding:.45rem .6rem; border-radius:8px }
+    .cards{ display:flex; flex-direction:column; gap:8px; min-height:10px }
+    .card-item{ display:flex; align-items:center; gap:8px; background:#eaf2ff; border:1px solid #dfebff; border-radius:10px; padding:.55rem .6rem; cursor:pointer; }
+    .card-title{ flex:1; border:0; background:transparent; font-weight:600 }
+    .list-foot{ margin-top:10px }
+
+    @media (max-width:1100px){ .board-wrap{ grid-template-columns:repeat(2,minmax(240px,1fr)) } }
+    @media (max-width:700px){ .board-wrap{ grid-template-columns:1fr } }
+
+    /* Top pages lista */
+    .top-row{ display:flex; justify-content:space-between; align-items:center; padding:.6rem .75rem; border:1px solid var(--border); border-radius:10px; background:#fff }
+    .top-row+.top-row{ margin-top:8px }
+    .top-path{ font-weight:600 }
+    .top-meta{ font-size:12px; color:var(--muted) }
+    .top-num{ font-weight:700 }
+
+    .spacer{ height:14px }
+  </style>
+</head>
+<body>
+  <header class="appbar">
+    <button id="sidebarToggle" class="hamburger" aria-label="Menü" aria-expanded="false">☰</button>
+    <div class="brand">Mesztor Admin</div>
+    <div id="envBadge" class="badge"><span class="dot"></span><span class="label">Demo mód</span></div>
+  </header>
+
+  <div class="admin-shell">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar" aria-label="Oldalsó menü">
+      <div class="side-head">Menü</div>
+      <nav class="side-nav">
+        <button class="side-link tab-btn active" data-pane="analytics"><span class="emoji">📈</span>Analitika</button>
+        <button class="side-link tab-btn" data-pane="layout"><span class="emoji">🧩</span>Beállítások – Layout</button>
+        <button class="side-link tab-btn" data-pane="email"><span class="emoji">✉️</span>Beállítások – Email</button>
+        <button class="side-link tab-btn" data-pane="content"><span class="emoji">📝</span>Beállítások – Tartalom</button>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <!-- Analitika -->
+      <section id="pane-analytics" class="tab-pane active container">
+        <div class="panel">
+          <div class="panel-head">Oldal analitika</div>
+          <div class="panel-body">
+            <div class="muted" id="dateRangeLabel">Időszak</div>
+            <div class="spacer"></div>
+            <div class="grid grid-3">
+              <div class="kpi">
+                <div class="label">Munkamenetek</div>
+                <div class="num" id="kpiSessions">0</div>
+                <div class="delta" id="kpiSessionsChange">+0.0%</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Egyedi látogatók</div>
+                <div class="num" id="kpiUsers">0</div>
+                <div class="delta" id="kpiUsersChange">+0.0%</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Átlagos session idő</div>
+                <div class="num" id="kpiAvgDuration">0p 00s</div>
+                <div class="delta" id="kpiDurChange">+0.0%</div>
+              </div>
+            </div>
+
+            <div class="spacer"></div>
+            <div class="kpi">
+              <div class="label">Oldalak / session</div>
+              <div class="num" id="kpiPagesPerSession">0.00</div>
+              <div class="delta" id="kpiPpsChange">+0.0%</div>
+            </div>
+
+            <div class="spacer"></div>
+            <div class="panel" style="padding:16px">
+              <canvas id="sessionsChart" height="220"></canvas>
+            </div>
+
+            <div class="spacer"></div>
+            <div class="panel">
+              <div class="panel-head">Top oldalak</div>
+              <div class="panel-body" id="topPages">
+                <div class="muted">Nincs adat.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Layout -->
+      <section id="pane-layout" class="tab-pane container">
+        <div class="panel">
+          <div class="panel-head">
+            Oldal szerkezet
+            <button id="layoutSaveBtnBoards" class="btn primary" style="float:right">Mentés</button>
+          </div>
+          <div class="panel-body">
+            <div class="muted" style="margin-bottom:10px">
+              Listák = oldalak (pl. <b>/</b>, <b>/termekek</b>). Kártyák = szekciók. Húzd, nevezd át, töröld.
+              <span id="layoutSaveStatus" class="muted" style="margin-left:8px"></span>
+            </div>
+            <div id="listsWrap" class="board-wrap"></div>
+            <div class="spacer"></div>
+            <button id="addListBtn" class="btn secondary">+ Újabb lista hozzáadása</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Email -->
+      <section id="pane-email" class="tab-pane container">
+        <div class="panel">
+          <div class="panel-head">Email beállítás</div>
+          <div class="panel-body">
+            <form id="emailForm" class="grid" style="grid-template-columns:1fr auto; gap:10px">
+              <input type="email" id="emailRecipient" placeholder="Címzett email (pl. info@domain.hu)" />
+              <button class="btn primary" type="submit">Mentés</button>
+            </form>
+            <div id="emailStatus" class="muted" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tartalom -->
+      <section id="pane-content" class="tab-pane container">
+        <div class="panel">
+          <div class="panel-head">Tartalom szerkesztése</div>
+          <div class="panel-body">
+            <div class="muted" style="margin-bottom:10px">
+              Az egyes modulokon belül a szövegre <b>kattintva tudod szerkeszteni</b> a tartalmat, ami az atadbázisba mentődik azonnal.
+            </div>
+
+            <iframe
+              id="sitePreview"
+              src="../main/index.html?adminPreview=1"
+              style="width:100%; min-height:700px; border:1px solid #e5e7eb; border-radius:16px; background:#fff;"
+            ></iframe>
+          </div>
+        </div>
+      </section>
+
+
+    </main>
+  </div>
+
+  <div id="overlay" class="overlay" aria-hidden="true"></div>
+
+  <!-- Main module -->
+  <script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref as dbRef, get, set, update as dbUpdate, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import Sortable from "https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/modular/sortable.esm.js";
+
+    /* ---------- Firebase config ---------- */
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZUGCJkn9L4xH_M8L0fZYTUresZ9qYPqo",
+      authDomain: "flymeto-696d0.firebaseapp.com",
+      databaseURL: "https://flymeto-696d0-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "flymeto-696d0",
+      storageBucket: "flymeto-696d0.firebasestorage.app",
+      messagingSenderId: "651204605205",
+      appId: "1:651204605205:web:d5dfbf3698be7ac6ee251c",
+      measurementId: "G-4L7YN2X9YL"
+    };
+
+    let app, dbRealtime, firebaseEnabled = false;
+    const envBadgeEl = document.getElementById("envBadge");
+    try{
+      app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+      dbRealtime = getDatabase(app);
+      firebaseEnabled = true;
+      envBadgeEl.classList.add("ok");
+      envBadgeEl.querySelector(".label").textContent = "Firebase aktív";
+    }catch(e){
+      console.warn("Firebase init hiba, demó mód:", e);
+      firebaseEnabled = false;
+      envBadgeEl.classList.remove("ok");
+      envBadgeEl.querySelector(".label").textContent = "Demo mód";
+    }
+
+    /* ---------- Sidebar / Tabs / Hamburger ---------- */
+    const tabs  = document.querySelectorAll('.tab-btn');
+    const panes = document.querySelectorAll('.tab-pane');
+    function activatePane(btn){
+      tabs.forEach(b => b.classList.toggle('active', b === btn));
+      panes.forEach(p => p.classList.toggle('active', p.id === 'pane-'+btn.dataset.pane));
+    }
+    tabs.forEach(btn => btn.addEventListener('click', ()=>{
+      activatePane(btn);
+      if (window.innerWidth <= 900) closeSidebar();
+    }));
+
+    const sidebarEl = document.getElementById('sidebar');
+    const overlayEl = document.getElementById('overlay');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    function openSidebar(){ sidebarEl.classList.add('open'); overlayEl.classList.add('show'); document.body.style.overflow='hidden'; toggleBtn?.setAttribute('aria-expanded','true'); }
+    function closeSidebar(){ sidebarEl.classList.remove('open'); overlayEl.classList.remove('show'); document.body.style.overflow=''; toggleBtn?.setAttribute('aria-expanded','false'); }
+    toggleBtn?.addEventListener('click', ()=> sidebarEl.classList.contains('open')? closeSidebar() : openSidebar());
+    overlayEl?.addEventListener('click', closeSidebar);
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeSidebar(); });
+
+    /* ---------- Helper-ek ---------- */
+    const uid  = ()=>"id_"+Math.random().toString(36).slice(2,9);
+    const slug = s => (s||"").toLowerCase().trim().replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"").replace(/\-+/g,"-");
+    const toHHMMSS = (sec)=>{ const s=Math.max(0,Math.round(+sec||0)); const m=Math.floor(s/60), r=s%60; return `${m}p ${String(r).padStart(2,"0")}s`; };
+
+    /* ---------- Analitika (Realtime DB -> aggregálás) ---------- */
+    const kpiSessionsEl     = document.getElementById("kpiSessions");
+    const kpiUsersEl        = document.getElementById("kpiUsers");
+    const kpiAvgDurationEl  = document.getElementById("kpiAvgDuration");
+    const kpiPagesPerSessEl = document.getElementById("kpiPagesPerSession");
+    const kpiSessionsChEl   = document.getElementById("kpiSessionsChange");
+    const kpiUsersChEl      = document.getElementById("kpiUsersChange");
+    const kpiDurChEl        = document.getElementById("kpiDurChange");
+    const kpiPpsChEl        = document.getElementById("kpiPpsChange");
+    const dateRangeLabelEl  = document.getElementById("dateRangeLabel");
+    const topPagesEl        = document.getElementById("topPages");
+    let sessionsChart;
+
+    const demoAnalytics = {
+      dateRangeLabel: "Utóbbi 7 nap (demo)",
+      byDay: [
+        { day: "2025-11-14", sessions: 31, users: 26, avgSessionSeconds: 140, pageviews: 81 },
+        { day: "2025-11-15", sessions:  2, users:  2, avgSessionSeconds: 120, pageviews:  5 },
+        { day: "2025-11-16", sessions:  3, users:  3, avgSessionSeconds: 160, pageviews:  7 },
+        { day: "2025-11-17", sessions:  3, users:  3, avgSessionSeconds: 170, pageviews:  8 },
+        { day: "2025-11-18", sessions:  3, users:  3, avgSessionSeconds: 170, pageviews:  8 },
+        { day: "2025-11-19", sessions:  1, users:  1, avgSessionSeconds: 100, pageviews:  2 },
+        { day: "2025-11-20", sessions:  2, users:  2, avgSessionSeconds: 160, pageviews:  6 }
+      ],
+      topPages: [
+        { path:"/", sessions: 18, avgSeconds: 180 },
+        { path:"/szolgaltatasok", sessions: 11, avgSeconds: 160 },
+        { path:"/referenciak", sessions:  8, avgSeconds: 200 },
+        { path:"/kapcsolat", sessions:  6, avgSeconds:  95 },
+      ],
+      prevPeriod: { sessions: 60, users: 50, avgSessionSeconds: 145, pageviewsPerSession: 2.9 },
+      deviceStats: { mobile:60, tablet:15, desktop:25 }
+    };
+
+    function fmtShort(iso){ const d=new Date(iso); if(isNaN(d)) return iso; return d.toLocaleDateString("hu-HU",{month:"2-digit",day:"2-digit"}); }
+    function pct(cur, prev){ if(!prev) return 0; return ((cur-prev)/prev)*100; }
+    function deviceType(ua=""){const u=ua.toLowerCase(); if(/mobile|iphone|ipod|android.*mobile/.test(u))return"mobile"; if(/ipad|tablet|android(?!.*mobile)/.test(u))return"tablet"; return"desktop";}
+
+    function buildTopPagesFromSessions(sessions){
+      const map=new Map();
+      sessions.forEach(s=>{
+        const path = s.firstPage || s.lastPage || "/";
+        const dur  = Number(s.durationSec||0);
+        const item = map.get(path)||{path,sessions:0,totalDur:0};
+        item.sessions++; item.totalDur+=dur; map.set(path,item);
+      });
+      return [...map.values()].map(x=>({path:x.path, sessions:x.sessions, avgSeconds:x.totalDur/x.sessions}))
+               .sort((a,b)=>b.sessions-a.sessions).slice(0,5);
+    }
+
+    function buildAnalyticsFromSessions(sessions){
+      if(!sessions?.length) return demoAnalytics;
+      const byDate=new Map(), visitors=new Set(); let totalDur=0,totalPv=0;
+      sessions.forEach(s=>{
+        const t = s.startedAt || s.lastUpdatedAt || Date.now();
+        const d = new Date(t); if(isNaN(d)) return;
+        const key = d.toISOString().slice(0,10);
+        const rec = byDate.get(key)||{day:key,sessions:0,sumDur:0,pageviews:0,userSet:new Set()};
+        rec.sessions++; const dur=+s.durationSec||0; rec.sumDur+=dur; totalDur+=dur;
+        const pv=+s.pageViews||0; rec.pageviews+=pv; totalPv+=pv;
+        if(s.visitorId) {rec.userSet.add(s.visitorId); visitors.add(s.visitorId);}
+        rec.device = deviceType(s.userAgent||"");
+        byDate.set(key,rec);
+      });
+      const days=[...byDate.values()].sort((a,b)=>a.day.localeCompare(b.day))
+        .map(r=>({day:r.day, sessions:r.sessions, users:r.userSet.size||r.sessions, avgSessionSeconds:r.sumDur/r.sessions, pageviews:r.pageviews}));
+      const totalSessions=days.reduce((s,d)=>s+d.sessions,0);
+      const uniqueVisitors = visitors.size || totalSessions;
+      const avgDur = totalSessions? days.reduce((s,d)=>s+d.avgSessionSeconds*d.sessions,0)/totalSessions : 0;
+      const pps    = totalSessions? totalPv/totalSessions : 0;
+      return {
+        dateRangeLabel: "Összes összegyűjtött adat",
+        byDay: days,
+        topPages: buildTopPagesFromSessions(sessions),
+        prevPeriod: { sessions: totalSessions, users: uniqueVisitors, avgSessionSeconds: avgDur, pageviewsPerSession: pps },
+        deviceStats: {} // opcionális
+      };
+    }
+
+    function setDelta(el,value){ const txt=(value>=0?"+":"")+value.toFixed(1)+"%"; el.textContent=txt; el.style.color = value>=0? "var(--success)":"var(--danger)"; }
+    function renderTopPages(data){
+      const pages=data.topPages||[];
+      if(!pages.length){ topPagesEl.innerHTML='<div class="muted">Nincs adat.</div>'; return; }
+      topPagesEl.innerHTML="";
+      pages.forEach(p=>{
+        const row=document.createElement("div"); row.className="top-row";
+        const left=document.createElement("div"); left.innerHTML=`<div class="top-path">${p.path}</div><div class="top-meta">${p.sessions} session · ${toHHMMSS(p.avgSeconds)}</div>`;
+        const right=document.createElement("div"); right.className="top-num"; right.textContent=p.sessions.toLocaleString("hu-HU");
+        row.appendChild(left); row.appendChild(right); topPagesEl.appendChild(row);
+      });
+    }
+
+    async function loadAnalytics(){
+      if(!firebaseEnabled || !dbRealtime){
+        const d=demoAnalytics; updateKpisAndChart(d); return;
+      }
+      try{
+        const snap=await get(dbRef(dbRealtime,"analytics/sessions"));
+        if(!snap.exists()){ updateKpisAndChart(demoAnalytics); return; }
+        const sessions = Object.values(snap.val()||{});
+        const d = buildAnalyticsFromSessions(sessions);
+        updateKpisAndChart(d);
+      }catch(e){
+        console.warn("[analytics] hiba:", e);
+        updateKpisAndChart(demoAnalytics);
+      }
+    }
+
+    function updateKpisAndChart(d){
+      const days=d.byDay||[];
+      const totalSessions = days.reduce((s,x)=>s+x.sessions,0);
+      const totalUsers    = days.reduce((s,x)=>s+x.users,0);
+      const totalPv       = days.reduce((s,x)=>s+x.pageviews,0);
+      const avgDur        = totalSessions? days.reduce((s,x)=>s+x.avgSessionSeconds*x.sessions,0)/totalSessions : 0;
+      const pps           = totalSessions? totalPv/totalSessions : 0;
+
+      kpiSessionsEl.textContent = totalSessions.toLocaleString("hu-HU");
+      kpiUsersEl.textContent    = totalUsers.toLocaleString("hu-HU");
+      kpiAvgDurationEl.textContent = toHHMMSS(avgDur);
+      kpiPagesPerSessEl.textContent = pps.toFixed(2);
+
+      // (demo jellegű) összevetés előző időszakkal
+      setDelta(kpiSessionsChEl, pct(totalSessions, d.prevPeriod?.sessions||totalSessions));
+      setDelta(kpiUsersChEl,    pct(totalUsers,    d.prevPeriod?.users||totalUsers));
+      setDelta(kpiDurChEl,      pct(avgDur,        d.prevPeriod?.avgSessionSeconds||avgDur));
+      setDelta(kpiPpsChEl,      pct(pps,           d.prevPeriod?.pageviewsPerSession||pps));
+
+      dateRangeLabelEl.textContent = d.dateRangeLabel||"Időszak";
+
+      const labels = days.map(x=>fmtShort(x.day));
+      const series = days.map(x=>x.sessions);
+      if(sessionsChart) sessionsChart.destroy();
+      sessionsChart = new Chart(document.getElementById("sessionsChart").getContext("2d"), {
+        type:"line",
+        data:{ labels, datasets:[{ label:"Munkamenetek", data:series, tension:.35, borderWidth:2, pointRadius:3, fill:false }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+      });
+
+      renderTopPages(d);
+    }
+
+    /* ---------- Layout (Trello board, Realtime DB) ---------- */
+    const listsWrap = document.getElementById("listsWrap");
+    const addListBtn = document.getElementById("addListBtn");
+    const saveBtnBoards = document.getElementById("layoutSaveBtnBoards");
+    const saveStatusEl = document.getElementById("layoutSaveStatus");
+
+    let board = { version:2, updatedAt: Date.now(), lists: [] };
+    let autosaveTimer=null;
+
+    function autoSave(){ clearTimeout(autosaveTimer); autosaveTimer=setTimeout(saveBoard, 600); }
+
+    function listTemplate(list){
+      return `
+        <div class="list" data-id="${list.id}">
+          <div class="list-head">
+            <input class="list-title" type="text" value="${list.title||""}" placeholder="Lista neve (pl. Főoldal)" />
+            <button class="btn danger del-list" title="Lista törlése">🗑</button>
+          </div>
+          <div class="list-head" style="margin-top:-6px">
+            <input class="list-path" type="text" value="${list.path||"/"}" placeholder="/útvonal (pl. /, /termekek)" />
+          </div>
+          <div class="cards" id="cards-${list.id}"></div>
+          <div class="list-foot"><button class="btn secondary add-card" type="button">+ Kártya hozzáadása</button></div>
+        </div>`;
+    }
+    function cardTemplate(card){
+      return `
+        <div class="card-item" data-id="${card.id}">
+          <input class="card-title" type="text" value="${card.title||""}" />
+          <button class="btn danger del-card" title="Kártya törlése">🗑</button>
+        </div>`;
+    }
+
+    function renderBoard(){
+      listsWrap.innerHTML="";
+      board.lists.forEach(list=>{
+        const wrap=document.createElement("div"); wrap.innerHTML=listTemplate(list);
+        const listEl=wrap.firstElementChild; const cardsEl=listEl.querySelector(".cards");
+        (list.cards||[]).forEach(c=>{ const cw=document.createElement("div"); cw.innerHTML=cardTemplate(c); cardsEl.appendChild(cw.firstElementChild); });
+
+        // Sortable cards
+        new Sortable(cardsEl,{ group:"cards", animation:150, onEnd:()=>{ syncFromDOM(); autoSave(); } });
+
+        // inputs/listeners
+        listEl.querySelector(".list-title").addEventListener("input", ()=>{ syncFromDOM(); autoSave(); });
+        listEl.querySelector(".list-path").addEventListener("input",  ()=>{ syncFromDOM(); autoSave(); });
+        listEl.querySelector(".add-card").addEventListener("click", ()=>{
+          const id=uid(); list.cards.push({ id, key:`sec-${id.slice(-4)}`, title:"új szekció" }); renderBoard(); autoSave();
+        });
+        listEl.querySelector(".del-list").addEventListener("click", ()=>{
+          if(!confirm("Biztosan törlöd a listát az összes kártyával?")) return;
+          board.lists=board.lists.filter(x=>x.id!==list.id); renderBoard(); autoSave();
+        });
+
+        // per-card listeners
+        cardsEl.querySelectorAll(".card-item").forEach(ci=>{
+          ci.querySelector(".card-title").addEventListener("input", ()=>{ syncFromDOM(); autoSave(); });
+          ci.querySelector(".del-card").addEventListener("click", ()=>{
+            const cid=ci.dataset.id; list.cards=list.cards.filter(c=>c.id!==cid); renderBoard(); autoSave();
+          });
+        });
+
+        listsWrap.appendChild(listEl);
+      });
+
+      // Sortable lists
+      new Sortable(listsWrap,{ animation:150, draggable:".list", onEnd:()=>{ syncFromDOM(); autoSave(); } });
+    }
+
+    function syncFromDOM(){
+      const lists=[];
+      listsWrap.querySelectorAll(".list").forEach(listEl=>{
+        const id=listEl.dataset.id, title=listEl.querySelector(".list-title").value.trim()||"Lista", path=listEl.querySelector(".list-path").value.trim()||"/";
+        const cards=[]; listEl.querySelectorAll(".card-item").forEach(ci=>{ const cid=ci.dataset.id; const ttl=ci.querySelector(".card-title").value.trim()||"szekció"; cards.push({ id:cid, title:ttl, key:slug(ttl) }); });
+        lists.push({ id, title, path, cards });
+      });
+      board.lists=lists; board.updatedAt=Date.now();
+    }
+
+    async function saveBoard(){
+      if(!firebaseEnabled || !dbRealtime){
+        saveStatusEl.textContent="Demo módban lokálisan frissítve."; setTimeout(()=>saveStatusEl.textContent="",1200); return;
+      }
+      try{ await set(dbRef(dbRealtime,"settings/layoutBoards"), board); saveStatusEl.textContent="Mentve ✅"; setTimeout(()=>saveStatusEl.textContent="",1200); }
+      catch(e){ console.warn("[layoutBoards] mentési hiba:", e); saveStatusEl.textContent="Hiba a mentésnél."; }
+    }
+    async function loadBoard(){
+      const seed={
+        version:2, updatedAt: Date.now(),
+        lists:[
+          { id:uid(), title:"Főoldal", path:"/", cards:[ {id:uid(),key:"hero",title:"hero"}, {id:uid(),key:"miert-mi",title:"miért mi"}, {id:uid(),key:"szolgaltatasok",title:"szolgáltatások"}, {id:uid(),key:"projects",title:"projects"}, {id:uid(),key:"footer",title:"footer"} ]},
+          { id:uid(), title:"Kapcsolat", path:"/kapcsolat", cards:[ {id:uid(),key:"kapcsolat-form",title:"kapcsolat form"}, {id:uid(),key:"kapcsolat-map",title:"kapcsolat map"} ]},
+          { id:uid(), title:"Referenciák", path:"/referenciak", cards:[ {id:uid(),key:"referenciak",title:"referenciák"}, {id:uid(),key:"top-termekek",title:"top termékek"}, {id:uid(),key:"top-beszallitok",title:"top beszállítók"} ]}
+        ]
+      };
+      if(!firebaseEnabled || !dbRealtime){ board=seed; renderBoard(); return; }
+      try{
+        const snap=await get(dbRef(dbRealtime,"settings/layoutBoards"));
+        board = snap.exists()? (snap.val()||seed) : seed;
+      }catch(e){ console.warn("[layoutBoards] betöltési hiba, seed indul:", e); board=seed; }
+      renderBoard();
+    }
+    document.getElementById("addListBtn").addEventListener("click", ()=>{ board.lists.push({id:uid(),title:"Új lista",path:"/",cards:[]}); renderBoard(); autoSave(); });
+    document.getElementById("layoutSaveBtnBoards").addEventListener("click", saveBoard);
+
+    /* ---------- Email beállítás ---------- */
+    const emailForm = document.getElementById("emailForm");
+    const emailRecipient = document.getElementById("emailRecipient");
+    const emailStatus = document.getElementById("emailStatus");
+    async function loadEmail(){
+      if(!firebaseEnabled || !dbRealtime) return;
+      try{ const snap=await get(dbRef(dbRealtime,"settings/email")); if(snap.exists()) emailRecipient.value=(snap.val()?.recipient)||""; }catch{}
+    }
+    emailForm.addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const recipient=emailRecipient.value.trim();
+      if(firebaseEnabled && dbRealtime){ await set(dbRef(dbRealtime,"settings/email"), { recipient, updatedAt: Date.now() }); }
+      emailStatus.textContent="Mentve ✅"; setTimeout(()=>emailStatus.textContent="",1500);
+    });
+
+    /* ---------- Tartalom szerkesztők ---------- */
+    const contentFormsWrap = document.getElementById("contentForms");
+
+    // Itt adjuk meg, hogy szekciónként milyen mezőket tud beállítani az admin.
+    // name = kulcs a DB-ben, label = felirat az admin felületen.
+    const SECTION_FIELDS = {
+      site: {
+        title: "Globális beállítások (fejléc, lábléc, elérhetőségek)",
+        fields: [
+          { name: "brandMain",        label: "Fejléc – cégnév (pl. Mesz-Tor Kft.)" },
+          { name: "brandSub",         label: "Fejléc – alcím (pl. Kaputechnikai szaküzlet)" },
+
+          { name: "topbarPhones",     label: "Topbar – telefonszám(ok)" },
+          { name: "topbarEmail",      label: "Topbar – e-mail cím" },
+          { name: "topbarAddress",    label: "Topbar – cím (pl. Székesfehérvár és környéke)" },
+          { name: "topbarCtaText",    label: "Topbar – CTA gomb szövege (pl. Ajánlatot kérek)" },
+
+          { name: "navHome",          label: "Menü – „Kezdőlap” felirat" },
+          { name: "navProducts",      label: "Menü – „Termékválaszték” felirat" },
+          { name: "navServices",      label: "Menü – „Szolgáltatások” felirat" },
+          { name: "navWhyUs",         label: "Menü – „Miért mi?” felirat" },
+          { name: "navReferences",    label: "Menü – „Referenciák” felirat" },
+          { name: "navContact",       label: "Menü – „Kapcsolat” felirat" },
+          { name: "navCtaText",       label: "Menü – kiemelt gomb szöveg (pl. Ajánlatkérés)" },
+
+          { name: "footerText",       label: "Lábléc – fő szöveg" },
+          { name: "footerLink1Label", label: "Lábléc – 1. link szöveg" },
+          { name: "footerLink1Href",  label: "Lábléc – 1. link URL" },
+          { name: "footerLink2Label", label: "Lábléc – 2. link szöveg" },
+          { name: "footerLink2Href",  label: "Lábléc – 2. link URL" },
+          { name: "footerLink3Label", label: "Lábléc – 3. link szöveg" },
+          { name: "footerLink3Href",  label: "Lábléc – 3. link URL" }
+        ],
+        image: false
+      },
+
+      hero: {
+        title: "Hero szekció (nyitó blokk)",
+        fields: [
+          { name: "kicker",             label: "Kis címke (pl. Kaputechnikai szaküzlet)" },
+          { name: "title",              label: "Fő cím (H1, pl. Mesz-Tor Kft.)" },
+          { name: "lead",               label: "Bevezető szöveg (1–2 mondat)" },
+
+          { name: "primaryCta",         label: "Elsődleges gomb szövege (pl. Ajánlatot kérek)" },
+          { name: "primaryCtaTarget",   label: "Elsődleges gomb cél (#anchor vagy URL)" },
+          { name: "secondaryCta",       label: "Másodlagos gomb szövege" },
+          { name: "secondaryCtaTarget", label: "Másodlagos gomb cél (#anchor vagy URL)" },
+
+          { name: "meta1",              label: "Alsó meta sor 1 (pl. 10+ év tapasztalat)" },
+          { name: "meta2",              label: "Alsó meta sor 2 (pl. Gyors kiszállás, megbízható minőség)" }
+        ],
+        image: true   // hero kép feltöltése
+      },
+
+      "miert-mi": {
+        title: "Miért mi? (előnyök blokk)",
+        fields: [
+          { name: "sectionKicker", label: "Szekció kis címke (pl. Miért válassz minket?)" },
+          { name: "sectionTitle",  label: "Szekció címe" },
+          { name: "sectionLead",   label: "Szekció leírás / mottó" },
+
+          { name: "card1Title",    label: "1. kártya cím" },
+          { name: "card1Text",     label: "1. kártya szöveg" },
+          { name: "card2Title",    label: "2. kártya cím" },
+          { name: "card2Text",     label: "2. kártya szöveg" },
+          { name: "card3Title",    label: "3. kártya cím" },
+          { name: "card3Text",     label: "3. kártya szöveg" }
+        ],
+        image: false
+      },
+
+      szolgaltatasok: {
+        title: "Szolgáltatások (folyamat lépések)",
+        fields: [
+          { name: "sectionKicker", label: "Szekció kis címke (pl. Szolgáltatásaink)" },
+          { name: "sectionTitle",  label: "Szekció címe" },
+          { name: "sectionLead",   label: "Szekció leírás" },
+
+          { name: "step1Title",    label: "1. lépés cím (pl. Felmérés)" },
+          { name: "step1Text",     label: "1. lépés szöveg" },
+          { name: "step2Title",    label: "2. lépés cím" },
+          { name: "step2Text",     label: "2. lépés szöveg" },
+          { name: "step3Title",    label: "3. lépés cím" },
+          { name: "step3Text",     label: "3. lépés szöveg" },
+          { name: "step4Title",    label: "4. lépés cím" },
+          { name: "step4Text",     label: "4. lépés szöveg" },
+          { name: "step5Title",    label: "5. lépés cím" },
+          { name: "step5Text",     label: "5. lépés szöveg" }
+        ],
+        image: false
+      },
+
+      projects: {
+        title: "Mottó / projektek blokk",
+        fields: [
+          { name: "mottoTitle", label: "Mottó blokk címe" },
+          { name: "mottoText",  label: "Mottó szöveg" },
+          { name: "ctaText",    label: "Ajánlatkérés blokk szöveg" },
+          { name: "ctaButton",  label: "Ajánlatkérés gomb felirata" }
+        ],
+        image: false
+      },
+
+      referenciak: {
+        title: "Referenciák szekció",
+        fields: [
+          { name: "sectionKicker", label: "Szekció kis címke" },
+          { name: "sectionTitle",  label: "Szekció címe (pl. Referenciáink)" },
+          { name: "sectionLead",   label: "Szekció leírás" },
+          { name: "emptyText",     label: "Üres állapot szöveg (ha nincs referencia)" }
+        ],
+        image: false
+      },
+
+      "kapcsolat-form": {
+        title: "Kapcsolat – bal oldali blokk / űrlap szövegek",
+        fields: [
+          { name: "sectionKicker", label: "Szekció kis címke" },
+          { name: "sectionTitle",  label: "Szekció címe (pl. Kapcsolat)" },
+          { name: "sectionLead",   label: "Szekció leírás (1–2 mondat)" },
+
+          { name: "leftIntro",     label: "Bal oldali kártya fő szöveg" },
+          { name: "ctaButton",     label: "Ajánlatkérés gomb felirata" },
+          { name: "leftTip",       label: "Bal oldali kártya kis tipp / megjegyzés" }
+        ],
+        image: false
+      },
+
+      "kapcsolat-map": {
+        title: "Kapcsolat – elérhetőségek + térkép",
+        fields: [
+          { name: "phoneLabel",    label: "Telefon címsor" },
+          { name: "phoneLine1",    label: "Telefon – 1. sor" },
+          { name: "phoneLine2",    label: "Telefon – 2. sor" },
+
+          { name: "emailLabel",    label: "E-mail címsor" },
+          { name: "emailAddress",  label: "E-mail cím" },
+
+          { name: "addressLabel",  label: "Cím címsor (pl. Bemutatóterem)" },
+          { name: "addressLine",   label: "Cím szöveg" },
+          { name: "openingHours",  label: "Nyitvatartás szöveg" },
+
+          { name: "facebookLabel", label: "Facebook címsor" },
+          { name: "facebookHandle",label: "Facebook oldal / URL" },
+
+          { name: "mapEmbedSrc",   label: "Google Maps iframe SRC (beágyazott térkép linkje)" }
+        ],
+        image: false
+      },
+
+      footer: {
+        title: "Lábléc (ha külön akarsz még beállítani)",
+        fields: [
+          { name: "text",         label: "Fő szöveg" },
+          { name: "link1Label",   label: "1. link szöveg" },
+          { name: "link1Href",    label: "1. link URL" },
+          { name: "link2Label",   label: "2. link szöveg" },
+          { name: "link2Href",    label: "2. link URL" },
+          { name: "link3Label",   label: "3. link szöveg" },
+          { name: "link3Href",    label: "3. link URL" }
+        ],
+        image: false
+      },
+
+      "top-termekek": {
+        title: "Termékválaszték blokk (opcionális)",
+        fields: [
+          { name: "sectionKicker", label: "Szekció kis címke" },
+          { name: "sectionTitle",  label: "Szekció címe" },
+          { name: "sectionLead",   label: "Szekció leírás" }
+        ],
+        image: false
+      },
+
+      "top-beszallitok": {
+        title: "Top beszállítók blokk (opcionális)",
+        fields: [
+          { name: "sectionTitle",  label: "Blokk címe" },
+          { name: "sectionLead",   label: "Blokk leírás" }
+        ],
+        image: false
+      }
+    };
+
+    // Egyszerűsítő helper: string -> {name,label}
+    function normalizeFieldsArray(fields) {
+      return (fields || []).map(f => {
+        if (typeof f === "string") {
+          return { name: f, label: f };
+        }
+        return f;
+      });
+    }
+
+    function sectionFormTemplate(key, data){
+      const metaBase = SECTION_FIELDS[key] || { title:key, fields:[], image:false };
+      const meta = { ...metaBase, fields: normalizeFieldsArray(metaBase.fields) };
+
+      const fieldsHtml = (meta.fields || []).map(f => {
+        const value = data && data[f.name]
+          ? String(data[f.name]).replace(/"/g,'&quot;')
+          : "";
+        return `
+        <label style="display:block;margin:.35rem 0">
+          <div style="font-size:.8rem;margin-bottom:.1rem">${f.label}</div>
+          <input type="text" data-field="${f.name}" value="${value}" />
+        </label>`;
+      }).join("");
+
+      const imgHtml = meta.image ? `
+        <label style="display:block;margin:.45rem 0">Kép (opcionális)
+          <input type="file" accept="image/*" data-img />
+        </label>
+        <div class="muted preview">${(data && data.imageDataUrl) ? 'Jelenleg van kép' : 'Nincs kép feltöltve'}</div>` : "";
+
+      return `
+        <div class="kpi panel" style="padding:14px" data-key="${key}">
+          <div style="font-weight:700;margin-bottom:.25rem">
+            ${meta.title} <span class="muted">(${key})</span>
+          </div>
+          ${fieldsHtml}
+          ${imgHtml}
+          <div style="margin-top:.5rem">
+            <button class="btn primary" data-save>Mentés</button>
+            <span class="muted" data-status></span>
+          </div>
+        </div>`;
+    }
+
+    function getSectionKeys(){
+      const set = new Set();
+
+      // Layout-ból jövő szekciók
+      if (board?.lists?.length) {
+        board.lists.forEach(list => {
+          (list.cards || []).forEach(c => {
+            const k = c.key || slug(c.title);
+            if (k) set.add(k);
+          });
+        });
+      }
+
+      // Előre definiált szekció-kulcsok (pl. 'site')
+      Object.keys(SECTION_FIELDS).forEach(k => set.add(k));
+
+      return [...set];
+    }
+
+    async function loadContent(){
+
+      if (!contentFormsWrap) return; 
+
+      const order = getSectionKeys();
+      let all = {};
+
+      if (firebaseEnabled && dbRealtime) {
+        const snap = await get(dbRef(dbRealtime,"content/sections"));
+        all = snap.exists() ? (snap.val() || {}) : {};
+      }
+
+      contentFormsWrap.innerHTML = order
+        .map(k => sectionFormTemplate(k, all[k]))
+        .join("");
+
+      contentFormsWrap.querySelectorAll("[data-key]").forEach(card => {
+        const key = card.dataset.key;
+        let imageDataUrl = all[key]?.imageDataUrl || null;
+
+        const imgInput = card.querySelector('input[type=file][data-img]');
+        if (imgInput) {
+          imgInput.addEventListener("change", ()=>{
+            const f = imgInput.files?.[0]; if (!f) return;
+            const r = new FileReader();
+            r.onload = ()=>{
+              imageDataUrl = r.result;
+              const prev = card.querySelector(".preview");
+              if (prev) prev.textContent = "Kép kiválasztva (mentés után elérhető).";
+            };
+            r.readAsDataURL(f);
+          });
+        }
+
+        card.querySelector("[data-save]").addEventListener("click", async (e)=>{
+          e.preventDefault();
+
+          const fields = {};
+          card.querySelectorAll('input[type=text][data-field]').forEach(inp => {
+            fields[inp.dataset.field] = inp.value.trim();
+          });
+
+          const payload = { ...fields, updatedAt: Date.now() };
+          if (imageDataUrl) payload.imageDataUrl = imageDataUrl;
+
+          if (firebaseEnabled && dbRealtime) {
+            await set(dbRef(dbRealtime, `content/sections/${key}`), payload);
+          }
+
+          const st = card.querySelector("[data-status]");
+          if (st) {
+            st.textContent = "Mentve ✅";
+            setTimeout(()=> st.textContent = "", 1500);
+          }
+        });
+      });
+    }
+
+
+
+    /* ---------- Start ---------- */
+    await loadBoard();
+    await loadEmail();
+    await loadContent();
+    await loadAnalytics();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <title>MESZ-TOR Kft. – Kaputechnikai szaküzlet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="MESZ-TOR Kft. – kaputechnikai termékek forgalmazása a kiegészítőktől a komplett kivitelezésig. Garázskapuk, ipari kapuk, kapumozgató motorok, automata üvegajtók, sorompók és szerviz Székesfehérváron." />
+
+  <!-- Google Font (nem kötelező, csak szebb) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #f5f7fb;
+      --color-surface: #ffffff;
+      --color-primary: #c86904;
+      --color-primary-soft: #e0efff;
+      --color-accent: #d8a600;
+      --color-text: #33291f;
+      --color-muted: #6b7280;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 40px rgba(42, 25, 15, 0.08);
+      --container-width: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #f0f4ff 0, #f5f7fb 32%, #f8fafc 100%);
+      color: var(--color-text);
+      line-height: 1.6;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Topbar */
+
+    .topbar {
+      background: #2a1c0f;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+    }
+
+    .topbar-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.4rem 1.5rem;
+    }
+
+    .topbar-left,
+    .topbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .topbar-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+
+    .topbar-item span.icon {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .topbar-cta {
+      background: var(--color-accent);
+      color: #ffffff;
+      padding: 0.3rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    /* Header / Nav */
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      background: linear-gradient(to right, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.9));
+      border-bottom: 1px solid rgba(42, 29, 15, 0.04);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 0.8rem 1.5rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 20% 20%, #efbb90, #c86c04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 1.1rem;
+      box-shadow: 0 10px 25px rgba(200, 154, 4, 0.35);
+    }
+
+    .brand-text-main {
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      font-size: 0.95rem;
+    }
+
+    .brand-text-sub {
+      font-size: 0.75rem;
+      color: var(--color-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-size: 0.93rem;
+    }
+
+    .nav-links a {
+      position: relative;
+      padding-bottom: 0.2rem;
+      color: #0f172a;
+      font-weight: 500;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.22s ease;
+    }
+
+    /* A dropdownos menüpont legyen rugalmas sorban elrendezve */
+    .nav-item.has-dropdown > a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      position: relative;
+    }
+
+    /* A NYÍL – itt felülírjuk a globális ::before-t is */
+    .nav-item.has-dropdown > a::before {
+      content: "▾";
+      position: static;   /* ne absolute legyen */
+      top: auto;
+      left: auto;
+      background: none;
+      font-size: 0.75rem;
+      transform: translateY(1px);
+      margin-left: 0.1rem;
+    }
+
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .nav-cta {
+      border-radius: 999px;
+      padding: 0.45rem 1.2rem;
+      border: none;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(200, 138, 4, 0.35);
+    }
+
+    .nav-cta:hover {
+      filter: brightness(1.05);
+    }
+
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .nav-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #2a1f0f;
+      margin: 4px 0;
+      border-radius: 999px;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    /* --- Felső menü: layout-board alapú dropdown-ok --- */
+    .nav-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-item + .nav-item {
+      margin-left: 0.75rem;
+    }
+
+    .nav-item > a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .nav-dropdown {
+      position: absolute;
+      top: 120%;
+      left: 0;
+      min-width: 180px;
+      padding: 0.45rem 0.5rem;
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 12px 30px rgba(15,23,42,0.14);
+      display: none;
+      flex-direction: column;
+      gap: 0.25rem;
+      z-index: 60;
+    }
+
+    .nav-item.has-dropdown:hover .nav-dropdown {
+      display: flex;
+    }
+
+    .nav-dropdown a {
+      font-size: 0.85rem;
+      padding: 0.25rem 0.15rem;
+      color: #0f172a;
+      white-space: nowrap;
+    }
+
+    /* ne rajzolja rá a fő menüpont aláhúzását a dropdown linkekre */
+    .nav-dropdown a::after {
+      display: none;
+    }
+
+
+    /* Hero */
+
+    .hero {
+      padding: 3.5rem 0 3.75rem;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .hero-kicker {
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      font-weight: 700;
+      padding: 0.2rem 0.8rem;
+      border-radius: 999px;
+      background: var(--color-primary-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-kicker-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--color-primary);
+    }
+
+    .hero-title {
+      font-size: clamp(2.2rem, 3vw, 2.8rem);
+      line-height: 1.12;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-title span.highlight {
+      color: var(--color-primary);
+    }
+
+    .hero-lead {
+      font-size: 1rem;
+      color: var(--color-muted);
+      max-width: 34rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      align-items: center;
+      margin-bottom: 1.8rem;
+    }
+
+    .btn-primary {
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      padding: 0.85rem 1.6rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      color: #ffffff;
+      box-shadow: 0 14px 30px rgba(200, 118, 4, 0.4);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.06);
+    }
+
+    .btn-ghost {
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      padding: 0.8rem 1.5rem;
+      background: rgba(255, 255, 255, 0.7);
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .btn-ghost span.icon {
+      font-size: 1.05rem;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--color-muted);
+    }
+
+    .hero-meta span strong {
+      display: block;
+      font-size: 0.95rem;
+      color: #111827;
+    }
+
+    .hero-visual {
+      position: relative;
+    }
+
+    .hero-card {
+      background: var(--color-surface);
+      border-radius: 26px;
+      padding: 1.4rem;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .hero-card-badge {
+      font-size: 0.75rem;
+      color: var(--color-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .hero-card-main {
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.6rem;
+    }
+
+    .hero-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: var(--color-primary-soft);
+      color: var(--color-primary);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+
+    /* Contact */
+
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .hero-stat-label {
+      font-size: 0.75rem;
+      color: var(--color-muted);
+    }
+
+    .hero-stat-value {
+      font-weight: 600;
+    }
+
+    .hero-glow {
+      position: absolute;
+      inset: -0%;
+      background: radial-gradient(circle at 10% 10%, rgba(4, 102, 200, 0.15), transparent 0%),
+                  radial-gradient(circle at 100% 100%, rgba(0, 180, 216, 0.18), transparent 0%);
+      opacity: 0.9;
+      border-radius: 20px;
+      z-index: 0;
+    }
+
+    /* Sections generic */
+
+    section {
+      padding: 3rem 0;
+    }
+
+    .section-header {
+      max-width: 42rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-kicker {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      margin: 0 0 0.35rem;
+    }
+
+    .section-lead {
+      font-size: 0.95rem;
+      color: var(--color-muted);
+      margin: 0;
+    }
+
+    /* Product grid */
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.3rem;
+      box-shadow: 0 14px 35px rgba(15, 23, 42, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .card-tag {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-muted);
+    }
+
+    .card-title {
+      font-size: 1.02rem;
+      font-weight: 600;
+    }
+
+    .card-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+      font-size: 0.83rem;
+    }
+
+    .chip-link {
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #111827;
+      border: 1px solid rgba(15, 23, 42, 0.04);
+    }
+
+    .chip-link:hover {
+      background: #e5e7eb;
+    }
+
+    .card-footer-link {
+      margin-top: 0.4rem;
+      font-size: 0.82rem;
+      color: var(--color-primary);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* Partners strip */
+
+    .partners-strip {
+      background: radial-gradient(circle at 0 0, #e0f2fe 0, #f5f7fb 40%, #ffffff 100%);
+      border-radius: 26px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .partners-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .partner-pill {
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      font-size: 0.85rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* Services / Why us */
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .icon-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem 1.2rem;
+      box-shadow: 0 10px 30px rgba(42, 31, 15, 0.05);
+    }
+
+    .icon-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: var(--color-primary-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--color-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .icon-card-title {
+      font-size: 0.98rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .icon-card-body {
+      font-size: 0.9rem;
+      color: var(--color-muted);
+    }
+
+    /* Motto & references */
+
+    .motto-block {
+      background: #0f172a;
+      color: #e5e7eb;
+      border-radius: 26px;
+      padding: 2.1rem 2rem;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .motto-block::before {
+      content: "„";
+      position: absolute;
+      top: -1.2rem;
+      left: 1.1rem;
+      font-size: 5rem;
+      color: rgba(148, 163, 184, 0.2);
+    }
+
+    .motto-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .motto-text {
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .refs-cta {
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .refs-cta-text {
+      font-size: 0.95rem;
+      color: var(--color-muted);
+    }
+
+        .references-grid {
+      margin-top: 1.8rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .reference-card {
+      background: #ffffff;
+      border-radius: 0.9rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .contact-map-frame {
+      padding: 0;
+    }
+
+    .reference-image-wrap {
+      position: relative;
+      padding-top: 62%;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .reference-image-wrap img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.25s ease-out;
+    }
+
+    .reference-card:hover .reference-image-wrap img {
+      transform: scale(1.03);
+    }
+
+    .reference-info {
+      padding: 0.8rem 0.95rem 0.9rem;
+      font-size: 0.9rem;
+    }
+
+    .reference-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .reference-desc {
+      font-size: 0.85rem;
+      color: var(--color-muted);
+    }
+
+    .references-empty {
+      margin-top: 1.2rem;
+      font-size: 0.9rem;
+      color: var(--color-muted);
+    }
+
+    /* Contact */
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 2rem;
+    }
+
+    .contact-card {
+      background: var(--color-surface);
+      border-radius: 24px;
+      padding: 1.7rem 1.7rem;
+    }
+
+    .contact-card-map {
+      background: rgba(0, 180, 216, 0);
+      border-radius: 24px;
+      margin-top: 25px;
+      padding: 0rem 0rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+    }
+
+    .contact-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #111827;
+    }
+
+    .contact-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: var(--color-primary-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--color-primary);
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    .contact-highlight {
+      font-size: 0.9rem;
+      color: var(--color-muted);
+      margin-top: 0.3rem;
+    }
+
+    /* Footer */
+
+    footer {
+      border-top: 1px solid rgba(148, 163, 184, 0.25);
+      background: #0f172a;
+      color: #9ca3af;
+      padding: 1.5rem 0 2rem;
+      font-size: 0.82rem;
+      margin-top: 2rem;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-links a {
+      color: #d1d5db;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 960px) {
+      .hero-inner {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .hero {
+        padding-top: 2.4rem;
+      }
+      .contact-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 800px) {
+      .topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.5rem 1.2rem;
+      }
+
+      .header-inner {
+        padding: 0.7rem 1.2rem;
+      }
+
+      .nav-links {
+        position: fixed;
+        inset: 60px 0 auto 0;
+        background: rgba(248, 250, 252, 0.98);
+        border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        padding: 0.75rem 1.5rem 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        transform: translateY(-120%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+      }
+
+      .nav-links.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .nav-toggle {
+        display: block;
+      }
+
+      .nav-cta {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .nav-links {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-item {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-left: 0;
+      }
+
+      .nav-item.has-dropdown > a::after {
+        content: "";
+      }
+
+      .nav-dropdown {
+        position: static;
+        box-shadow: none;
+        background: transparent;
+        padding: 0.1rem 0 0.2rem 0.75rem;
+        display: flex;
+      }
+
+    }
+
+    @media (max-width: 600px) {
+      section {
+        padding: 2.3rem 0;
+      }
+
+      .motto-block {
+        padding: 1.7rem 1.6rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn-primary,
+      .btn-ghost {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-inner container">
+      <div class="topbar-left">
+        <div class="topbar-item">
+          <span class="icon">📞</span>
+          <span data-section="site" data-field="topbarPhones">
+            06-22-331-332 · 06-20-977-09-07
+          </span>
+        </div>
+        <div class="topbar-item">
+          <span class="icon">✉️</span>
+          <span data-section="site" data-field="topbarEmail">
+            mesztorkaputechnika1@gmail.com
+          </span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-item">
+          <span class="icon">📍</span>
+          <span data-section="site" data-field="topbarAddress">
+            Székesfehérvár, Berényi út 81.
+          </span>
+        </div>
+        <a href="#contact"
+          class="topbar-cta"
+          data-section="site"
+          data-field="topbarCtaText">
+          Vegye fel velünk a kapcsolatot
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Header / Nav -->
+  <header class="site-header">
+    <div class="header-inner container">
+      <div class="brand">
+        <div class="brand-logo">M</div>
+        <div>
+          <div class="brand-text-main"
+              data-section="site" data-field="brandMain">
+            MESZ-TOR Kft.
+          </div>
+          <div class="brand-text-sub"
+              data-section="site" data-field="brandSub">
+            Kaputechnikai szaküzlet és kivitelezés
+          </div>
+        </div>
+      </div>
+
+      <button class="nav-toggle" aria-label="Menü megnyitása">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="main-nav">
+        <div class="nav-links">
+          <a href="#hero"      data-section="site" data-field="navHome">Kezdőlap</a>
+          <a href="#products"  data-section="site" data-field="navProducts">Termékválaszték</a>
+          <a href="#services"  data-section="site" data-field="navServices">Szolgáltatások</a>
+          <a href="#why-us"    data-section="site" data-field="navWhyUs">Miért  mi?</a>
+          <a href="#references"data-section="site" data-field="navReferences">Referenciák</a>
+          <a href="#contact"   data-section="site" data-field="navContact">Kapcsolat</a>
+          <button class="nav-cta"
+                  onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'});"
+                  data-section="site" data-field="navCtaText">
+            Ajánlatkérés
+          </button>
+        </div>
+      </nav>
+
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Hero -->
+    <section id="hero" class="hero">
+      <div class="container hero-inner">
+        <div>
+          <div class="hero-kicker">
+            <span class="hero-kicker-dot"></span>
+            <span data-section="hero" data-field="kicker">
+              Csalódásmentes kaputechnika
+            </span>
+          </div>
+          <h1 class="hero-title"
+              data-section="hero" data-field="title">
+            Üdvözöljük a <span class="highlight">kaputechnikai termékek</span> világában.
+          </h1>
+          <p class="hero-lead"
+            data-section="hero" data-field="lead">
+            Fő profilunk a kaputechnikai termékek forgalmazása a kiegészítőktől a komplett kivitelezésig.
+            Stabil termékeket és precíz szolgáltatást nyújtunk meglévő és leendő ügyfeleink részére.
+          </p>
+          <div class="hero-actions">
+            <button class="btn-primary"
+                    onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'});"
+                    data-section="hero" data-field="primaryCta">
+              Kérek személyre szabott ajánlatot
+            </button>
+            <button class="btn-ghost"
+                    onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'});"
+                    data-section="hero" data-field="secondaryCta">
+              <span class="icon">⬇️</span>
+              Termékválaszték megtekintése
+            </button>
+          </div>
+          <div class="hero-meta">
+            <span data-section="hero" data-field="meta1">
+              <strong>Székesfehérvár</strong> bemutatóterem · Berényi út 81.
+            </span>
+            <span data-section="hero" data-field="meta2">
+              <strong>Sokéves tapasztalat</strong> lakossági és ipari kaputechnikában
+            </span>
+          </div>
+
+        </div>
+
+        <div class="hero-visual">
+          <div class="hero-glow"></div>
+          <div class="hero-card">
+            <div class="hero-card-badge" data-section="hero" data-field="herobadge">Kaputechnikai megoldások</div>
+            <div class="hero-card-main">
+              <span data-section="hero" data-field="herosoanleft">Lakossági &amp; ipari kapuk</span>
+              <span style="font-size:0.85rem;color:var(--color-muted);" data-section="hero" data-field="herospanright">tanácsadás · kivitelezés · szerviz</span>
+            </div>
+            <div class="hero-pill-row">
+              <span class="pill" data-section="hero" data-field="herocard1">Garázskapuk</span>
+              <span class="pill" data-section="hero" data-field="herocard2">Ipari kapuk</span>
+              <span class="pill" data-section="hero" data-field="herocard3">Kapumozgató motorok</span>
+              <span class="pill" data-section="hero" data-field="herocard4">Sorompók</span>
+            </div>
+            <div class="hero-stats">
+              <div>
+                <div class="hero-stat-label" data-section="hero" data-field="heroctexttitleleft">Szolgáltatásaink</div>
+                <div class="hero-stat-value" data-section="hero" data-field="heroctexttitleright">Ajánlatkészítéstől a szervizig</div>
+              </div>
+              <div>
+                <div class="hero-stat-label" data-section="hero" data-field="heroctextleft">Megbízható beszállítók</div>
+                <div class="hero-stat-value" data-section="hero" data-field="heroctextright">Hörmann és további kiemelt partnerek</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Products -->
+    <section id="products">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-kicker" data-section="products" data-field="sectionKicker">Termékválaszték</div>
+          <h2 class="section-title" data-section="products" data-field="sectionTitle">Kaputechnikai megoldások egy helyen</h2>
+          <p class="section-lead" data-section="products" data-field="sectionLead">
+            Lakossági garázskapuktól az ipari gyorskapukig, kapumozgató motoroktól az automata üvegajtókig –
+            segítünk megtalálni az adott helyre legideálisabb megoldást.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <div class="card-tag" data-section="products" data-field="productcardtop">Lakossági megoldások</div>
+            <div class="card-title" data-section="products" data-field="productcardtitle">Garázskapuk</div>
+            <p class="icon-card-body" data-section="products" data-field="productcardtext">
+              Esztétikus és biztonságos garázskapuk a mindennapi használathoz.
+            </p>
+            <div class="card-links">
+              <span class="chip-link" data-section="products" data-field="productcard1">Lakossági redőnykapuk</span>
+              <span class="chip-link" data-section="products" data-field="productcard2">Szekcionált garázskapuk</span>
+              <span class="chip-link" data-section="products" data-field="productcard3">Billenőkapuk</span>
+            </div>
+            <a href="#contact" class="card-footer-link" data-section="products" data-field="productcardcontact1">Ajánlat garázskapura →</a>
+          </article>
+
+          <article class="card">
+            <div class="card-tag">Ipari megoldások</div>
+            <div class="card-title">Ipari kapuk</div>
+            <p class="icon-card-body">
+              Megbízható ipari kapuk raktárakhoz, csarnokokhoz és logisztikai központokhoz.
+            </p>
+            <div class="card-links">
+              <span class="chip-link">Ipari redőnykapuk</span>
+              <span class="chip-link">Ipari szekcionált kapuk</span>
+              <span class="chip-link">Gyorskapuk</span>
+            </div>
+            <a href="#contact" class="card-footer-link">Ipari kapu ajánlat →</a>
+          </article>
+
+          <article class="card">
+            <div class="card-tag">Mozgatástechnika</div>
+            <div class="card-title">Kapumozgató meghajtások</div>
+            <p class="icon-card-body">
+              Kapumozgató motorok lakossági és ipari felhasználásra.
+            </p>
+            <div class="card-links">
+              <span class="chip-link">Szárnyas kapu motorok</span>
+              <span class="chip-link">Tolókapu motorok</span>
+              <span class="chip-link">Garázskapu motorok</span>
+            </div>
+            <a href="#contact" class="card-footer-link">Kapumozgató megoldások →</a>
+          </article>
+
+          <article class="card">
+            <div class="card-tag">Beléptetés</div>
+            <div class="card-title">Automata üvegajtók &amp; sorompók</div>
+            <p class="icon-card-body">
+              Modern, megbízható beléptetési rendszerek üzletekhez, irodákhoz, parkolókhoz.
+            </p>
+            <div class="card-links">
+              <span class="chip-link">Automata üvegajtók</span>
+              <span class="chip-link">Sorompók</span>
+            </div>
+            <a href="#contact" class="card-footer-link">Beléptetőrendszer ajánlat →</a>
+          </article>
+
+          <article class="card">
+            <div class="card-tag">Kiegészítők</div>
+            <div class="card-title">Távirányítók, fotocellák, klaviatúrák</div>
+            <p class="icon-card-body">
+              Biztonságot és kényelmet növelő kiegészítők széles választéka.
+            </p>
+            <div class="card-links">
+              <span class="chip-link">Távirányítók</span>
+              <span class="chip-link">Fotocellák</span>
+              <span class="chip-link">Klaviatúrák</span>
+            </div>
+            <a href="#contact" class="card-footer-link">Kiegészítők iránt érdeklődöm →</a>
+          </article>
+
+          <article class="card">
+            <div class="card-tag">Kerítésmegoldások</div>
+            <div class="card-title">Alu kerítések &amp; egyedi utcai kapuk</div>
+            <p class="icon-card-body">
+              Tartós és elegáns alu kerítések, személyre szabott utcai kapukkal.
+            </p>
+            <div class="card-links">
+              <span class="chip-link">Alu kerítések</span>
+              <span class="chip-link">Egyedi utcai kapuk</span>
+            </div>
+            <a href="#contact" class="card-footer-link">Kerítés és utcai kapu ajánlat →</a>
+          </article>
+        </div>
+
+        <div style="margin-top:2.2rem;">
+          <div class="partners-strip">
+            <div style="font-size:0.9rem;color:var(--color-muted);">Megbízható beszállító partnereink:</div>
+            <div class="partners-list">
+              <span class="partner-pill">Hörmann Hungária Kft.</span>
+              <span class="partner-pill">Automata Bejáratok Specialistája Kft.</span>
+              <span class="partner-pill">Roll-N Kft.</span>
+              <span class="partner-pill">Overgate Kft.</span>
+              <span class="partner-pill">Motors For Gate Kft.</span>
+              <span class="partner-pill">Kapuker Kft.</span>
+              <span class="partner-pill">Gal-La Bt.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Services -->
+    <section id="services">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-kicker">Szolgáltatásaink</div>
+          <h2 class="section-title">Teljes körű támogatás a tervezéstől a szervizig</h2>
+          <p class="section-lead">
+            Nem csak termékeket kínálunk, hanem komplett megoldást: felmérés, tanácsadás, szállítás,
+            beüzemelés és márkafüggetlen szerviz egy kézben.
+          </p>
+        </div>
+
+        <div class="icon-grid">
+          <article class="icon-card">
+            <div class="icon-badge">📝</div>
+            <h3 class="icon-card-title">Ajánlat készítés</h3>
+            <p class="icon-card-body">
+              Gyors, személyre szabott, díjmentes árajánlat készítése az Ön igényeire szabva.
+            </p>
+          </article>
+
+          <article class="icon-card">
+            <div class="icon-badge">📐</div>
+            <h3 class="icon-card-title">Felmérés</h3>
+            <p class="icon-card-body">
+              Precíz helyszíni felmérés szakképzett munkatársunk által, a legjobb műszaki megoldás érdekében.
+            </p>
+          </article>
+
+          <article class="icon-card">
+            <div class="icon-badge">💬</div>
+            <h3 class="icon-card-title">Szaktanácsadás</h3>
+            <p class="icon-card-body">
+              Hozzáértő kollégáink segítenek eligazodni a termékek, méretek és műszaki lehetőségek között.
+            </p>
+          </article>
+
+          <article class="icon-card">
+            <div class="icon-badge">🚚</div>
+            <h3 class="icon-card-title">Szállítás</h3>
+            <p class="icon-card-body">
+              Szakszerű, sérülésmentes szállítás a kaputechnikai termékek sajátosságainak figyelembevételével.
+            </p>
+          </article>
+
+          <article class="icon-card">
+            <div class="icon-badge">🛠️</div>
+            <h3 class="icon-card-title">Beüzemelés</h3>
+            <p class="icon-card-body">
+              Magas színvonalú beszerelés és beüzemelés, hogy az új kapu hosszú távon megbízhatóan működjön.
+            </p>
+          </article>
+
+          <article class="icon-card">
+            <div class="icon-badge">🔧</div>
+            <h3 class="icon-card-title">Szervizelés, javítás</h3>
+            <p class="icon-card-body">
+              Márkafüggetlen kaputechnikai termékek javítása, karbantartása, gyors reakcióval.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why us -->
+    <section id="why-us">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-kicker">Miért válasszon minket?</div>
+          <h2 class="section-title">Minőség, szakértelem, hosszú távú biztonság</h2>
+          <p class="section-lead">
+            A megbízható minőségű, csalódásmentes termékek mellett köteleztük el magunkat,
+            mert számunkra az Ön hosszú távú elégedettsége a legfontosabb.
+          </p>
+        </div>
+
+        <div class="icon-grid">
+          <article class="icon-card">
+            <div class="icon-badge">⭐</div>
+            <h3 class="icon-card-title">Magas minőségű termékek</h3>
+            <p class="icon-card-body">
+              Az árat nem az olcsóbb termék, hanem a minőség határozza meg – ennek megfelelően válogattuk össze kínálatunkat.
+            </p>
+          </article>
+
+          <article class="icon-card">
+            <div class="icon-badge">📦</div>
+            <h3 class="icon-card-title">Széles termékválaszték</h3>
+            <p class="icon-card-body">
+              Az összes meghatározó gyártó termékei elérhetőek, így mindig a legjobb megoldást ajánljuk.
+            </p>
+          </article>
+
+          <article class="icon-card">
+            <div class="icon-badge">🛡️</div>
+            <h3 class="icon-card-title">Kiemelt garanciák</h3>
+            <p class="icon-card-body">
+              Beszállítóink kiemelt garanciával hálálják meg a minőségi termékekbe vetett bizalmat.
+            </p>
+          </article>
+
+          <article class="icon-card">
+            <div class="icon-badge">🤝</div>
+            <h3 class="icon-card-title">Vevőbarát ügyfélszolgálat</h3>
+            <p class="icon-card-body">
+              Barátságos, felkészült ügyfélszolgálat segít a megfelelő termék és megoldás kiválasztásában.
+            </p>
+          </article>
+
+          <article class="icon-card">
+            <div class="icon-badge">👷</div>
+            <h3 class="icon-card-title">Precíz munkatársak</h3>
+            <p class="icon-card-body">
+              Hozzáértő szakemberekből álló csapatunk magas szintű szakmai előképzettséggel dolgozik.
+            </p>
+          </article>
+
+          <article class="icon-card">
+            <div class="icon-badge">🏭</div>
+            <h3 class="icon-card-title">Bőséges raktárkészlet</h3>
+            <p class="icon-card-body">
+              A leggyakrabban használt termékekből mindig tartunk raktáron a gyors kiszolgálás érdekében.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Motto + References -->
+    <section id="motto">
+      <div class="container">
+        <div class="motto-block">
+          <div class="motto-title">Mottónk</div>
+          <div class="motto-text">
+            Tudjuk, hogy egy nem megfelelő minőségű termék miatti rossz szájíz tovább tart, mint az alacsony ár okozta
+            pillanatnyi öröm. Hiszünk abban, hogy az árat nem egy olcsóbb termék, hanem a minőség határozza meg.
+            Ezért mi a megbízható minőségű, csalódásmentes termékek mellett köteleztük el magunkat.
+          </div>
+          <div class="refs-cta">
+            <div class="refs-cta-text">
+              Nézze meg korábbi munkáinkról készült referencia fotóinkat, és inspirálódjon a megvalósult projektekből.
+            </div>
+            <a id="references-link" href="#references" class="btn-ghost">
+              Referencia fotók iránt érdeklődöm
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- References -->
+    <section id="references">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-kicker">Referenciák</div>
+          <h2 class="section-title">Korábbi munkáink</h2>
+          <p class="section-lead">
+            Néhány kiemelt projektünk az elmúlt időszakból. A fotók az admin felületen keresztül tölthetők fel,
+            és automatikusan megjelennek itt.
+          </p>
+        </div>
+
+        <div id="references-grid" class="references-grid">
+          <!-- A kártyákat JavaScript tölti be -->
+        </div>
+
+        <p id="references-empty" class="references-empty" style="display:none;">
+          Jelenleg még nincs feltöltött referencia fotó. Amint hozzáadsz képeket az admin felületen,
+          itt automatikusan megjelennek.
+        </p>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-kicker">Kapcsolat</div>
+          <h2 class="section-title">Vegye fel velünk a kapcsolatot</h2>
+          <p class="section-lead">
+            Ha termékeinkkel vagy szolgáltatásainkkal kapcsolatban kérdése van, vagy szaktanácsra lenne szüksége,
+            forduljon hozzánk bizalommal – szívesen segítünk.
+          </p>
+        </div>
+
+        <div class="contact-grid">
+          <div class="contact-card">
+            <p class="icon-card-body" style="margin-bottom:1.2rem;">
+              Küldje el elképzelését, és kollégáink rövid időn belül felveszik Önnel a kapcsolatot
+              egy személyre szabott ajánlattal. Az alábbi elérhetőségeken is rendelkezésére állunk.
+            </p>
+            <button class="btn-primary" style="width:100%;justify-content:center;box-shadow: none;">
+              Ajánlatkérés e-mailben
+            </button>
+            <p class="contact-highlight">
+              Tipp: csatoljon fotót, méreteket és rövid leírást, így gyorsabban tudunk pontos ajánlatot adni.
+            </p>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-item">
+              <div class="contact-icon">📞</div>
+              <div>
+                <div class="contact-label">Telefon</div>
+                <div>06-22-331-332</div>
+                <div>Mobil: 06-20-977-09-07</div>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">✉️</div>
+              <div>
+                <div class="contact-label">E-mail</div>
+                <div>mesztorkaputechnika1@gmail.com</div>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">📍</div>
+              <div>
+                <div class="contact-label">Bemutatóterem</div>
+                <div>Székesfehérvár, Berényi út 81.</div>
+                <div class="contact-highlight">
+                  Ügyfélfogadás: Hétfő–Péntek 8:00–12:00 és 13:00–17:00
+                </div>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">👍</div>
+              <div>
+                <div class="contact-label">Facebook</div>
+                <div>/mesztorkaputechnika</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+          <div class="contact-card-map">
+            <div class="contact-map">
+              <div class="contact-map-frame">
+                <iframe
+                  loading="lazy"
+                  style="width:100%; margin:0px; border:none; border-radius: 24px;height: 250px;"
+                  allowfullscreen
+                  referrerpolicy="no-referrer-when-downgrade"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2711.5744152118177!2d18.427701676388274!3d47.20340921573286!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4769f7c6a3f97fab%3A0x18808bf47ea10725!2sMesz-Tor%20Kft.%20-%20Kaputechnika!5e0!3m2!1shu!2shu!4v1762281591018!5m2!1shu!2shu">
+                </iframe>
+              </div>
+            </div>
+          </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-inner">
+      <div>© MESZ-TOR Kft. – Kaputechnikai szaküzlet, Székesfehérvár</div>
+      <div class="footer-links">
+        <a href="#hero">Kezdőlap</a>
+        <a href="#">Általános szerződési feltételek</a>
+        <a href="#">Adatvédelmi tájékoztató</a>
+        <a href="#">Cookie szabályzat</a>
+      </div>
+    </div>
+  </footer>
+
+    <script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, update, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZUGCJkn9L4xH_M8L0fZYTUresZ9qYPqo",
+      authDomain: "flymeto-696d0.firebaseapp.com",
+      databaseURL: "https://flymeto-696d0-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "flymeto-696d0",
+      storageBucket: "flymeto-696d0.firebasestorage.app",
+      messagingSenderId: "651204605205",
+      appId: "1:651204605205:web:d5dfbf3698be7ac6ee251c",
+      measurementId: "G-4L7YN2X9YL"
+    };
+
+    const gridEl  = document.getElementById("references-grid");
+    const emptyEl = document.getElementById("references-empty");
+
+    let app;
+    let db;
+    let firebaseEnabled = false;
+
+    try {
+      if (firebaseConfig.apiKey) {
+        app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+        db  = getDatabase(app);
+        firebaseEnabled = true;
+      }
+    } catch (e) {
+      console.warn("[firebase] init hiba – demo mód:", e);
+      firebaseEnabled = false;
+    }
+
+        /* ------------ LAYOUT → NAV (layoutBoards alapján) ------------ */
+
+    const navLinksEl = document.querySelector(".main-nav .nav-links");
+    let navClickHandlerAttached = false;
+
+    // Tartalom betöltés + adminPreview esetén inline szerkesztés + nav
+    if (firebaseEnabled) {
+      initContentInline().catch(err => console.warn("Tartalom betöltés hiba:", err));
+      initLayoutNav().catch(err => console.warn("Layout/nav betöltés hiba:", err));
+    }
+
+    // layout-kulcs → fallback section ID
+    const KEY_FALLBACK_IDS = {
+      "miert-mi": "why-us",
+      "szolgaltatasok": "services",
+      "projects": "motto",
+      "footer": "footer",
+      "kapcsolat-form": "contact",
+      "kapcsolat-map": "contact",
+      "referenciak": "references",
+      "top-termekek": "products",
+      "top-beszallitok": "products"
+    };
+
+    function findSectionByKey(key) {
+      if (!key) return null;
+
+      // 1) próbáljuk data-section alapján (ha később ráteszed a szekciókra)
+      let el = document.querySelector(`[data-section="${key}"]`);
+      if (el) {
+        const sec = el.closest("section, footer");
+        return sec || el;
+      }
+
+      // 2) fallback: előre ismert ID-k
+      const fbId = KEY_FALLBACK_IDS[key];
+      if (fbId) {
+        const sec2 = document.getElementById(fbId);
+        if (sec2) return sec2;
+        if (fbId === "footer") {
+          const f = document.querySelector("footer");
+          if (f) return f;
+        }
+      }
+
+      // 3) utolsó esély: létezik ilyen ID?
+      const sec3 = document.getElementById(key);
+      if (sec3) return sec3;
+      if (key === "footer") return document.querySelector("footer") || null;
+
+      return null;
+    }
+
+    function attachNavClickHandler() {
+      if (!navLinksEl || navClickHandlerAttached) return;
+      navClickHandlerAttached = true;
+
+      // Delegált kattintás: bármelyik A / BUTTON, amin van data-section-key
+      navLinksEl.addEventListener("click", (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+
+        const withKey = t.closest("[data-section-key]");
+        const key = withKey?.dataset.sectionKey;
+        if (!key) return;
+
+        e.preventDefault();
+
+        const secEl = findSectionByKey(key);
+        if (secEl) {
+          secEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+
+    function buildNavFromBoard(board) {
+      if (!navLinksEl || !board?.lists?.length) return;
+
+      // Eredeti CTA felirat elmentése, mielőtt töröljük a navot
+      const existingCtaBtn = document.querySelector(".nav-cta");
+      const ctaText = existingCtaBtn?.textContent?.trim() || "Ajánlatkérés";
+
+      // kiürítjük a statikus navot
+      navLinksEl.innerHTML = "";
+
+      board.lists.forEach((list) => {
+        const cards = Array.isArray(list.cards) ? list.cards : [];
+        const listTitle = list.title || "Oldal";
+
+        const navItem = document.createElement("div");
+        navItem.className = "nav-item";
+
+        const firstKey = cards[0]?.key || "";
+
+        const topLink = document.createElement("a");
+        topLink.href = "#";
+        topLink.textContent = listTitle;
+        if (firstKey) topLink.dataset.sectionKey = firstKey;
+        navItem.appendChild(topLink);
+
+        if (cards.length > 1) {
+          navItem.classList.add("has-dropdown");
+          const dd = document.createElement("div");
+          dd.className = "nav-dropdown";
+
+          cards.forEach((card) => {
+            const a = document.createElement("a");
+            a.href = "#";
+            a.textContent = card.title || card.key || "";
+            if (card.key) a.dataset.sectionKey = card.key;
+            dd.appendChild(a);
+          });
+
+          navItem.appendChild(dd);
+        }
+
+        navLinksEl.appendChild(navItem);
+      });
+
+      // CTA gomb a végére (kapcsolat szekcióra ugorva)
+      const ctaBtn = document.createElement("button");
+      ctaBtn.type = "button";
+      ctaBtn.className = "nav-cta";
+      ctaBtn.textContent = ctaText;
+      // fallback a contact szekcióra:
+      ctaBtn.dataset.sectionKey = "kapcsolat-form";
+      navLinksEl.appendChild(ctaBtn);
+
+      attachNavClickHandler();
+    }
+
+    // A főoldali szekciók sorrendjének igazítása a "/" path-ú lista alapján
+    function reorderSectionsFromBoard(board) {
+      const mainEl = document.querySelector("main");
+      if (!mainEl || !board?.lists?.length) return;
+
+      // az a lista, amelyiknek az útvonala "/" – ha nincs, akkor az első
+      const mainList =
+        board.lists.find(l => (l.path || "/") === "/") ||
+        board.lists[0];
+
+      if (!mainList) return;
+
+      const cards = Array.isArray(mainList.cards) ? mainList.cards : [];
+      if (!cards.length) return;
+
+      const used = new Set();
+      const ordered = [];
+
+      // Először a board-on megadott szekciók
+      cards.forEach(card => {
+        const key = card.key;
+        if (!key) return;
+        const sec = findSectionByKey(key);
+        if (!sec) return;
+        // Csak a <main>-en belüli sectionöket rendezzük
+        if (!mainEl.contains(sec)) return;
+        if (used.has(sec)) return;
+
+        used.add(sec);
+        ordered.push(sec);
+      });
+
+      // Utána a maradék sectionök eredeti sorrendben
+      const allSections = Array.from(mainEl.querySelectorAll("section"));
+      allSections.forEach(sec => {
+        if (!used.has(sec)) {
+          ordered.push(sec);
+        }
+      });
+
+      // Új sorrend alkalmazása
+      ordered.forEach(sec => {
+        mainEl.appendChild(sec);
+      });
+    }
+
+    async function initLayoutNav() {
+      if (!firebaseEnabled || !db || !navLinksEl) return;
+      try {
+        // Itt volt a bug: /board végű útvonalat olvastunk,
+        // de az admin közvetlenül settings/layoutBoards alá menti a boardot.
+        const snap = await get(ref(db, "settings/layoutBoards"));
+        if (!snap.exists()) return;
+        const board = snap.val();
+        if (board && Array.isArray(board.lists) && board.lists.length) {
+          buildNavFromBoard(board);
+          reorderSectionsFromBoard(board);
+        }
+      } catch (err) {
+        console.warn("[layout/nav] hiba:", err);
+      }
+    }
+
+
+
+    /* ------------ TARTALOM INLINE SZERKESZTÉS (adminPreview mód) ------------ */
+
+    const urlParams = new URLSearchParams(location.search);
+    const inlineEditMode = urlParams.has("adminPreview");
+
+    let sectionsCache = {};
+
+    async function loadContentSections() {
+      if (!firebaseEnabled || !db) return;
+      try {
+        const snap = await get(ref(db, "content/sections"));
+        sectionsCache = snap.exists() ? (snap.val() || {}) : {};
+      } catch (err) {
+        console.warn("[content] betöltés hiba:", err);
+        sectionsCache = {};
+      }
+    }
+
+    function applyContentSectionsToDom() {
+      document.querySelectorAll("[data-section][data-field]").forEach(el => {
+        const section = el.dataset.section;
+        const field   = el.dataset.field;
+        if (!section || !field) return;
+        const sec = sectionsCache[section];
+        const val = sec && typeof sec[field] === "string" ? sec[field] : null;
+        if (val && val.trim() !== "") {
+          // HTML-t engedünk, így pl. <span class="highlight"> is megmarad
+          el.innerHTML = val;
+        }
+      });
+    }
+
+    function initInlineEditing() {
+      if (!inlineEditMode || !firebaseEnabled || !db) return;
+
+      const style = document.createElement("style");
+      style.textContent = `
+        [data-section][data-field].inline-editable {
+          outline: 1px dashed transparent;
+          cursor: text;
+          transition: outline-color .15s ease, background-color .15s ease;
+        }
+        [data-section][data-field].inline-editable:hover {
+          outline-color: #cbd5f5;
+        }
+        [data-section][data-field].inline-editable:focus {
+          outline-color: #3b82f6;
+        }
+      `;
+      document.head.appendChild(style);
+
+      document.querySelectorAll("[data-section][data-field]").forEach(el => {
+        el.classList.add("inline-editable");
+        el.setAttribute("contenteditable", "true");
+
+        el.addEventListener("focus", () => {
+          el.dataset._orig = el.innerHTML;
+        });
+
+        el.addEventListener("blur", async () => {
+          const section = el.dataset.section;
+          const field   = el.dataset.field;
+          const value   = (el.innerHTML || "").trim();
+          if (!section || !field) return;
+
+          if (!sectionsCache[section]) sectionsCache[section] = {};
+          sectionsCache[section][field] = value;
+          sectionsCache[section].updatedAt = Date.now();
+
+          try {
+            await set(ref(db, `content/sections/${section}`), sectionsCache[section]);
+            el.style.outlineColor = "#16a34a";
+            setTimeout(() => { el.style.outlineColor = ""; }, 800);
+          } catch (err) {
+            console.warn("[content] mentés hiba:", err);
+            if (el.dataset._orig != null) {
+              el.innerHTML = el.dataset._orig;
+            }
+          }
+        });
+      });
+    }
+
+    async function initContentInline() {
+      if (!firebaseEnabled || !db) return;
+      await loadContentSections();
+      applyContentSectionsToDom();
+      initInlineEditing();
+    }
+
+
+    /* ------------ REFERENCIÁK – Realtime Database-ből ------------ */
+
+    const demoItems = [
+      {
+        title: "Ipari szekcionált kapu",
+        description: "Ipari kaputechnika kivitelezés Székesfehérváron.",
+        imageUrl: "https://images.pexels.com/photos/4484076/pexels-photo-4484076.jpeg?auto=compress&cs=tinysrgb&w=1200"
+      },
+      {
+        title: "Családi ház garázskapu",
+        description: "Szigetelt, motoros garázskapu beépítés.",
+        imageUrl: "https://images.pexels.com/photos/4491919/pexels-photo-4491919.jpeg?auto=compress&cs=tinysrgb&w=1200"
+      },
+      {
+        title: "Sorompó rendszer",
+        description: "Beléptető sorompó parkolóhoz.",
+        imageUrl: "https://images.pexels.com/photos/9799766/pexels-photo-9799766.jpeg?auto=compress&cs=tinysrgb&w=1200"
+      }
+    ];
+
+    function renderReferences(items) {
+      if (!gridEl) return;
+
+      gridEl.innerHTML = "";
+
+      if (!items || !items.length) {
+        if (emptyEl) emptyEl.style.display = "block";
+        return;
+      }
+      if (emptyEl) emptyEl.style.display = "none";
+
+      items.forEach(item => {
+        const card = document.createElement("article");
+        card.className = "reference-card";
+
+        const imgWrap = document.createElement("div");
+        imgWrap.className = "reference-image-wrap";
+
+        if (item.imageUrl) {
+          const img = document.createElement("img");
+          img.src = item.imageUrl;
+          img.alt = item.title || "Referencia fotó";
+          img.loading = "lazy";
+          imgWrap.appendChild(img);
+        }
+
+        const info = document.createElement("div");
+        info.className = "reference-info";
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "reference-title";
+        titleEl.textContent = item.title || "Referencia";
+
+        const descEl = document.createElement("div");
+        descEl.className = "reference-desc";
+        descEl.textContent = item.description || "";
+
+        info.appendChild(titleEl);
+        info.appendChild(descEl);
+
+        card.appendChild(imgWrap);
+        card.appendChild(info);
+        gridEl.appendChild(card);
+      });
+    }
+
+    async function loadReferences() {
+      if (!gridEl) return;
+
+      if (!firebaseEnabled || !db) {
+        renderReferences(demoItems);
+        return;
+      }
+
+      try {
+        const snap = await get(ref(db, "references"));
+        if (!snap.exists()) {
+          renderReferences(demoItems);
+          return;
+        }
+
+        const val = snap.val() || {};
+        const items = Object.entries(val)
+          .map(([key, d]) => ({
+            title: d.title || "",
+            description: d.description || "",
+            imageUrl: d.imageUrl || d.imageDataUrl || "",
+            createdAt: d.createdAt || 0
+          }))
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+          .slice(0, 8);
+
+        renderReferences(items);
+      } catch (err) {
+        console.warn("[references] Realtime DB hiba – demo lista:", err);
+        renderReferences(demoItems);
+      }
+    }
+
+    loadReferences();
+
+    
+
+    /* ------------ ANALITIKA – ugyanaz a logika, mint eddig ------------ */
+
+    const analyticsEnabled = firebaseEnabled && !!db;
+
+    if (analyticsEnabled) {
+      const VISITOR_KEY       = "mesztor_visitor_id";
+      const SESSION_KEY       = "mesztor_session_id";
+      const SESSION_START_KEY = "mesztor_session_start";
+      const PAGEVIEWS_KEY     = "mesztor_session_pageviews";
+
+      function uuid() {
+        if (crypto.randomUUID) return crypto.randomUUID();
+        return Date.now().toString(36) + Math.random().toString(36).slice(2);
+      }
+
+      let visitorId = localStorage.getItem(VISITOR_KEY);
+      if (!visitorId) {
+        visitorId = uuid();
+        localStorage.setItem(VISITOR_KEY, visitorId);
+      }
+
+      const now = Date.now();
+      let sessionId    = sessionStorage.getItem(SESSION_KEY);
+      let sessionStart = Number(sessionStorage.getItem(SESSION_START_KEY) || 0);
+
+      if (!sessionId || !sessionStart || (now - sessionStart) > 30 * 60 * 1000) {
+        sessionId    = uuid();
+        sessionStart = now;
+        sessionStorage.setItem(SESSION_KEY, sessionId);
+        sessionStorage.setItem(SESSION_START_KEY, String(sessionStart));
+        sessionStorage.setItem(PAGEVIEWS_KEY, "0");
+      }
+
+      let pageViews = Number(sessionStorage.getItem(PAGEVIEWS_KEY) || "0") + 1;
+      sessionStorage.setItem(PAGEVIEWS_KEY, String(pageViews));
+
+      const sessionRef = ref(db, `analytics/sessions/${sessionId}`);
+      const pagePath   = location.pathname || "/";
+
+      function sendSnapshot() {
+        const t = Date.now();
+        const durationSec = Math.floor((t - sessionStart) / 1000);
+        const payload = {
+          visitorId,
+          sessionId,
+          startedAt: sessionStart,
+          lastUpdatedAt: t,
+          durationSec,
+          pageViews,
+          lastPage: pagePath,
+          userAgent: navigator.userAgent || ""
+        };
+        return update(sessionRef, payload).catch(err => {
+          console.warn("[analytics] update hiba:", err);
+        });
+      }
+
+      // első írás
+      set(sessionRef, {
+        visitorId,
+        sessionId,
+        startedAt: sessionStart,
+        lastUpdatedAt: now,
+        durationSec: 0,
+        pageViews,
+        firstPage: pagePath,
+        userAgent: navigator.userAgent || ""
+      }).catch(err => console.warn("[analytics] set hiba:", err));
+
+      // periodikus frissítés
+      sendSnapshot();
+      const intId = setInterval(sendSnapshot, 15000);
+
+      window.addEventListener("beforeunload", () => {
+        sendSnapshot();
+        clearInterval(intId);
+      });
+    }
+  </script>
+
+
+
+  <script>
+    const navToggle = document.querySelector(".nav-toggle");
+    const navLinks  = document.querySelector(".nav-links");
+
+    if (navToggle && navLinks) {
+      navToggle.addEventListener("click", () => {
+        navLinks.classList.toggle("open");
+      });
+
+      // delegált kattintás, minden A/BUTTON-ra
+      navLinks.addEventListener("click", (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+
+        const clickable = t.closest("a,button");
+        if (!clickable) return;
+
+        navLinks.classList.remove("open");
+      });
+    }
+  </script>
+
+</body>
+</html>
