@@ -1,0 +1,27 @@
+{
+  "name": "main",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "dev:index": "vite --open index.html",
+    "dev:admin": "vite --open admin.html",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/levente2001/mesztor_web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/levente2001/mesztor_web/issues"
+  },
+  "homepage": "https://github.com/levente2001/mesztor_web#readme",
+  "devDependencies": {
+    "vite": "^7.2.4"
+  }
+}
