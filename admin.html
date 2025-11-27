@@ -158,6 +158,7 @@
         <button class="side-link tab-btn" data-pane="layout"><span class="emoji">🧩</span>Beállítások – Layout</button>
         <button class="side-link tab-btn" data-pane="email"><span class="emoji">✉️</span>Beállítások – Email</button>
         <button class="side-link tab-btn" data-pane="content"><span class="emoji">📝</span>Beállítások – Tartalom</button>
+        <button class="side-link tab-btn" data-pane="references"><span class="emoji">📸</span>Referencia fotók</button>
       </nav>
     </aside>
 
@@ -261,6 +262,54 @@
           </div>
         </div>
       </section>
+
+      <!-- Referencia fotók -->
+      <section id="pane-references" class="tab-pane container">
+        <div class="panel">
+          <div class="panel-head">Referencia fotók</div>
+          <div class="panel-body">
+            <p class="muted" style="margin-bottom:10px">
+              Itt tudsz referencia kártyákat létrehozni. Ezek a <b>„Referenciáink”</b> blokkban jelennek meg a főoldalon.
+            </p>
+
+            <form id="referencesForm" class="stack gap" style="max-width:480px;">
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Cím (opcionális)</div>
+                <input type="text" id="refTitle" placeholder="pl. Ipari szekcionált kapu" />
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Rövid leírás</div>
+                <textarea
+                  id="refDesc"
+                  rows="3"
+                  style="width:100%;resize:vertical;"
+                  placeholder="pl. Ipari kaputechnika kivitelezés Székesfehérváron."
+                ></textarea>
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Kép feltöltése</div>
+                <input type="file" id="refImage" accept="image/*" />
+              </label>
+
+              <div>
+                <button type="submit" class="btn primary" style="margin-top:10px;">Referencia mentése</button>
+                <span id="referencesStatus" class="muted" style="margin-left:8px;"></span>
+              </div>
+            </form>
+
+            <div class="spacer"></div>
+
+            <h3 style="font-size:1rem;margin-bottom:.25rem;">Meglévő referenciák</h3>
+            <p class="muted" style="margin-bottom:.5rem;">
+              A legfrissebbek vannak felül. A törlés nem visszavonható.
+            </p>
+            <div id="referencesList" class="stack gap"></div>
+          </div>
+        </div>
+      </section>
+
 
 
     </main>
@@ -894,6 +943,128 @@
       });
     }
 
+        /* ---------- Referencia fotók admin ---------- */
+    const referencesForm = document.getElementById("referencesForm");
+    const referencesStatusEl = document.getElementById("referencesStatus");
+    const referencesListEl = document.getElementById("referencesList");
+    const refTitleInput = document.getElementById("refTitle");
+    const refDescInput = document.getElementById("refDesc");
+    const refImageInput = document.getElementById("refImage");
+
+    async function loadReferencesAdmin(){
+      if (!referencesListEl) return;
+
+      if (!firebaseEnabled || !dbRealtime) {
+        referencesListEl.innerHTML = '<div class="muted">Demo mód – a referenciák nem kerülnek mentésre.</div>';
+        return;
+      }
+
+      referencesListEl.innerHTML = '<div class="muted">Betöltés...</div>';
+
+      try{
+        const snap = await get(dbRef(dbRealtime, "references"));
+        if (!snap.exists()) {
+          referencesListEl.innerHTML = '<div class="muted">Még nincs feltöltött referencia.</div>';
+          return;
+        }
+
+        const val = snap.val() || {};
+        const items = Object.entries(val)
+          .map(([id, d]) => ({ id, ...(d || {}) }))
+          .sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        referencesListEl.innerHTML = items.map(item => {
+          const imgSrc = item.imageUrl || item.imageDataUrl || "";
+          return `
+            <div class="kpi panel" style="padding:10px; display:flex; gap:10px; align-items:center; margin-top: 10px;">
+              <div style="width:80px; flex-shrink:0;">
+                ${imgSrc ? `<img src="${imgSrc}" alt="Referencia" style="width:100%;height:60px;object-fit:cover;border-radius:4px;">` : ""}
+              </div>
+              <div style="flex:1 1 auto;min-width:0;">
+                <div style="font-weight:600; margin-bottom:4px;">${item.title || "Referencia"}</div>
+                <div class="muted" style="font-size:.8rem;">${item.description || ""}</div>
+              </div>
+              <div style="flex-shrink:0;">
+                <button class="btn ghost" data-ref-delete="${item.id}">Törlés</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        referencesListEl.querySelectorAll("[data-ref-delete]").forEach(btn => {
+          btn.addEventListener("click", async ()=>{
+            const id = btn.getAttribute("data-ref-delete");
+            if (!id) return;
+            if (!confirm("Biztosan törlöd ezt a referenciát?")) return;
+            try{
+              await remove(dbRef(dbRealtime, "references/" + id));
+              await loadReferencesAdmin();
+            }catch(err){
+              console.warn("[referencesAdmin] törlés hiba:", err);
+              alert("Nem sikerült törölni a referenciát.");
+            }
+          });
+        });
+      }catch(err){
+        console.warn("[referencesAdmin] betöltés hiba:", err);
+        referencesListEl.innerHTML = '<div class="muted">Nem sikerült betölteni a referenciákat.</div>';
+      }
+    }
+
+    if (referencesForm) {
+      referencesForm.addEventListener("submit", async (e)=>{
+        e.preventDefault();
+
+        if (!firebaseEnabled || !dbRealtime) {
+          alert("Firebase nincs bekapcsolva (demo mód). A mentés nem lehetséges.");
+          return;
+        }
+
+        const title = (refTitleInput.value || "").trim();
+        const description = (refDescInput.value || "").trim();
+        const file = refImageInput?.files?.[0];
+
+        if (!file) {
+          alert("Kérlek válassz egy képfájlt.");
+          return;
+        }
+
+        referencesStatusEl.textContent = "Feltöltés folyamatban...";
+
+        try{
+          const dataUrl = await new Promise((resolve, reject)=>{
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = () => reject(r.error || new Error("FileReader hiba"));
+            r.readAsDataURL(file);
+          });
+
+          const newRef = push(dbRef(dbRealtime, "references"));
+          const payload = {
+            title,
+            description,
+            imageDataUrl: dataUrl,
+            createdAt: Date.now()
+          };
+
+          await set(newRef, payload);
+
+          refTitleInput.value = "";
+          refDescInput.value = "";
+          refImageInput.value = "";
+          referencesStatusEl.textContent = "Mentve ✅";
+
+          await loadReferencesAdmin();
+        }catch(err){
+          console.warn("[referencesAdmin] mentés hiba:", err);
+          referencesStatusEl.textContent = "Hiba mentés közben.";
+        }finally{
+          setTimeout(()=>{ if (referencesStatusEl) referencesStatusEl.textContent = ""; }, 2000);
+        }
+      });
+    }
+
+
 
 
     /* ---------- Start ---------- */
@@ -901,6 +1072,7 @@
     await loadEmail();
     await loadContent();
     await loadAnalytics();
+    await loadReferencesAdmin();
   </script>
 </body>
 </html>

@@ -130,17 +130,20 @@
     }
 
     .brand-logo {
-      width: 40px;
-      height: 40px;
+      width: 80px;
+      height: 56px;
       border-radius: 12px;
-      background: radial-gradient(circle at 20% 20%, #efbb90, #c86c04);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
       font-weight: 800;
       font-size: 1.1rem;
-      box-shadow: 0 10px 25px rgba(200, 154, 4, 0.35);
+    }
+
+    .brand-img {
+      height: 56px;
+      width: 80px;
     }
 
     .brand-text-main {
@@ -811,6 +814,76 @@
       align-items: center;
     }
 
+        /* Referencia kép nagy nézet (modal) – csak desktopon használjuk */
+    .reference-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.75);
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+
+    .reference-modal-backdrop.open {
+      display: flex;
+    }
+
+    .reference-modal {
+      position: relative;
+      max-width: min(900px, 90vw);
+      max-height: min(80vh, 600px);
+      border-radius: 1rem;
+      overflow: hidden;
+      background: #020617;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.6);
+    }
+
+    .reference-modal img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .reference-modal-close {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      border: none;
+      border-radius: 999px;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.7);
+      color: #e5e7eb;
+      font-size: 1rem;
+    }
+
+    .reference-modal-close:hover {
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    /* Mobilon akkor se látszódjon, ha véletlenül megnyitnánk */
+    @media (max-width: 800px) {
+      .reference-modal-backdrop {
+        display: none !important;
+      }
+    }
+
+    /* Desktopon legyen "zoom-in" kurzor a referencia képeken */
+    @media (min-width: 801px) {
+      .reference-image-wrap img {
+        cursor: zoom-in;
+      }
+    }
+
+
     .footer-links {
       display: flex;
       flex-wrap: wrap;
@@ -942,6 +1015,26 @@
             mesztorkaputechnika1@gmail.com
           </span>
         </div>
+        <div class="topbar-item">
+          <a
+            href="https://www.facebook.com/mesztorkaputechnika" 
+            target="_blank"
+            rel="noopener"
+            aria-label="Mesz-Tor Facebook oldal"
+            style="display:flex;align-items:center;justify-content: center;text-decoration:none;color:inherit;"
+          >
+            <span class="icon" aria-hidden="true" style="display:flex;align-items:center;justify-content: center;">
+              <!-- egyszerű FB logó SVG -->
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M22 12.07C22 6.51 17.52 2 12 2S2 6.51 2 12.07C2 17.1 5.66 21.29 10.44 22v-7.03H8.08v-2.9h2.36V9.41c0-2.33 1.38-3.62 3.5-3.62.99 0 2.03.18 2.03.18v2.26h-1.14c-1.12 0-1.47.7-1.47 1.42v1.7h2.5l-.4 2.9h-2.1V22C18.34 21.29 22 17.1 22 12.07Z"
+                />
+              </svg>
+            </span>
+            <span></span>
+          </a>
+        </div>
       </div>
       <div class="topbar-right">
         <div class="topbar-item">
@@ -965,7 +1058,9 @@
   <header class="site-header">
     <div class="header-inner container">
       <div class="brand">
-        <div class="brand-logo">M</div>
+        <div class="brand-logo">
+          <img src="mesztor-effect.png" class="brand-img" alt="">
+        </div>
         <div>
           <div class="brand-text-main"
               data-section="site" data-field="brandMain">
@@ -1777,6 +1872,55 @@
       initInlineEditing();
     }
 
+        /* ------------ Referencia kép modal (csak desktopon) ------------ */
+    const referenceModalBackdrop = document.getElementById("reference-modal");
+    const referenceModalImage    = document.getElementById("reference-modal-image");
+    const referenceModalCloseBtn = document.getElementById("reference-modal-close");
+
+    function isDesktop() {
+      return window.matchMedia("(min-width: 801px)").matches;
+    }
+
+    function openReferenceModal(src, alt) {
+      if (!isDesktop()) return; // csak asztali nézetben
+      if (!referenceModalBackdrop || !referenceModalImage) return;
+
+      referenceModalImage.src = src;
+      referenceModalImage.alt = alt || "Referencia fotó";
+      referenceModalBackdrop.classList.add("open");
+      referenceModalBackdrop.setAttribute("aria-hidden", "false");
+    }
+
+    function closeReferenceModal() {
+      if (!referenceModalBackdrop || !referenceModalImage) return;
+      referenceModalBackdrop.classList.remove("open");
+      referenceModalBackdrop.setAttribute("aria-hidden", "true");
+      referenceModalImage.src = "";
+    }
+
+    if (referenceModalBackdrop) {
+      // háttérre kattintás = bezárás
+      referenceModalBackdrop.addEventListener("click", (e) => {
+        if (e.target === referenceModalBackdrop) {
+          closeReferenceModal();
+        }
+      });
+    }
+
+    if (referenceModalCloseBtn) {
+      referenceModalCloseBtn.addEventListener("click", () => {
+        closeReferenceModal();
+      });
+    }
+
+    // ESC-re is zárjuk
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeReferenceModal();
+      }
+    });
+
+
 
     /* ------------ REFERENCIÁK – Realtime Database-ből ------------ */
 
@@ -1821,8 +1965,15 @@
           img.src = item.imageUrl;
           img.alt = item.title || "Referencia fotó";
           img.loading = "lazy";
+
+          // Kattintásra nagy kép modal – csak desktopon nyit ki
+          img.addEventListener("click", () => {
+            openReferenceModal(item.imageUrl, item.title || "Referencia fotó");
+          });
+
           imgWrap.appendChild(img);
         }
+
 
         const info = document.createElement("div");
         info.className = "reference-info";
@@ -1984,6 +2135,22 @@
       });
     }
   </script>
+
+  <!-- Referencia kép nagy nézet (csak desktopon) -->
+  <div id="reference-modal" class="reference-modal-backdrop" aria-hidden="true">
+    <div class="reference-modal" role="dialog" aria-modal="true">
+      <button
+        type="button"
+        id="reference-modal-close"
+        class="reference-modal-close"
+        aria-label="Bezárás"
+      >
+        ×
+      </button>
+      <img id="reference-modal-image" src="" alt="Referencia nagyban" />
+    </div>
+  </div>
+
 
 </body>
 </html>
