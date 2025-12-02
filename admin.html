@@ -159,6 +159,9 @@
         <button class="side-link tab-btn" data-pane="email"><span class="emoji">✉️</span>Beállítások – Email</button>
         <button class="side-link tab-btn" data-pane="content"><span class="emoji">📝</span>Beállítások – Tartalom</button>
         <button class="side-link tab-btn" data-pane="references"><span class="emoji">📸</span>Referencia fotók</button>
+        <button class="side-link tab-btn" data-pane="suppliers">
+          <span class="emoji">🏢</span>Beszállító partnerek
+        </button>
       </nav>
     </aside>
 
@@ -226,7 +229,7 @@
             </div>
             <div id="listsWrap" class="board-wrap"></div>
             <div class="spacer"></div>
-            <button id="addListBtn" class="btn secondary">+ Újabb lista hozzáadása</button>
+            <button id="addListBtn" style="display:none" class="btn secondary">+ Újabb lista hozzáadása</button>
           </div>
         </div>
       </section>
@@ -262,6 +265,54 @@
           </div>
         </div>
       </section>
+
+      <!-- Beszállító partnerek -->
+      <section id="pane-suppliers" class="tab-pane container">
+        <div class="panel">
+          <div class="panel-head">Beszállító partnerek logói</div>
+          <div class="panel-body">
+            <p class="muted" style="margin-bottom:10px">
+              Itt tudod beállítani a <b>„Megbízható beszállító partnereink”</b> blokkban megjelenő logókat.
+              A logók a Firebase Realtime Database-ben tárolódnak base64 formában, külön tárhely nélkül.
+            </p>
+
+            <form id="supplierForm" class="stack gap" style="max-width:480px;">
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Név</div>
+                <input type="text" id="supplierName" placeholder="pl. Hörmann Hungária Kft." />
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Alcím (opcionális)</div>
+                <input
+                  type="text"
+                  id="supplierSubtitle"
+                  placeholder="pl. Automata bejáratok specialistája"
+                />
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Logó feltöltése</div>
+                <input type="file" id="supplierImage" accept="image/*" />
+              </label>
+
+              <div>
+                <button type="submit" class="btn primary" style="margin-top:10px;">Beszállító mentése</button>
+                <span id="supplierStatus" class="muted" style="margin-left:8px;"></span>
+              </div>
+            </form>
+
+            <div class="spacer"></div>
+
+            <h3 style="font-size:1rem;margin-bottom:.25rem;">Meglévő beszállítók</h3>
+            <p class="muted" style="margin-bottom:.5rem;">
+              Itt tudod <b>átírni a nevet</b>, illetve <b>cserélni a logót</b>, vagy törölni a partnert.
+            </p>
+            <div id="suppliersList" class="stack gap"></div>
+          </div>
+        </div>
+      </section>
+
 
       <!-- Referencia fotók -->
       <section id="pane-references" class="tab-pane container">
@@ -539,7 +590,7 @@
             <input class="list-path" type="text" value="${list.path||"/"}" placeholder="/útvonal (pl. /, /termekek)" />
           </div>
           <div class="cards" id="cards-${list.id}"></div>
-          <div class="list-foot"><button class="btn secondary add-card" type="button">+ Kártya hozzáadása</button></div>
+          <div style="display:none" class="list-foot"><button class="btn secondary add-card" type="button">+ Kártya hozzáadása</button></div>
         </div>`;
     }
     function cardTemplate(card){
@@ -943,6 +994,233 @@
       });
     }
 
+        /* ---------- Beszállító partnerek admin ---------- */
+    const supplierForm = document.getElementById("supplierForm");
+    const supplierNameInput = document.getElementById("supplierName");
+    const supplierSubtitleInput = document.getElementById("supplierSubtitle");
+    const supplierImageInput = document.getElementById("supplierImage");
+    const supplierStatusEl = document.getElementById("supplierStatus");
+    const suppliersListEl = document.getElementById("suppliersList");
+
+    async function loadSuppliersAdmin() {
+      if (!suppliersListEl) return;
+
+      if (!firebaseEnabled || !dbRealtime) {
+        suppliersListEl.innerHTML =
+          '<div class="muted">Demo mód – a beszállítók nem kerülnek mentésre.</div>';
+        return;
+      }
+
+      suppliersListEl.innerHTML = '<div class="muted">Betöltés...</div>';
+
+      try {
+        const snap = await get(dbRef(dbRealtime, "suppliers"));
+        if (!snap.exists()) {
+          suppliersListEl.innerHTML =
+            '<div class="muted">Még nincs rögzített beszállító partner.</div>';
+          return;
+        }
+
+        const val = snap.val() || {};
+        const items = Object.entries(val)
+          .map(([id, d]) => ({ id, ...(d || {}) }))
+          .sort((a, b) => {
+            const ai = typeof a.orderIndex === "number" ? a.orderIndex : 0;
+            const bi = typeof b.orderIndex === "number" ? b.orderIndex : 0;
+            if (ai !== bi) return ai - bi;
+            return (b.createdAt || 0) - (a.createdAt || 0);
+          });
+
+        const pendingImages = new Map();
+
+        suppliersListEl.innerHTML = items
+          .map((item) => {
+            const imgSrc = item.imageUrl || item.imageDataUrl || "";
+            const name = (item.name || "").replace(/"/g, "&quot;");
+            const subtitle = (item.subtitle || "").replace(/"/g, "&quot;");
+
+            return `
+              <div class="kpi panel"
+                   style="padding:10px; display:flex; gap:10px; align-items:center; margin-top:10px;"
+                   data-supplier-id="${item.id}">
+                <div style="width:80px; flex-shrink:0;">
+                  ${
+                    imgSrc
+                      ? `<img src="${imgSrc}" alt="Beszállító logó"
+                               style="width:100%;height:60px;object-fit:contain;border-radius:4px;background:#fff;">`
+                      : `<div style="width:100%;height:60px;border-radius:4px;border:1px dashed #cbd5e1;
+                                   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#94a3b8;">
+                           Nincs logó
+                         </div>`
+                  }
+                </div>
+                <div style="flex:1 1 auto;min-width:0;">
+                  <input type="text"
+                         data-supplier-name
+                         value="${name}"
+                         style="width:100%;padding:.4rem .5rem;border-radius:8px;border:1px solid #e5e7eb;margin-bottom:4px;" />
+                  <input type="text"
+                         data-supplier-subtitle
+                         value="${subtitle}"
+                         placeholder="Alcím (opcionális)"
+                         style="width:100%;padding:.35rem .5rem;border-radius:8px;border:1px solid #e5e7eb;font-size:.8rem;" />
+                  <div style="margin-top:.35rem;font-size:.78rem;color:#64748b;">
+                    Logó csere:
+                    <input type="file" accept="image/*" data-supplier-image
+                           style="display:inline-block;margin-left:4px;" />
+                  </div>
+                </div>
+                <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+                  <button class="btn primary" data-supplier-save>Mentés</button>
+                  <button class="btn ghost" data-supplier-delete>Törlés</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        // Kép csere – FileReader -> pendingImages
+        suppliersListEl.querySelectorAll("[data-supplier-image]").forEach((input) => {
+          input.addEventListener("change", () => {
+            const wrap = input.closest("[data-supplier-id]");
+            const id = wrap?.dataset.supplierId;
+            const file = input.files?.[0];
+            if (!id || !file) return;
+
+            const r = new FileReader();
+            r.onload = () => {
+              pendingImages.set(id, r.result);
+              const imgEl = wrap.querySelector("img");
+              if (imgEl) imgEl.src = r.result;
+            };
+            r.readAsDataURL(file);
+          });
+        });
+
+        // Mentés (név + subtitle + opcionális új kép)
+        suppliersListEl.querySelectorAll("[data-supplier-save]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const wrap = btn.closest("[data-supplier-id]");
+            if (!wrap) return;
+
+            const id = wrap.dataset.supplierId;
+            const nameInput = wrap.querySelector("[data-supplier-name]");
+            const subtitleInput = wrap.querySelector("[data-supplier-subtitle]");
+
+            const name = nameInput?.value?.trim() || "";
+            const subtitle = subtitleInput?.value?.trim() || "";
+
+            const baseRef = dbRef(dbRealtime, "suppliers/" + id);
+            const snapCur = await get(baseRef);
+            if (!snapCur.exists()) return;
+
+            const current = snapCur.val() || {};
+            const payload = {
+              ...current,
+              name,
+              subtitle,
+              updatedAt: Date.now()
+            };
+
+            if (pendingImages.has(id)) {
+              payload.imageDataUrl = pendingImages.get(id); // base64 mentés
+              delete payload.imageUrl;
+            }
+
+            try {
+              await set(baseRef, payload);
+              alert("Mentve ✅");
+            } catch (err) {
+              console.warn("[suppliersAdmin] mentés hiba:", err);
+              alert("Nem sikerült menteni a beszállítót.");
+            }
+          });
+        });
+
+        // Törlés
+        suppliersListEl.querySelectorAll("[data-supplier-delete]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const wrap = btn.closest("[data-supplier-id]");
+            const id = wrap?.dataset.supplierId;
+            if (!id) return;
+            if (!confirm("Biztosan törlöd ezt a beszállítót?")) return;
+
+            try {
+              await remove(dbRef(dbRealtime, "suppliers/" + id));
+              await loadSuppliersAdmin();
+            } catch (err) {
+              console.warn("[suppliersAdmin] törlés hiba:", err);
+              alert("Nem sikerült törölni a beszállítót.");
+            }
+          });
+        });
+      } catch (err) {
+        console.warn("[suppliersAdmin] betöltés hiba:", err);
+        suppliersListEl.innerHTML =
+          '<div class="muted">Nem sikerült betölteni a beszállítókat.</div>';
+      }
+    }
+
+    if (supplierForm) {
+      supplierForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!firebaseEnabled || !dbRealtime) {
+          alert("Firebase nincs bekapcsolva (demo mód). A mentés nem lehetséges.");
+          return;
+        }
+
+        const name = (supplierNameInput.value || "").trim();
+        const subtitle = (supplierSubtitleInput.value || "").trim();
+        const file = supplierImageInput?.files?.[0];
+
+        if (!name) {
+          alert("Add meg a beszállító nevét.");
+          return;
+        }
+
+        if (!file) {
+          alert("Válassz egy logót.");
+          return;
+        }
+
+        supplierStatusEl.textContent = "Feltöltés folyamatban...";
+
+        try {
+          const dataUrl = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = () => reject(r.error || new Error("FileReader hiba"));
+            r.readAsDataURL(file);
+          });
+
+          const newRef = push(dbRef(dbRealtime, "suppliers"));
+          await set(newRef, {
+            name,
+            subtitle,
+            imageDataUrl: dataUrl,
+            orderIndex: Date.now(),
+            createdAt: Date.now()
+          });
+
+          supplierNameInput.value = "";
+          supplierSubtitleInput.value = "";
+          supplierImageInput.value = "";
+          supplierStatusEl.textContent = "Mentve ✅";
+
+          await loadSuppliersAdmin();
+        } catch (err) {
+          console.warn("[suppliersAdmin] mentés hiba:", err);
+          supplierStatusEl.textContent = "Hiba mentés közben.";
+        } finally {
+          setTimeout(() => {
+            if (supplierStatusEl) supplierStatusEl.textContent = "";
+          }, 2000);
+        }
+      });
+    }
+
+
         /* ---------- Referencia fotók admin ---------- */
     const referencesForm = document.getElementById("referencesForm");
     const referencesStatusEl = document.getElementById("referencesStatus");
@@ -1072,6 +1350,7 @@
     await loadEmail();
     await loadContent();
     await loadAnalytics();
+    await loadSuppliersAdmin();
     await loadReferencesAdmin();
   </script>
 </body>

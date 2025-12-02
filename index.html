@@ -15,7 +15,7 @@
     :root {
       --color-bg: #f5f7fb;
       --color-surface: #ffffff;
-      --color-primary: #c86904;
+      --color-primary: #D96C06;
       --color-primary-soft: #e0efff;
       --color-accent: #d8a600;
       --color-text: #33291f;
@@ -37,7 +37,7 @@
     body {
       margin: 0;
       font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, #f0f4ff 0, #f5f7fb 32%, #f8fafc 100%);
+      background: #EEEEEE;
       color: var(--color-text);
       line-height: 1.6;
     }
@@ -62,7 +62,7 @@
     /* Topbar */
 
     .topbar {
-      background: #2a1c0f;
+      background: #222222;
       color: #e5e7eb;
       font-size: 0.85rem;
     }
@@ -121,6 +121,7 @@
       justify-content: space-between;
       gap: 1.5rem;
       padding: 0.8rem 1.5rem;
+      position: relative; 
     }
 
     .brand {
@@ -213,12 +214,12 @@
       border-radius: 999px;
       padding: 0.45rem 1.2rem;
       border: none;
-      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      background: #D96C06;
       color: #ffffff;
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
-      box-shadow: 0 10px 25px rgba(200, 138, 4, 0.35);
+      box-shadow: 0 5px 15px rgba(200, 138, 4, 0.35);
     }
 
     .nav-cta:hover {
@@ -243,11 +244,22 @@
     }
 
     /* --- Felső menü: layout-board alapú dropdown-ok --- */
+    .main-nav {
+      position: static; /* már NEM ehhez igazítjuk a dropdown-t */
+    }
+
     .nav-item {
-      position: relative;
+      position: static;         /* így a legközelebbi pozicionált ős a header-inner lesz */
       display: flex;
       align-items: center;
     }
+
+    /* maradhat, de így már csak megerősítés */
+    .nav-item.has-dropdown {
+      position: static;
+    }
+
+
 
     .nav-item + .nav-item {
       margin-left: 0.75rem;
@@ -259,36 +271,84 @@
       gap: 0.25rem;
     }
 
-    .nav-dropdown {
-      position: absolute;
-      top: 120%;
-      left: 0;
-      min-width: 180px;
-      padding: 0.45rem 0.5rem;
-      border-radius: 12px;
-      background: #ffffff;
-      box-shadow: 0 12px 30px rgba(15,23,42,0.14);
-      display: none;
-      flex-direction: column;
-      gap: 0.25rem;
-      z-index: 60;
-    }
+        /* --- Mega dropdown a felső menühöz --- */
+    /* --- Mega dropdown a felső menühöz --- */
+.nav-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(980px, calc(100vw - 3rem)); /* szép, középre húzott doboz, mindkét oldalt kb. 1.5rem margó */
+  padding: 1.6rem 2rem;
+  border-radius: 0px 0px 10px 10px;
+  background: #fff;
+  display: none;
+  z-index: 60;
+}
 
-    .nav-item.has-dropdown:hover .nav-dropdown {
-      display: flex;
-    }
+/* Rácsos elrendezés */
+.nav-item.has-dropdown.dropdown-open .nav-dropdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.8rem;
+}
 
-    .nav-dropdown a {
-      font-size: 0.85rem;
-      padding: 0.25rem 0.15rem;
-      color: #0f172a;
-      white-space: nowrap;
-    }
 
-    /* ne rajzolja rá a fő menüpont aláhúzását a dropdown linkekre */
-    .nav-dropdown a::after {
-      display: none;
-    }
+/* ne rajzolja rá a fő menüpont aláhúzását a dropdown linkekre */
+.nav-dropdown a::after {
+  display: none;
+}
+
+/* Kártyás dropdown elemek */
+.nav-dropdown .nav-dd-item {
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.65rem 0.75rem;
+  color: #0f172a;
+  white-space: normal;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  border-radius: 0.9rem;
+  text-decoration: none;
+  background: transparent;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nav-dropdown .nav-dd-item:hover {
+  background: #f8fafc;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+  color: #0f172a;
+}
+
+.nav-dd-icon {
+  flex: 0 0 2.4rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.nav-dd-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.nav-dd-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.nav-dd-sub {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
 
 
     /* Hero */
@@ -352,15 +412,14 @@
     }
 
     .btn-primary {
-      border-radius: 999px;
+      border-radius: 10px;
       border: none;
       cursor: pointer;
       padding: 0.85rem 1.6rem;
       font-weight: 600;
       font-size: 0.95rem;
-      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      background: #222222;
       color: #ffffff;
-      box-shadow: 0 14px 30px rgba(200, 118, 4, 0.4);
     }
 
     .btn-primary:hover {
@@ -368,14 +427,15 @@
     }
 
     .btn-ghost {
-      border-radius: 999px;
-      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 10px;
+      border: none;
       padding: 0.8rem 1.5rem;
       background: rgba(255, 255, 255, 0.7);
       font-weight: 500;
       font-size: 0.9rem;
       display: inline-flex;
       align-items: center;
+      box-shadow: 0 4px 10px rgba(98, 98, 98, 0.2);
       gap: 0.5rem;
       cursor: pointer;
     }
@@ -406,7 +466,6 @@
       background: var(--color-surface);
       border-radius: 26px;
       padding: 1.4rem;
-      box-shadow: var(--shadow-soft);
       position: relative;
       z-index: 1;
       overflow: hidden;
@@ -517,7 +576,6 @@
       background: var(--color-surface);
       border-radius: var(--radius-lg);
       padding: 1.25rem 1.3rem;
-      box-shadow: 0 14px 35px rgba(15, 23, 42, 0.06);
       display: flex;
       flex-direction: column;
       gap: 0.45rem;
@@ -568,10 +626,8 @@
     /* Partners strip */
 
     .partners-strip {
-      background: radial-gradient(circle at 0 0, #e0f2fe 0, #f5f7fb 40%, #ffffff 100%);
-      border-radius: 26px;
+      border-radius: 10px;
       padding: 1.25rem 1.5rem;
-      box-shadow: var(--shadow-soft);
       display: flex;
       flex-direction: column;
       gap: 0.9rem;
@@ -605,7 +661,6 @@
       background: var(--color-surface);
       border-radius: var(--radius-lg);
       padding: 1.1rem 1.2rem;
-      box-shadow: 0 10px 30px rgba(42, 31, 15, 0.05);
     }
 
     .icon-badge {
@@ -635,7 +690,7 @@
     /* Motto & references */
 
     .motto-block {
-      background: #0f172a;
+      background: #2a1c0f;
       color: #e5e7eb;
       border-radius: 26px;
       padding: 2.1rem 2rem;
@@ -908,72 +963,145 @@
       }
     }
 
-    @media (max-width: 800px) {
-      .topbar-inner {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0.5rem 1.2rem;
-      }
+@media (max-width: 800px) {
+  /* ne lehessen oldalra scrollozni */
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
 
-      .header-inner {
-        padding: 0.7rem 1.2rem;
-      }
+  .topbar-inner {
+    display: none;
+  }
+
+  .header-inner {
+    padding: 0.7rem 1.2rem;
+  }
 
       .nav-links {
         position: fixed;
-        inset: 60px 0 auto 0;
+        top: 60px;          /* a header alól induljon */
+        left: 0;
+        right: 0;
+        bottom: 0;          /* a képernyő aljáig tartson */
         background: rgba(248, 250, 252, 0.98);
         border-bottom: 1px solid rgba(15, 23, 42, 0.06);
-        padding: 0.75rem 1.5rem 1rem;
+        padding: 0.75rem 1.25rem 1.25rem;
+
+        display: flex;
         flex-direction: column;
         align-items: flex-start;
-        transform: translateY(-120%);
+
+        transform: translateY(-100%);  /* alapból „felhúzva” */
         opacity: 0;
         pointer-events: none;
         transition: transform 0.2s ease, opacity 0.2s ease;
+
+        overflow-y: auto;              /* BELÜL görgethető */
+        -webkit-overflow-scrolling: touch;
+        z-index: 999;                  /* mindent takarjon */
       }
 
-      .nav-links.open {
-        transform: translateY(0);
-        opacity: 1;
-        pointer-events: auto;
-      }
 
-      .nav-toggle {
-        display: block;
-      }
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+    height: 70vh;
+    pointer-events: auto;
+  }
 
-      .nav-cta {
-        width: 100%;
-        justify-content: center;
-        text-align: center;
-      }
+  .nav-toggle {
+    display: block;
+  }
 
-      .nav-links {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+  .nav-cta {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
 
-      .nav-item {
-        width: 100%;
-        flex-direction: column;
-        align-items: flex-start;
-        margin-left: 0;
-      }
+  /* a fő menüpontok egymás alatt, teljes szélességen */
+  .nav-item {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 0;
+  }
 
-      .nav-item.has-dropdown > a::after {
-        content: "";
-      }
+  .nav-links a {
+    font-size: 0.9rem;   /* kicsit kisebb betű */
+  }
 
-      .nav-dropdown {
-        position: static;
-        box-shadow: none;
-        background: transparent;
-        padding: 0.1rem 0 0.2rem 0.75rem;
-        display: flex;
-      }
+  .nav-item > a {
+    padding: 0.4rem 0;
+  }
 
-    }
+  /* ne legyen külön nyíl utána mobilon */
+  .nav-item.has-dropdown > a::after {
+    content: "";
+  }
+
+  .contactemail {
+    font-size: 0.85rem;
+  }
+
+  /* mega-menü helyett sima, függőleges lista mobilon */
+  .nav-dropdown {
+    position: static;
+    top: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    margin-top: 0.15rem;
+    box-shadow: none;
+    background: transparent;
+    padding: 0.1rem 0 0.6rem 0.5rem;  /* kis behúzás balra */
+    display: block;
+  }
+
+  /* felülírjuk a desktop-grid display-t */
+  .nav-item.has-dropdown.dropdown-open .nav-dropdown {
+    display: block;
+  }
+
+  /* kártyás, de egymás alatti, NEM szélesebb a képernyőnél */
+  .nav-dropdown .nav-dd-item {
+    width: 100%;
+    margin: 0;
+    padding: 0.45rem 0.25rem 0.45rem 0;
+    border-radius: 0.7rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    text-decoration: none;
+    background: transparent;
+  }
+
+  .nav-dropdown .nav-dd-item:hover {
+    background: rgba(15, 23, 42, 0.04);
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* ikon + szöveg mobilra optimalizálva */
+  .nav-dd-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    font-size: 1rem;
+  }
+
+  .nav-dd-title {
+    font-size: 0.85rem;
+  }
+
+  .nav-dd-sub {
+    font-size: 0.76rem;
+  }
+}
+
+
 
     @media (max-width: 600px) {
       section {
@@ -995,6 +1123,114 @@
         justify-content: center;
       }
     }
+
+      /* Top beszállító partnerek */
+
+    .top-partners-section {
+      margin-top: 2.25rem;
+    }
+
+    .partners-strip {
+      background: #fcf5ed;
+      border-radius: 20px;
+      border-radius: var(--radius-lg);
+      padding: 1.8rem 1.9rem;
+    }
+
+    .partners-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .partners-heading-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .partners-heading-lead {
+      margin-top: 0.25rem;
+      font-size: 0.9rem;
+      color: var(--color-muted);
+      max-width: 40rem;
+    }
+
+    .partners-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.3rem;
+      align-items: stretch;
+    }
+
+    .partner-card {
+      border-radius: 1rem;
+      padding: 1rem 1rem 1.1rem;
+      background: #fcf5ed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.55rem;
+    }
+
+    .partner-logo {
+      width: 130px;
+      height:110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .partner-logo img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .partner-logo-placeholder {
+      width: 64px;
+      height: 64px;
+      border-radius: 999px;
+      border: 1px dashed #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #64748b;
+      background: #f8fafc;
+    }
+
+    .partner-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .partner-subtitle {
+      font-size: 0.8rem;
+      color: var(--color-muted);
+    }
+
+    .partners-empty {
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--color-muted);
+      text-align: center;
+    }
+
+    @media (max-width: 640px) {
+      .partners-strip {
+        padding: 1.3rem 1.2rem;
+      }
+
+      .partners-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1005,13 +1241,13 @@
       <div class="topbar-left">
         <div class="topbar-item">
           <span class="icon">📞</span>
-          <span data-section="site" data-field="topbarPhones">
+          <span data-section="site" class="mobileinvisible" data-field="topbarPhones">
             06-22-331-332 · 06-20-977-09-07
           </span>
         </div>
         <div class="topbar-item">
           <span class="icon">✉️</span>
-          <span data-section="site" data-field="topbarEmail">
+          <span data-section="site" class="mobileinvisible" data-field="topbarEmail">
             mesztorkaputechnika1@gmail.com
           </span>
         </div>
@@ -1032,23 +1268,17 @@
                 />
               </svg>
             </span>
-            <span></span>
+            <span class="mobileinvisible" data-section="site" data-field="topbarFacebook" style="margin-left: 5px">/mesztorkaputechnika</span>
           </a>
         </div>
       </div>
       <div class="topbar-right">
         <div class="topbar-item">
           <span class="icon">📍</span>
-          <span data-section="site" data-field="topbarAddress">
+          <span class="mobileinvisible" data-section="site" data-field="topbarAddress">
             Székesfehérvár, Berényi út 81.
           </span>
         </div>
-        <a href="#contact"
-          class="topbar-cta"
-          data-section="site"
-          data-field="topbarCtaText">
-          Vegye fel velünk a kapcsolatot
-        </a>
       </div>
     </div>
   </div>
@@ -1266,20 +1496,41 @@
           </article>
         </div>
 
-        <div style="margin-top:2.2rem;">
-          <div class="partners-strip">
-            <div style="font-size:0.9rem;color:var(--color-muted);" data-section="products" data-field="partner0">Megbízható beszállító partnereink:</div>
-            <div class="partners-list">
-              <span class="partner-pill" data-section="products" data-field="partner1">Hörmann Hungária Kft.</span>
-              <span class="partner-pill" data-section="products" data-field="partner2">Automata Bejáratok Specialistája Kft.</span>
-              <span class="partner-pill" data-section="products" data-field="partner3">Roll-N Kft.</span>
-              <span class="partner-pill" data-section="products" data-field="partner4">Overgate Kft.</span>
-              <span class="partner-pill" data-section="products" data-field="partner5">Motors For Gate Kft.</span>
-              <span class="partner-pill" data-section="products" data-field="partner6">Kapuker Kft.</span>
-              <span class="partner-pill" data-section="products" data-field="partner7">Gal-La Bt.</span>
+      </div>
+
+    </section>
+
+    <!-- Top partners -->
+    <section class="top-partners-section" id="top-partners" data-section="top-beszallitok">
+      <div class="container">
+        <div class="partners-strip">
+              <div class="partners-inner">
+                <div class="partners-heading">
+                  <div
+                    class="partners-heading-title"
+                    data-section="top-beszallitok"
+                    data-field="sectionTitle"
+                  >
+                    Megbízható beszállító partnereink
+                  </div>
+                  <p
+                    class="partners-heading-lead"
+                    data-section="top-beszallitok"
+                    data-field="sectionLead"
+                  >
+                    A minőségi kaputechnika mögött megbízható, hosszú távú gyártói partnerek állnak.
+                  </p>
+                </div>
+
+                <!-- Dinamikus rács Firebase-ből -->
+                <div id="suppliers-grid" class="partners-grid" aria-live="polite"></div>
+
+                <!-- Üres állapot -->
+                <div id="suppliers-empty" class="partners-empty">
+                  Jelenleg nincs rögzített beszállító partner.
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -1425,7 +1676,7 @@
             <div class="refs-cta-text" data-section="motto" data-field="refs_text">
               Nézze meg korábbi munkáinkról készült referencia fotóinkat, és inspirálódjon a megvalósult projektekből.
             </div>
-            <a id="references-link" href="#references" class="btn-ghost" data-section="motto" data-field="refs_link">
+            <a id="references-link" href="#references" class="btn-ghost" style="color: #222222" data-section="motto" data-field="refs_link">
               Referencia fotók iránt érdeklődöm
             </a>
           </div>
@@ -1496,7 +1747,7 @@
               <div class="contact-icon" data-section="contact" data-field="contact_m_icon">✉️</div>
               <div>
                 <div class="contact-label" data-section="contact" data-field="contact_m_label">E-mail</div>
-                <div data-section="contact" data-field="contact_m_address">mesztorkaputechnika1@gmail.com</div>
+                <div data-section="contact" class="contactemail" data-field="contact_m_address">mesztorkaputechnika1@gmail.com</div>
               </div>
             </div>
 
@@ -1526,7 +1777,7 @@
               <div class="contact-map-frame">
                 <iframe
                   loading="lazy"
-                  style="width:100%; margin:0px; border:none; border-radius: 24px;height: 250px;"
+                  style="width:100%; margin:0px; border:thin solid lightgrey; border-radius: 24px;height: 250px;"
                   allowfullscreen
                   referrerpolicy="no-referrer-when-downgrade"
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2711.5744152118177!2d18.427701676388274!3d47.20340921573286!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4769f7c6a3f97fab%3A0x18808bf47ea10725!2sMesz-Tor%20Kft.%20-%20Kaputechnika!5e0!3m2!1shu!2shu!4v1762281591018!5m2!1shu!2shu">
@@ -1571,6 +1822,10 @@
     const gridEl  = document.getElementById("references-grid");
     const emptyEl = document.getElementById("references-empty");
 
+    const suppliersGrid  = document.getElementById("suppliers-grid");
+    const suppliersEmpty = document.getElementById("suppliers-empty");
+
+
     let app;
     let db;
     let firebaseEnabled = false;
@@ -1599,16 +1854,28 @@
 
     // layout-kulcs → fallback section ID
     const KEY_FALLBACK_IDS = {
-      "miert-mi": "why-us",
-      "szolgaltatasok": "services",
-      "projects": "motto",
-      "footer": "footer",
+      hero: "hero",
+      "termekek-attekintes": "products",
+      "garazskapuk": "products",
+      "ipari-kapuk": "products",
+      "kapumozgatok": "products",
+      "automata-bejaratok": "products",
+      "miert-mesztor": "why-us",
+      "top-beszallitok": "top-partners",   
+      "kiemelt-szolgaltatasok": "services",
+      "helyszini-felmeres": "services",
+      "tanacsadas": "services",
+      "gyors-szerviz": "services",
+      "munkafolyamat": "services",
+      "referencia-garazskapuk": "references",
+      "referencia-ipari-kapuk": "references",
+      "referencia-fotok": "references",
       "kapcsolat-form": "contact",
-      "kapcsolat-map": "contact",
-      "referenciak": "references",
-      "top-termekek": "products",
-      "top-beszallitok": "products"
+      "kapcsolat-map": "contact"
     };
+
+    
+
 
     function findSectionByKey(key) {
       if (!key) return null;
@@ -1639,83 +1906,277 @@
       return null;
     }
 
-    function attachNavClickHandler() {
-      if (!navLinksEl || navClickHandlerAttached) return;
-      navClickHandlerAttached = true;
+    
+        // ----- Szekciók mutatása / elrejtése (Kapcsolat full-screen mód) -----
+    const mainEl = document.querySelector("main");
+    const PAGE_SECTIONS = mainEl ? Array.from(mainEl.querySelectorAll("section")) : [];
 
-      // Delegált kattintás: bármelyik A / BUTTON, amin van data-section-key
-      navLinksEl.addEventListener("click", (e) => {
-        const t = e.target;
-        if (!(t instanceof HTMLElement)) return;
+    function isContactKey(key) {
+      return key === "kapcsolat-form" || key === "kapcsolat-map" || key === "contact";
+    }
 
-        const withKey = t.closest("[data-section-key]");
-        const key = withKey?.dataset.sectionKey;
+    function showOnlyContactSection() {
+      if (!PAGE_SECTIONS.length) return;
+      PAGE_SECTIONS.forEach((sec) => {
+        if (sec.id === "contact") {
+          sec.style.display = "";
+        } else {
+          sec.style.display = "none";
+        }
+      });
+    }
+
+    function showAllSections() {
+      if (!PAGE_SECTIONS.length) return;
+      PAGE_SECTIONS.forEach((sec) => {
+        sec.style.display = "";
+      });
+    }
+
+    
+      function attachNavClickHandler() {
+        if (!navLinksEl || navClickHandlerAttached) return;
+        navClickHandlerAttached = true;
+
+        navLinksEl.addEventListener("click", (e) => {
+          const t = e.target;
+          if (!(t instanceof HTMLElement)) return;
+
+          const withKey = t.closest("[data-section-key]");
+          const key = withKey?.dataset.sectionKey;
+          if (!key) return;
+
+          e.preventDefault();
+
+          // Kapcsolat: csak a contact szekció maradjon látható
+          if (isContactKey(key)) {
+            showOnlyContactSection();
+          } else {
+            // bármely más menü visszaállítja az egész oldalt
+            showAllSections();
+          }
+
+          const secEl = findSectionByKey(key);
+          if (secEl) {
+            secEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+
+          // mobil menü zárása kattintás után
+          if (navLinksEl.classList.contains("open")) {
+            navLinksEl.classList.remove("open");
+            const btn = document.querySelector(".nav-toggle");
+            if (btn?.classList.contains("open")) btn.classList.remove("open");
+          }
+        });
+      }
+
+          // --- Dropdown hover javítás: kis késleltetéssel zárjuk csak be ---
+    function attachDropdownHoverFix() {
+      if (!navLinksEl) return;
+
+      const items = navLinksEl.querySelectorAll(".nav-item.has-dropdown");
+
+      items.forEach((item) => {
+        // ha már rá van kötve, ne duplázzuk az eventeket
+        if (item.dataset.dropdownHoverWired === "1") return;
+        item.dataset.dropdownHoverWired = "1";
+
+        const dropdown = item.querySelector(".nav-dropdown");
+        if (!dropdown) return;
+
+        let hideTimer = null;
+
+        const open = () => {
+          if (hideTimer) {
+            clearTimeout(hideTimer);
+            hideTimer = null;
+          }
+          item.classList.add("dropdown-open");
+        };
+
+        const scheduleClose = () => {
+          hideTimer = window.setTimeout(() => {
+            item.classList.remove("dropdown-open");
+          }, 120); // 0.12 mp elég, hogy átérj a gap-en
+        };
+
+        // ha a felső menüre visszamész
+        item.addEventListener("mouseenter", open);
+        item.addEventListener("mouseleave", scheduleClose);
+
+        // ha a lenyílóra mész rá / onnan jössz le
+        dropdown.addEventListener("mouseenter", open);
+        dropdown.addEventListener("mouseleave", scheduleClose);
+      });
+    }
+
+    // --- Dropdown meta adatok: ikon + szöveg ---
+const NAV_DROPDOWN_HIDDEN_KEYS = new Set(["hero", "footer"]);
+
+const NAV_CARD_META = {
+  "mirt-mi": {
+    icon: "⭐",
+    label: "Miért mi?",
+    sub: "Legfontosabb előnyeink, miért érdemes velünk dolgozni."
+  },
+  "szolgltatsok": {
+    icon: "🛠️",
+    label: "Szolgáltatásaink",
+    sub: "Tanácsadás, kivitelezés, szerviz – a teljes folyamat egy kézben."
+  },
+  "projects": {
+    icon: "📐",
+    label: "Termékválaszték",
+    sub: "Rövid mottó + ajánlatkérés blokk a lap alján."
+  },
+  "referencik": {
+    icon: "📸",
+    label: "Referenciák",
+    sub: "Elkészült garázs- és ipari kapuink, fotókkal."
+  },
+  "top-termekek": {
+    icon: "📦",
+    label: "Top termékek",
+    sub: "Legnépszerűbb kaputechnikai megoldásaink."
+  },
+  "beszllt-partnereink": {
+    icon: "🏢",
+    label: "Top beszállítók",
+    sub: "Megbízható gyártók, akikkel együtt dolgozunk."
+  }
+};
+
+
+
+
+function buildNavFromBoard(board) {
+  if (!navLinksEl || !board || !Array.isArray(board.lists) || !board.lists.length) return;
+
+  // Eredeti CTA felirat elmentése, mielőtt töröljük a navot
+  const existingCtaBtn = document.querySelector(".nav-cta");
+  const ctaText = existingCtaBtn?.textContent?.trim() || "Ajánlatkérés";
+
+  // Statikus nav kiürítése
+  navLinksEl.innerHTML = "";
+
+  // Path → melyik nav szöveg mezőhöz tartozzon
+  const resolveNavFieldForPath = (path) => {
+    const p = (path || "/").toLowerCase().trim();
+
+    if (p === "/" || p === "/index" || p === "/fooldal") return "navHome";
+    if (p.startsWith("/termek")) return "navProducts";
+    if (p.startsWith("/szolgal")) return "navServices";
+    if (p.startsWith("/miert") || p.startsWith("/rolunk")) return "navWhyUs";
+    if (p.startsWith("/refer")) return "navReferences";
+    if (p.startsWith("/kapcsolat") || p.startsWith("/contact")) return "navContact";
+
+    return null;
+  };
+
+  board.lists.forEach((list) => {
+    const cards = Array.isArray(list.cards) ? list.cards : [];
+    const listTitle = list.title || "Oldal";
+    const path = (list.path || "/").trim();
+    const navField = resolveNavFieldForPath(path);
+
+    const navItem = document.createElement("div");
+    navItem.className = "nav-item";
+
+    const primaryCard = cards[0];
+    const primaryKey = primaryCard?.key || "";
+
+    const topLink = document.createElement("a");
+    topLink.href = "#";
+    topLink.textContent = listTitle;
+
+    // ide ugrik a fő menüpont kattintáskor
+    if (primaryKey) {
+      topLink.dataset.sectionKey = primaryKey;
+    }
+
+    // adminPreview módhoz
+    if (navField) {
+      topLink.dataset.section = "site";
+      topLink.dataset.field = navField;
+    }
+
+    navItem.appendChild(topLink);
+
+    // Kapcsolat lista: ne legyen dropdown
+    const isContactList =
+      navField === "navContact" ||
+      cards.some((c) => c.key === "kapcsolat-form" || c.key === "kapcsolat-map");
+
+    // Többi listánál, ha több kártya van → dropdown
+    if (!isContactList && cards.length > 1) {
+      navItem.classList.add("has-dropdown");
+
+      const dd = document.createElement("div");
+      dd.className = "nav-dropdown";
+
+      cards.forEach((card) => {
+        const key = card.key || "";
         if (!key) return;
 
-        e.preventDefault();
+        // hero/footer NE jelenjen meg a dropdownban
+        if (NAV_DROPDOWN_HIDDEN_KEYS.has(key)) return;
 
-        const secEl = findSectionByKey(key);
-        if (secEl) {
-          secEl.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
-    }
+        const meta = NAV_CARD_META[key] || {};
 
-    function buildNavFromBoard(board) {
-      if (!navLinksEl || !board?.lists?.length) return;
+        const a = document.createElement("a");
+        a.href = "#";
+        a.className = "nav-dd-item";
+        a.dataset.sectionKey = key;
 
-      // Eredeti CTA felirat elmentése, mielőtt töröljük a navot
-      const existingCtaBtn = document.querySelector(".nav-cta");
-      const ctaText = existingCtaBtn?.textContent?.trim() || "Ajánlatkérés";
+        const iconSpan = document.createElement("span");
+        iconSpan.className = "nav-dd-icon";
+        iconSpan.textContent = meta.icon || "•";
 
-      // kiürítjük a statikus navot
-      navLinksEl.innerHTML = "";
+        const mainSpan = document.createElement("span");
+        mainSpan.className = "nav-dd-main";
 
-      board.lists.forEach((list) => {
-        const cards = Array.isArray(list.cards) ? list.cards : [];
-        const listTitle = list.title || "Oldal";
+        const titleSpan = document.createElement("span");
+        titleSpan.className = "nav-dd-title";
+        // ha van meta label, azt használjuk, különben a kártya címét
+        titleSpan.textContent = meta.label || card.title || card.key || "";
 
-        const navItem = document.createElement("div");
-        navItem.className = "nav-item";
+        mainSpan.appendChild(titleSpan);
 
-        const firstKey = cards[0]?.key || "";
-
-        const topLink = document.createElement("a");
-        topLink.href = "#";
-        topLink.textContent = listTitle;
-        if (firstKey) topLink.dataset.sectionKey = firstKey;
-        navItem.appendChild(topLink);
-
-        if (cards.length > 1) {
-          navItem.classList.add("has-dropdown");
-          const dd = document.createElement("div");
-          dd.className = "nav-dropdown";
-
-          cards.forEach((card) => {
-            const a = document.createElement("a");
-            a.href = "#";
-            a.textContent = card.title || card.key || "";
-            if (card.key) a.dataset.sectionKey = card.key;
-            dd.appendChild(a);
-          });
-
-          navItem.appendChild(dd);
+        if (meta.sub) {
+          const subSpan = document.createElement("span");
+          subSpan.className = "nav-dd-sub";
+          subSpan.textContent = meta.sub;
+          mainSpan.appendChild(subSpan);
         }
 
-        navLinksEl.appendChild(navItem);
+        a.appendChild(iconSpan);
+        a.appendChild(mainSpan);
+
+        dd.appendChild(a);
       });
 
-      // CTA gomb a végére (kapcsolat szekcióra ugorva)
-      const ctaBtn = document.createElement("button");
-      ctaBtn.type = "button";
-      ctaBtn.className = "nav-cta";
-      ctaBtn.textContent = ctaText;
-      // fallback a contact szekcióra:
-      ctaBtn.dataset.sectionKey = "kapcsolat-form";
-      navLinksEl.appendChild(ctaBtn);
-
-      attachNavClickHandler();
+      navItem.appendChild(dd);
     }
+
+    navLinksEl.appendChild(navItem);
+  });
+
+  // CTA gomb a nav végén – ez is kap data-section / data-field-et
+  const ctaBtn = document.createElement("button");
+  ctaBtn.type = "button";
+  ctaBtn.className = "nav-cta";
+  ctaBtn.textContent = ctaText;
+  ctaBtn.dataset.sectionKey = "kapcsolat-form";
+  ctaBtn.dataset.section = "site";
+  ctaBtn.dataset.field = "navCtaText";
+
+  navLinksEl.appendChild(ctaBtn);
+
+  attachNavClickHandler();
+  attachDropdownHoverFix();
+}
+
+
 
     // A főoldali szekciók sorrendjének igazítása a "/" path-ú lista alapján
     function reorderSectionsFromBoard(board) {
@@ -1942,6 +2403,18 @@
       }
     ];
 
+    const demoSuppliers = [
+      { name: "Hörmann Hungária Kft." },
+      { name: "Automata Bejáratok Specialistája Kft." },
+      { name: "Roll-N Kft." },
+      { name: "Overgate Kft." },
+      { name: "Overgate Kft." },
+      { name: "Motors For Gate Kft." },
+      { name: "Kapuker Kft." },
+      { name: "Gal-La Bt." }
+    ];
+
+
     function renderReferences(items) {
       if (!gridEl) return;
 
@@ -1963,7 +2436,7 @@
         if (item.imageUrl) {
           const img = document.createElement("img");
           img.src = item.imageUrl;
-          img.alt = item.title || "Referencia fotó";
+          img.alt = item.title || "Referencia";
           img.loading = "lazy";
 
           // Kattintásra nagy kép modal – csak desktopon nyit ki
@@ -2029,6 +2502,81 @@
     }
 
     loadReferences();
+
+        function renderSuppliers(items) {
+      if (!suppliersGrid) return;
+
+      if (!items || !items.length) {
+        suppliersGrid.innerHTML = "";
+        if (suppliersEmpty) suppliersEmpty.style.display = "block";
+        return;
+      }
+
+      if (suppliersEmpty) suppliersEmpty.style.display = "none";
+
+      suppliersGrid.innerHTML = items.map((item) => {
+        const name = item.name || "";
+        const subtitle = item.subtitle || "";
+        const imgSrc = item.imageUrl || item.imageDataUrl || "";
+        const first = name.trim().charAt(0).toUpperCase() || "M";
+
+        const logoHtml = imgSrc
+          ? `<img src="${imgSrc}" alt="${name || "Beszállító"} logója" loading="lazy" />`
+          : `<div class="partner-logo-placeholder">${first}</div>`;
+
+        return `
+          <div class="partner-card">
+            <div class="partner-logo">
+              ${logoHtml}
+            </div>
+            <div class="partner-name">${name}</div>
+            ${subtitle ? `<div class="partner-subtitle">${subtitle}</div>` : ""}
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadSuppliers() {
+      if (!suppliersGrid) return;
+
+      // Ha nincs Firebase (demo mód), akkor csak a neveket mutatjuk
+      if (!firebaseEnabled || !db) {
+        renderSuppliers(demoSuppliers);
+        return;
+      }
+
+      try {
+        const snap = await get(ref(db, "suppliers"));
+        if (!snap.exists()) {
+          renderSuppliers(demoSuppliers);
+          return;
+        }
+
+        const val = snap.val() || {};
+        const items = Object.entries(val)
+          .map(([id, d]) => ({
+            id,
+            name: d.name || "",
+            subtitle: d.subtitle || "",
+            imageUrl: d.imageUrl || d.imageDataUrl || "",
+            orderIndex: typeof d.orderIndex === "number" ? d.orderIndex : 0,
+            createdAt: d.createdAt || 0
+          }))
+          .sort((a, b) => {
+            if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
+            return (b.createdAt || 0) - (a.createdAt || 0);
+          });
+
+        renderSuppliers(items);
+      } catch (err) {
+        console.warn("[suppliers] Realtime DB hiba – demo lista:", err);
+        renderSuppliers(demoSuppliers);
+      }
+    }
+
+    loadReferences();
+    loadSuppliers();
+
 
     
 
