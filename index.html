@@ -869,6 +869,61 @@
       align-items: center;
     }
 
+    /* --------- Termékválaszték – termék kártyák --------- */
+
+.product-grid-card {
+  background: #fff;
+  border-radius: 1.1rem;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  cursor: pointer;
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+}
+
+.product-grid-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 12px 30px rgba(95, 95, 97, 0.75);
+}
+
+.product-grid-card-image {
+  position: relative;
+  padding-top: 62%;
+  border-radius: 0.9rem;
+  overflow: hidden;
+  background: #020617;
+  border: 1px solid rgba(15, 23, 42, 0.9);
+}
+
+.product-grid-card-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-grid-card-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.product-grid-card-desc {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.product-grid-card .btn-primary {
+  margin-top: 0.25rem;
+  align-self: flex-start;
+  font-size: 0.85rem;
+  padding-inline: 0.9rem;
+}
+
+
         /* Referencia kép nagy nézet (modal) – csak desktopon használjuk */
     .reference-modal-backdrop {
       position: fixed;
@@ -923,6 +978,140 @@
     .reference-modal-close:hover {
       background: rgba(15, 23, 42, 0.9);
     }
+
+    /* ------------ Főoldali hero slider ------------ */
+
+.hero-slider {
+  padding: 2.5rem 0 2.8rem;
+}
+
+.hero-slider-inner {
+  width: min(1100px, 100% - 2rem);
+  margin-inline: auto;
+}
+
+.hero-slider-viewport {
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #0f172a 0, #020617 55%);
+}
+
+.hero-slider-track {
+  display: flex;
+  transition: transform 0.55s ease;
+}
+
+.hero-slide {
+  position: relative;
+  min-width: 100%;
+  height: min(420px, 65vh);
+  background: #020617;
+}
+
+.hero-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.05);
+}
+
+.hero-slide-overlay {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 1.4rem 1.6rem 1.5rem;
+  background: linear-gradient(to top, #222, rgba(15, 23, 42, 0.4), transparent);
+  color: #e5e7eb;
+}
+
+.hero-slide-title {
+  font-size: clamp(1.2rem, 2vw + .4rem, 1.7rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-bottom: .2rem;
+}
+
+.hero-slide-subtitle {
+  font-size: .9rem;
+  color: #cbd5f5;
+}
+
+.hero-slider-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  color: #e5e7eb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.hero-slider-nav:hover {
+  background: rgba(30, 64, 175, 0.9);
+}
+
+.hero-slider-nav-prev {
+  left: 14px;
+}
+
+.hero-slider-nav-next {
+  right: 14px;
+}
+
+.hero-slider-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-bottom: 2px;
+}
+
+.hero-slider-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(15, 23, 42, 0.7);
+  cursor: pointer;
+  padding: 0;
+}
+
+.hero-slider-dot.is-active {
+  background: #f97316;
+  border-color: #fed7aa;
+}
+
+@media (max-width: 700px) {
+  .hero-slider {
+    padding-top: 1.8rem;
+  }
+
+  .hero-slider-viewport {
+    border-radius: 1.1rem;
+  }
+
+  .hero-slide {
+    height: min(320px, 60vh);
+  }
+
+  .hero-slide-overlay {
+    padding-inline: 1.1rem;
+    padding-bottom: 1.1rem;
+  }
+}
+
 
     /* Mobilon akkor se látszódjon, ha véletlenül megnyitnánk */
     @media (max-width: 800px) {
@@ -1328,6 +1517,26 @@
 
   <main>
 
+    <!-- Főoldali automatikus slider -->
+    <section id="hero-slider" class="hero-slider">
+      <div class="hero-slider-inner">
+        <div class="hero-slider-viewport">
+          <div id="heroSliderTrack" class="hero-slider-track">
+            <!-- Diaképek JS-ből -->
+          </div>
+
+          <button id="heroSliderPrev" class="hero-slider-nav hero-slider-nav-prev" type="button" aria-label="Előző kép">
+            ‹
+          </button>
+          <button id="heroSliderNext" class="hero-slider-nav hero-slider-nav-next" type="button" aria-label="Következő kép">
+            ›
+          </button>
+
+          <div id="heroSliderDots" class="hero-slider-dots"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- Hero -->
     <section id="hero" class="hero">
       <div class="container hero-inner">
@@ -1397,7 +1606,8 @@
             </div>
           </div>
         </div>
-      </div>
+
+      
     </section>
 
     <!-- Products -->
@@ -1412,7 +1622,7 @@
           </p>
         </div>
 
-        <div class="card-grid">
+        <!--<div class="card-grid">
           <article class="card">
             <div class="card-tag" data-section="products" data-field="lakossagi_top">Lakossági megoldások</div>
             <div class="card-title" data-section="products" data-field="lakossagi_title">Garázskapuk</div>
@@ -1494,11 +1704,38 @@
             </div>
             <a href="#contact" class="card-footer-link" data-section="products" data-field="keritcontact">Kerítés és utcai kapu ajánlat →</a>
           </article>
-        </div>
+
+          
+        </div>-->
+
+      <!-- Dinamikus termékválaszték (Firebase /products) 
+      <div class="section-header" style="margin-top: 2.5rem;">
+        <div class="section-kicker">Termékválaszték</div>
+        <h3 class="section-title" style="font-size: 1.4rem;">
+          Konkrét termékeink
+        </h3>
+        <p class="section-lead">
+          Az alábbi listában a jelenleg elérhető termékeket találja. A részletes adatokért
+          kattintson a kártyára.
+        </p>
+      </div>-->
+
+      <div id="termekvalasztek-grid" class="card-grid">
+        <!-- JS tölti be a termékeket -->
+      </div>
+
+      <p id="termekvalasztek-empty" class="references-empty" style="display:none;">
+        Jelenleg nincs felvitt termék. Amint hozzáadsz egyet az admin felületen,
+        itt automatikusan meg fog jelenni.
+      </p>
+
+      </div>
 
       </div>
 
     </section>
+
+    
 
     <!-- Top partners -->
     <section class="top-partners-section" id="top-partners" data-section="top-beszallitok">
@@ -1837,6 +2074,8 @@
     let db;
     let firebaseEnabled = false;
 
+
+
     try {
       if (firebaseConfig.apiKey) {
         app = getApps().length ? getApp() : initializeApp(firebaseConfig);
@@ -1846,6 +2085,187 @@
     } catch (e) {
       console.warn("[firebase] init hiba – demo mód:", e);
       firebaseEnabled = false;
+    }
+
+    try {
+      app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+      db = getDatabase(app);
+      firebaseEnabled = true;
+    } catch (err) {
+      console.warn("[heroSlider] Firebase init hiba:", err);
+      firebaseEnabled = false;
+    }
+
+    const sliderSection = document.getElementById("hero-slider");
+    const trackEl       = document.getElementById("heroSliderTrack");
+    const dotsEl        = document.getElementById("heroSliderDots");
+    const prevBtn       = document.getElementById("heroSliderPrev");
+    const nextBtn       = document.getElementById("heroSliderNext");
+
+    let slides = [];
+    let currentIndex = 0;
+    let autoplayTimer = null;
+    const AUTOPLAY_MS = 6000;
+
+    function updateSliderPosition() {
+      if (!trackEl || !slides.length) return;
+      const offset = currentIndex * -100;
+      trackEl.style.transform = `translateX(${offset}%)`;
+
+      if (dotsEl) {
+        const dots = dotsEl.querySelectorAll(".hero-slider-dot");
+        dots.forEach((dot, idx) => {
+          if (idx === currentIndex) {
+            dot.classList.add("is-active");
+          } else {
+            dot.classList.remove("is-active");
+          }
+        });
+      }
+    }
+
+    function goToSlide(index) {
+      if (!slides.length) return;
+      const max = slides.length;
+      currentIndex = (index + max) % max;
+      updateSliderPosition();
+    }
+
+    function nextSlide() {
+      goToSlide(currentIndex + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentIndex - 1);
+    }
+
+    function startAutoplay() {
+      if (autoplayTimer || slides.length <= 1) return;
+      autoplayTimer = setInterval(nextSlide, AUTOPLAY_MS);
+    }
+
+    function stopAutoplay() {
+      if (!autoplayTimer) return;
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+
+    function renderHeroSlider(items) {
+      if (!sliderSection || !trackEl || !dotsEl) return;
+
+      if (!items || !items.length) {
+        sliderSection.style.display = "none";
+        return;
+      }
+
+      sliderSection.style.display = "";
+      trackEl.innerHTML = "";
+      dotsEl.innerHTML = "";
+
+      slides = items.slice();
+
+      items.forEach((item, idx) => {
+        const slideEl = document.createElement("article");
+        slideEl.className = "hero-slide";
+
+        if (item.imageUrl) {
+          const img = document.createElement("img");
+          img.src = item.imageUrl;
+          img.alt = item.title || "Slider kép";
+          img.loading = "lazy";
+          slideEl.appendChild(img);
+        }
+
+        if (item.title || item.subtitle) {
+          const overlay = document.createElement("div");
+          overlay.className = "hero-slide-overlay";
+
+          if (item.title) {
+            const h = document.createElement("div");
+            h.className = "hero-slide-title";
+            h.textContent = item.title;
+            overlay.appendChild(h);
+          }
+
+          if (item.subtitle) {
+            const p = document.createElement("div");
+            p.className = "hero-slide-subtitle";
+            p.textContent = item.subtitle;
+            overlay.appendChild(p);
+          }
+
+          slideEl.appendChild(overlay);
+        }
+
+        trackEl.appendChild(slideEl);
+
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "hero-slider-dot";
+        dot.setAttribute("aria-label", `Ugrás a(z) ${idx + 1}. slider képre`);
+        dot.addEventListener("click", () => {
+          stopAutoplay();
+          goToSlide(idx);
+          startAutoplay();
+        });
+        dotsEl.appendChild(dot);
+      });
+
+      currentIndex = 0;
+      updateSliderPosition();
+      startAutoplay();
+    }
+
+    async function loadHeroSlider() {
+      if (!sliderSection || !trackEl) return;
+
+      if (!firebaseEnabled || !db) {
+        sliderSection.style.display = "none";
+        return;
+      }
+
+      try {
+        const snap = await get(ref(db, "heroSlider"));
+        if (!snap.exists()) {
+          sliderSection.style.display = "none";
+          return;
+        }
+
+        const val = snap.val() || {};
+        const items = Object.entries(val)
+          .map(([id, d]) => ({
+            id,
+            title: d?.title || "",
+            subtitle: d?.subtitle || "",
+            imageUrl: d?.imageUrl || d?.imageDataUrl || "",
+            createdAt: d?.createdAt || 0
+          }))
+          .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+        renderHeroSlider(items);
+      } catch (err) {
+        console.warn("[heroSlider] betöltés hiba:", err);
+        sliderSection.style.display = "none";
+      }
+    }
+
+    if (prevBtn) prevBtn.addEventListener("click", () => {
+      stopAutoplay();
+      prevSlide();
+      startAutoplay();
+    });
+
+    if (nextBtn) nextBtn.addEventListener("click", () => {
+      stopAutoplay();
+      nextSlide();
+      startAutoplay();
+    });
+
+    if (sliderSection) {
+      sliderSection.addEventListener("mouseenter", stopAutoplay);
+      sliderSection.addEventListener("mouseleave", startAutoplay);
+      sliderSection.addEventListener("focusin", stopAutoplay);
+      sliderSection.addEventListener("focusout", startAutoplay);
     }
 
         /* ------------ LAYOUT → NAV (layoutBoards alapján) ------------ */
@@ -2024,7 +2444,8 @@ const NAV_CARD_META = {
   "mirt-mi": {
     icon: "⭐",
     label: "Miért mi?",
-    sub: "Legfontosabb előnyeink, miért érdemes velünk dolgozni."
+    sub: "Legfontosabb előnyeink, miért érdemes velünk dolgozni.",
+    path: "#why-us"
   },
   "szolgltatsok": {
     icon: "🛠️",
@@ -2131,7 +2552,14 @@ function buildNavFromBoard(board) {
         const meta = NAV_CARD_META[key] || {};
 
         const a = document.createElement("a");
-        a.href = "#";
+        a.href = meta.path || "#";
+        a.addEventListener("click", (e) => {
+          e.preventDefault(); // ne kövesse a href-et
+          const target = document.getElementById(meta.path  );
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth" });
+          }
+        });
         a.className = "nav-dd-item";
         a.dataset.sectionKey = key;
 
@@ -2509,6 +2937,7 @@ function buildNavFromBoard(board) {
     }
 
     loadReferences();
+    loadHeroSlider();
 
         function renderSuppliers(items) {
       if (!suppliersGrid) return;
@@ -2581,11 +3010,111 @@ function buildNavFromBoard(board) {
       }
     }
 
-    loadReferences();
+    /* ------------ TERMÉKVÁLASZTÉK – termékek listázása ------------ */
+
+    const termekGrid = document.getElementById("termekvalasztek-grid");
+    const termekEmpty = document.getElementById("termekvalasztek-empty");
+
+    function renderProducts(items) {
+      if (!termekGrid) return;
+
+      termekGrid.innerHTML = "";
+
+      if (!items || !items.length) {
+        if (termekEmpty) termekEmpty.style.display = "block";
+        return;
+      }
+
+      if (termekEmpty) termekEmpty.style.display = "none";
+
+      items.forEach((item) => {
+        const card = document.createElement("article");
+        card.className = "product-grid-card";
+
+        const goToDetails = () => {
+          if (!item.id) return;
+          window.location.href = `details.html?id=${encodeURIComponent(item.id)}`;
+        };
+
+        card.addEventListener("click", goToDetails);
+
+        if (item.imageUrl) {
+          const imgWrap = document.createElement("div");
+          imgWrap.className = "product-grid-card-image";
+
+          const img = document.createElement("img");
+          img.src = item.imageUrl;
+          img.alt = item.name || "Termék fotója";
+          img.loading = "lazy";
+
+          imgWrap.appendChild(img);
+          card.appendChild(imgWrap);
+        }
+
+        const titleEl = document.createElement("h3");
+        titleEl.className = "product-grid-card-title";
+        titleEl.textContent = item.name || "Termék";
+        card.appendChild(titleEl);
+
+        if (item.shortDescription) {
+          const shortEl = document.createElement("p");
+          shortEl.className = "product-grid-card-desc";
+          shortEl.textContent = item.shortDescription;
+          card.appendChild(shortEl);
+        }
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-primary";
+        btn.textContent = "Részletek";
+        btn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          goToDetails();
+        });
+        card.appendChild(btn);
+
+        termekGrid.appendChild(card);
+      });
+    }
+
+    async function loadProducts() {
+      if (!termekGrid) return;
+
+      // Ha nincs Firebase (demo mód), csak üres lista
+      if (!firebaseEnabled || !db) {
+        renderProducts([]);
+        return;
+      }
+
+      try {
+        const snap = await get(ref(db, "products"));
+        if (!snap.exists()) {
+          renderProducts([]);
+          return;
+        }
+
+        const val = snap.val() || {};
+        const items = Object.entries(val)
+          .map(([id, d]) => ({
+            id,
+            name: d.name || "",
+            shortDescription: d.shortDescription || d.tagline || "",
+            longDescription: d.longDescription || d.description || "",
+            imageUrl: d.imageUrl || d.imageDataUrl || "",
+            createdAt: d.createdAt || 0
+          }))
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        renderProducts(items);
+      } catch (err) {
+        console.warn("[products] Realtime DB hiba:", err);
+        renderProducts([]);
+      }
+    }
+
+
     loadSuppliers();
-
-
-    
+    loadProducts();
 
     /* ------------ ANALITIKA – ugyanaz a logika, mint eddig ------------ */
 
@@ -2705,7 +3234,6 @@ function buildNavFromBoard(board) {
       <img id="reference-modal-image" src="" alt="Referencia nagyban" />
     </div>
   </div>
-
 
 </body>
 </html>

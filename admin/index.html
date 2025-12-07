@@ -142,6 +142,7 @@
     .spacer{ height:14px }
   </style>
 </head>
+
 <body>
   <header class="appbar">
     <button id="sidebarToggle" class="hamburger" aria-label="Menü" aria-expanded="false">☰</button>
@@ -162,6 +163,11 @@
         <button class="side-link tab-btn" data-pane="suppliers">
           <span class="emoji">🏢</span>Beszállító partnerek
         </button>
+        <button class="side-link tab-btn" data-pane="products">
+          <span class="emoji">📦</span>
+          <span>Termékek</span>
+        </button>
+        <button class="side-link tab-btn" data-pane="slider"><span class="emoji">🖼️</span>Főoldali slider</button>
       </nav>
     </aside>
 
@@ -312,6 +318,129 @@
           </div>
         </div>
       </section>
+
+      <!-- Termékek admin -->
+      <section id="pane-products" class="tab-pane container">
+        <h1 class="page-title">Termékválaszték – termékek</h1>
+
+        <div class="panel" style="padding: 20px">
+          <h2 class="panel-title">Új termék felvitele</h2>
+          <p class="muted">
+            Add meg a termék nevét, rövid és hosszabb leírását, valamint egy fotót.
+            Ezek fognak megjelenni a főoldali „Termékválaszték” kártyákon és a
+            részletes termékoldalon.
+          </p>
+
+          <form id="productForm" class="stack gap">
+            <label>
+              <div style="font-size:.8rem;margin-bottom:.15rem;">Termék neve</div>
+              <input
+                type="text"
+                id="productName"
+                placeholder="pl. Szigetelt szekcionált garázskapu"
+              />
+            </label>
+
+            <label>
+              <div style="font-size:.8rem;margin-bottom:.15rem;">Rövid leírás (kártyára)</div>
+              <textarea
+                id="productShort"
+                rows="2"
+                style="width:100%;resize:vertical;"
+                placeholder="pl. 40 mm panel, motoros működtetés, 5 év garancia."
+              ></textarea>
+            </label>
+
+            <label>
+              <div style="font-size:.8rem;margin-bottom:.15rem;">Részletes leírás (részletek oldalra)</div>
+              <textarea
+                id="productLong"
+                rows="6"
+                style="width:100%;resize:vertical;"
+                placeholder="Ide írhatod a részletes műszaki paramétereket, garanciát, kiegészítőket stb."
+              ></textarea>
+            </label>
+
+            <label>
+              <div style="font-size:.8rem;margin-bottom:.15rem;">Termék fotó</div>
+              <input type="file" id="productImage" accept="image/*" />
+            </label>
+
+            <div>
+              <button type="submit" class="btn primary" style="margin-top:10px;">
+                Termék mentése
+              </button>
+              <span id="productStatus" class="muted" style="margin-left:8px;"></span>
+            </div>
+          </form>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="panel" style="padding: 20px">
+          <h2 class="panel-title" style="margin-bottom:.25rem;">Meglévő termékek</h2>
+          <p class="muted" style="margin-bottom:.5rem;">
+            A legújabb termékek jelennek meg elöl. A törlés végleges.
+          </p>
+          <div id="productsList" class="stack gap"></div>
+        </div>
+      </section>
+
+            <!-- Főoldali slider -->
+      <section id="pane-slider" class="tab-pane container">
+        <div class="panel">
+          <div class="panel-head">Főoldali slider – képek</div>
+          <div class="panel-body">
+            <p class="muted" style="margin-bottom:10px">
+              Itt tudod beállítani a főoldalon megjelenő <b>automatikusan lapozódó képslidet</b>.
+              A képek a Firebase Realtime Database <code>heroSlider</code> ágában tárolódnak base64 formában.
+            </p>
+
+            <form id="sliderForm" class="stack gap" style="max-width:480px;">
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Cím (opcionális)</div>
+                <input type="text" id="slideTitle" placeholder="pl. Ipari szekcionált kapuk" />
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Alcím / rövid leírás (opcionális)</div>
+                <input
+                  type="text"
+                  id="slideSubtitle"
+                  placeholder="pl. Nagy igénybevételre tervezett ipari megoldások"
+                />
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Kép feltöltése</div>
+                <input type="file" id="slideImage" accept="image/*" />
+              </label>
+
+              <div>
+                <button type="submit" class="btn primary" style="margin-top:10px;">
+                  Diakép mentése
+                </button>
+                <span id="sliderStatus" class="muted" style="margin-left:8px;"></span>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="panel">
+          <div class="panel-head">Meglévő slider képek</div>
+          <div class="panel-body">
+            <p class="muted" style="margin-bottom:6px;">
+              A képek abban a sorrendben jelennek meg a főoldali sliderben, ahogy itt látszanak.
+              A sorrendet jelenleg a feltöltés ideje határozza meg (legrégebbi elöl).
+            </p>
+            <div id="sliderList" class="stack gap"></div>
+          </div>
+        </div>
+      </section>
+
+
 
 
       <!-- Referencia fotók -->
@@ -1342,6 +1471,301 @@
       });
     }
 
+    /* ---------- Termékek admin ---------- */
+
+    const productForm       = document.getElementById("productForm");
+    const productNameInput  = document.getElementById("productName");
+    const productShortInput = document.getElementById("productShort");
+    const productLongInput  = document.getElementById("productLong");
+    const productImageInput = document.getElementById("productImage");
+    const productStatusEl   = document.getElementById("productStatus");
+    const productsListEl    = document.getElementById("productsList");
+
+    async function loadProductsAdmin() {
+      if (!productsListEl) return;
+
+      if (!firebaseEnabled || !dbRealtime) {
+        productsListEl.innerHTML =
+          '<div class="muted">Demo mód – a termékek nem kerülnek mentésre.</div>';
+        return;
+      }
+
+      productsListEl.innerHTML = '<div class="muted">Betöltés...</div>';
+
+      try {
+        const snap = await get(dbRef(dbRealtime, "products"));
+        if (!snap.exists()) {
+          productsListEl.innerHTML =
+            '<div class="muted">Még nincs rögzített termék.</div>';
+          return;
+        }
+
+        const val = snap.val() || {};
+        const items = Object.entries(val)
+          .map(([id, d]) => ({ id, ...(d || {}) }))
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+          .reverse(); // legújabb felül
+
+        productsListEl.innerHTML = items
+          .map((item) => {
+            const imgSrc = item.imageUrl || item.imageDataUrl || "";
+            const name = (item.name || "").replace(/"/g, "&quot;");
+            const short = (item.shortDescription || item.tagline || "").replace(/"/g, "&quot;");
+            const detailUrl = `details.html?id=${encodeURIComponent(item.id)}`;
+
+            return `
+              <div class="kpi panel"
+                   style="padding:10px; display:flex; gap:10px; align-items:flex-start; margin-top:10px;"
+                   data-product-id="${item.id}">
+                <div style="width:80px; flex-shrink:0;">
+                  ${
+                    imgSrc
+                      ? `<img src="${imgSrc}" alt="Termék kép"
+                               style="width:100%;height:60px;object-fit:cover;border-radius:4px;">`
+                      : `<div style="width:100%;height:60px;border-radius:4px;border:1px dashed #cbd5e1;
+                                   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#94a3b8;">
+                           Nincs kép
+                         </div>`
+                  }
+                </div>
+                <div style="flex:1 1 auto;min-width:0;">
+                  <div style="font-weight:600;margin-bottom:4px;">${name || "Termék"}</div>
+                  <div class="muted" style="font-size:.8rem;margin-bottom:4px;">${short}</div>
+                  <a href="${detailUrl}" target="_blank" class="muted" style="font-size:.78rem;">
+                    Részletek megnyitása új lapon ↗
+                  </a>
+                </div>
+                <div style="flex-shrink:0;">
+                  <button class="btn ghost" data-product-delete="${item.id}">Törlés</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        productsListEl.querySelectorAll("[data-product-delete]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-product-delete");
+            if (!id) return;
+            if (!confirm("Biztosan törlöd ezt a terméket?")) return;
+
+            try {
+              await remove(dbRef(dbRealtime, "products/" + id));
+              await loadProductsAdmin();
+            } catch (err) {
+              console.warn("[productsAdmin] törlés hiba:", err);
+              alert("Nem sikerült törölni a terméket.");
+            }
+          });
+        });
+      } catch (err) {
+        console.warn("[productsAdmin] betöltés hiba:", err);
+        productsListEl.innerHTML =
+          '<div class="muted">Nem sikerült betölteni a termékeket.</div>';
+      }
+    }
+
+    if (productForm) {
+      productForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!firebaseEnabled || !dbRealtime) {
+          alert("Firebase nincs bekapcsolva (demo mód). A mentés nem lehetséges.");
+          return;
+        }
+
+        const name  = (productNameInput.value || "").trim();
+        const short = (productShortInput.value || "").trim();
+        const long  = (productLongInput.value || "").trim();
+        const file  = productImageInput?.files?.[0] || null;
+
+        if (!name) {
+          alert("Add meg a termék nevét.");
+          return;
+        }
+
+        productStatusEl.textContent = "Feltöltés folyamatban...";
+
+        try {
+          let dataUrl = "";
+          if (file) {
+            dataUrl = await new Promise((resolve, reject) => {
+              const r = new FileReader();
+              r.onload = () => resolve(r.result);
+              r.onerror = () => reject(r.error || new Error("FileReader hiba"));
+              r.readAsDataURL(file);
+            });
+          }
+
+          const newRef = push(dbRef(dbRealtime, "products"));
+          await set(newRef, {
+            name,
+            shortDescription: short,
+            longDescription: long,
+            imageDataUrl: dataUrl || null,
+            createdAt: Date.now()
+          });
+
+          productNameInput.value = "";
+          productShortInput.value = "";
+          productLongInput.value = "";
+          productImageInput.value = "";
+          productStatusEl.textContent = "Mentve ✅";
+
+          await loadProductsAdmin();
+        } catch (err) {
+          console.warn("[productsAdmin] mentés hiba:", err);
+          productStatusEl.textContent = "Hiba mentés közben.";
+        } finally {
+          setTimeout(() => {
+            if (productStatusEl) productStatusEl.textContent = "";
+          }, 2000);
+        }
+      });
+    }
+
+        /* ---------- Főoldali slider admin ---------- */
+
+    const sliderForm       = document.getElementById("sliderForm");
+    const slideTitleInput  = document.getElementById("slideTitle");
+    const slideSubtitleInput = document.getElementById("slideSubtitle");
+    const slideImageInput  = document.getElementById("slideImage");
+    const sliderStatusEl   = document.getElementById("sliderStatus");
+    const sliderListEl     = document.getElementById("sliderList");
+
+    async function loadSliderAdmin() {
+      if (!sliderListEl) return;
+
+      if (!firebaseEnabled || !dbRealtime) {
+        sliderListEl.innerHTML =
+          '<div class="muted">Demo mód – a slider képek nem kerülnek mentésre.</div>';
+        return;
+      }
+
+      sliderListEl.innerHTML = '<div class="muted">Betöltés...</div>';
+
+      try {
+        const snap = await get(dbRef(dbRealtime, "heroSlider"));
+        if (!snap.exists()) {
+          sliderListEl.innerHTML =
+            '<div class="muted">Még nincs feltöltött slider kép.</div>';
+          return;
+        }
+
+        const val = snap.val() || {};
+        const items = Object.entries(val)
+          .map(([id, d]) => ({ id, ...(d || {}) }))
+          .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)); // legrégebbi elöl
+
+        sliderListEl.innerHTML = items
+          .map((item) => {
+            const imgSrc = item.imageUrl || item.imageDataUrl || "";
+            const title = (item.title || "").replace(/"/g, "&quot;");
+            const subtitle = (item.subtitle || "").replace(/"/g, "&quot;");
+
+            return `
+              <div class="kpi panel"
+                   style="padding:10px; display:flex; gap:10px; align-items:center; margin-top:10px;"
+                   data-slide-id="${item.id}">
+                <div style="width:80px; flex-shrink:0;">
+                  ${
+                    imgSrc
+                      ? `<img src="${imgSrc}" alt="Slider kép"
+                               style="width:100%;height:60px;object-fit:cover;border-radius:4px;">`
+                      : `<div style="width:100%;height:60px;border-radius:4px;border:1px dashed #cbd5e1;
+                                   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#94a3b8;">
+                           Nincs kép
+                         </div>`
+                  }
+                </div>
+                <div style="flex:1 1 auto;min-width:0;">
+                  <div style="font-weight:600;margin-bottom:4px;">${title || "Diakép"}</div>
+                  <div class="muted" style="font-size:.8rem;">${subtitle}</div>
+                </div>
+                <div style="flex-shrink:0;">
+                  <button class="btn ghost" data-slide-delete="${item.id}">Törlés</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        sliderListEl.querySelectorAll("[data-slide-delete]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-slide-delete");
+            if (!id) return;
+            if (!confirm("Biztosan törlöd ezt a diaképet?")) return;
+
+            try {
+              await remove(dbRef(dbRealtime, "heroSlider/" + id));
+              await loadSliderAdmin();
+            } catch (err) {
+              console.warn("[sliderAdmin] törlés hiba:", err);
+              alert("Nem sikerült törölni a diaképet.");
+            }
+          });
+        });
+      } catch (err) {
+        console.warn("[sliderAdmin] betöltés hiba:", err);
+        sliderListEl.innerHTML =
+          '<div class="muted">Nem sikerült betölteni a slider képeket.</div>';
+      }
+    }
+
+    if (sliderForm) {
+      sliderForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!firebaseEnabled || !dbRealtime) {
+          alert("Firebase nincs bekapcsolva (demo mód). A mentés nem lehetséges.");
+          return;
+        }
+
+        const title = (slideTitleInput.value || "").trim();
+        const subtitle = (slideSubtitleInput.value || "").trim();
+        const file = slideImageInput?.files?.[0];
+
+        if (!file) {
+          alert("Kérlek válassz egy képfájlt.");
+          return;
+        }
+
+        sliderStatusEl.textContent = "Feltöltés folyamatban...";
+
+        try {
+          const dataUrl = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = () => reject(r.error || new Error("FileReader hiba"));
+            r.readAsDataURL(file);
+          });
+
+          const newRef = push(dbRef(dbRealtime, "heroSlider"));
+          const payload = {
+            title,
+            subtitle,
+            imageDataUrl: dataUrl,
+            createdAt: Date.now()
+          };
+
+          await set(newRef, payload);
+
+          slideTitleInput.value = "";
+          slideSubtitleInput.value = "";
+          slideImageInput.value = "";
+          sliderStatusEl.textContent = "Mentve ✅";
+
+          await loadSliderAdmin();
+        } catch (err) {
+          console.warn("[sliderAdmin] mentés hiba:", err);
+          sliderStatusEl.textContent = "Hiba mentés közben.";
+        } finally {
+          setTimeout(() => {
+            if (sliderStatusEl) sliderStatusEl.textContent = "";
+          }, 2000);
+        }
+      });
+    }
 
 
 
@@ -1352,6 +1776,10 @@
     await loadAnalytics();
     await loadSuppliersAdmin();
     await loadReferencesAdmin();
+    await loadProductsAdmin();
+    await loadSliderAdmin();
   </script>
+  
+
 </body>
 </html>
