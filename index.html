@@ -23,7 +23,7 @@
       --radius-lg: 18px;
       --radius-md: 12px;
       --shadow-soft: 0 18px 40px rgba(42, 25, 15, 0.08);
-      --container-width: 1180px;
+      --container-width: 1280px;
     }
 
     * {
@@ -56,7 +56,7 @@
       width: 100%;
       max-width: var(--container-width);
       margin: 0 auto;
-      padding: 0 1.5rem;
+      padding: 0 2rem;
     }
 
     /* Topbar */
@@ -354,7 +354,7 @@
     /* Hero */
 
     .hero {
-      padding: 3.5rem 0 3.75rem;
+      padding: 1.5rem 0 3.75rem;
     }
 
     .hero-inner {
@@ -463,13 +463,27 @@
     }
 
     .hero-card {
-      background: var(--color-surface);
       border-radius: 26px;
       padding: 1.4rem;
       position: relative;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 1;
       overflow: hidden;
     }
+
+  /* a kép visszaforgatva, hogy egyenesen álljon */
+  .hero-card img {
+    width: 80%;
+    height: 80%;
+    object-fit: cover;
+    display: block;
+    transform-origin: center center;
+  }
+
+
 
     .hero-card-badge {
       font-size: 0.75rem;
@@ -839,7 +853,7 @@
       align-items: center;
       justify-content: center;
       font-size: 1rem;
-      color: var(--color-primary);
+      color: #0d6efd;
       flex-shrink: 0;
       margin-top: 0.1rem;
     }
@@ -982,17 +996,18 @@
     /* ------------ Főoldali hero slider ------------ */
 
 .hero-slider {
-  padding: 2.5rem 0 2.8rem;
+  padding: 0rem 0 0rem;
 }
 
 .hero-slider-inner {
-  width: min(1100px, 100% - 2rem);
+  max-width: 100%;
+  padding: 0rem 0 2.8rem;
   margin-inline: auto;
 }
 
 .hero-slider-viewport {
   position: relative;
-  border-radius: 1.5rem;
+  border-radius: 1rem;
   overflow: hidden;
   background: radial-gradient(circle at top, #0f172a 0, #020617 55%);
 }
@@ -1478,7 +1493,9 @@
     <div class="header-inner container">
       <div class="brand">
         <div class="brand-logo">
-          <img src="mesztor-effect.png" class="brand-img" alt="">
+          <a href="#">
+            <img src="mesztor-effect.png" class="brand-img" alt="">
+          </a>
         </div>
         <div>
           <div class="brand-text-main"
@@ -1519,34 +1536,41 @@
 
     <!-- Főoldali automatikus slider -->
     <section id="hero-slider" class="hero-slider">
-      <div class="hero-slider-inner">
-        <div class="hero-slider-viewport">
-          <div id="heroSliderTrack" class="hero-slider-track">
-            <!-- Diaképek JS-ből -->
-          </div>
-
-          <button id="heroSliderPrev" class="hero-slider-nav hero-slider-nav-prev" type="button" aria-label="Előző kép">
-            ‹
-          </button>
-          <button id="heroSliderNext" class="hero-slider-nav hero-slider-nav-next" type="button" aria-label="Következő kép">
-            ›
-          </button>
-
-          <div id="heroSliderDots" class="hero-slider-dots"></div>
-        </div>
-      </div>
+      
     </section>
 
     <!-- Hero -->
     <section id="hero" class="hero">
+      <div class="container">
+        <div class="hero-slider-inner">
+          <div class="hero-kicker">
+              <span class="hero-kicker-dot"></span>
+              <span data-section="hero" data-field="kicker">
+                Csalódásmentes kaputechnika
+              </span>
+            </div>
+          <div class="hero-slider-viewport">
+            <div id="heroSliderTrack" class="hero-slider-track">
+              <!-- Diaképek JS-ből -->
+            </div>
+
+            <button id="heroSliderPrev" class="hero-slider-nav hero-slider-nav-prev" type="button" aria-label="Előző kép">
+              ‹
+            </button>
+            <button id="heroSliderNext" class="hero-slider-nav hero-slider-nav-next" type="button" aria-label="Következő kép">
+              ›
+            </button>
+
+            <div id="heroSliderDots" class="hero-slider-dots"></div>
+          </div>
+        </div>
+        
+      </div>
+      
+
       <div class="container hero-inner">
         <div>
-          <div class="hero-kicker">
-            <span class="hero-kicker-dot"></span>
-            <span data-section="hero" data-field="kicker">
-              Csalódásmentes kaputechnika
-            </span>
-          </div>
+          
           <h1 class="hero-title"
               data-section="hero" data-field="title">
             Üdvözöljük a <span class="highlight">kaputechnikai termékek</span> világában.
@@ -1569,21 +1593,16 @@
               Termékválaszték megtekintése
             </button>
           </div>
-          <div class="hero-meta">
-            <span data-section="hero" data-field="meta1">
-              <strong>Székesfehérvár</strong> bemutatóterem · Berényi út 81.
-            </span>
-            <span data-section="hero" data-field="meta2">
-              <strong>Sokéves tapasztalat</strong> lakossági és ipari kaputechnikában
-            </span>
-          </div>
 
         </div>
 
         <div class="hero-visual">
           <div class="hero-glow"></div>
+          
           <div class="hero-card">
-            <div class="hero-card-badge" data-section="hero" data-field="herobadge">Kaputechnikai megoldások</div>
+
+            <img src="epuletshapeform.png" alt="Mesztor-image">
+            <!--<div class="hero-card-badge" data-section="hero" data-field="herobadge">Kaputechnikai megoldások</div>
             <div class="hero-card-main">
               <span data-section="hero" data-field="herosoanleft">Lakossági &amp; ipari kapuk</span>
               <span style="font-size:0.85rem;color:var(--color-muted);" data-section="hero" data-field="herospanright">tanácsadás · kivitelezés · szerviz</span>
@@ -1604,7 +1623,7 @@
                 <div class="hero-stat-value" data-section="hero" data-field="heroctextright">Hörmann és további kiemelt partnerek</div>
               </div>
             </div>
-          </div>
+          </div>-->
         </div>
 
       
@@ -1957,24 +1976,28 @@
         </div>
 
         <div class="contact-grid">
-          <div class="contact-card">
-            <p class="icon-card-body" style="margin-bottom:1.2rem;" data-section="contact" data-field="contact_text">
-              Küldje el elképzelését, és kollégáink rövid időn belül felveszik Önnel a kapcsolatot
-              egy személyre szabott ajánlattal. Az alábbi elérhetőségeken is rendelkezésére állunk.
-            </p>
-            <button
-              class="btn-primary"
-              style="width:100%;justify-content:center;box-shadow:none;"
-              data-section="contact"
-              data-field="contact_mail"
-              onclick="window.location.href='mailto:mesztorkaputechnika1@gmail.com';"
-            >
-              Ajánlatkérés e-mailben
-            </button>
+          <div class="contact-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <p class="icon-card-body" style="margin-bottom:1.2rem;" data-section="contact" data-field="contact_text">
+                  Küldje el elképzelését, és kollégáink rövid időn belül felveszik Önnel a kapcsolatot
+                  egy személyre szabott ajánlattal. Az alábbi elérhetőségeken is rendelkezésére állunk.
+                </p>
+              </div>
+              <div>
+                <button
+                  class="btn-primary"
+                  style="width:100%;justify-content:center;box-shadow:none;"
+                  data-section="contact"
+                  data-field="contact_mail"
+                  onclick="window.location.href='mailto:mesztorkaputechnika1@gmail.com';"
+                >
+                  Ajánlatkérés e-mailben
+                </button>
 
-            <p class="contact-highlight" data-section="contact" data-field="contact_highlight">
-              Tipp: csatoljon fotót, méreteket és rövid leírást, így gyorsabban tudunk pontos ajánlatot adni.
-            </p>
+                <p class="contact-highlight" data-section="contact" data-field="contact_highlight">
+                  Tipp: csatoljon fotót, méreteket és rövid leírást, így gyorsabban tudunk pontos ajánlatot adni.
+                </p>
+              </div>
           </div>
 
           <div class="contact-card">
@@ -2007,7 +2030,11 @@
             </div>
 
             <div class="contact-item">
-              <div class="contact-icon" data-section="contact" data-field="contact_f_icon">👍</div>
+              <div class="contact-icon" data-section="contact" data-field="contact_f_icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
+                  <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
+                </svg>
+              </div>
               <div>
                 <div class="contact-label" data-section="contact" data-field="contact_f_label"><a href="https://facebook.com/mesztorkaputechnika">Facebook</a></div>
                 <div data-section="contact" data-field="contact_f_address">/mesztorkaputechnika</div>
@@ -2334,7 +2361,7 @@
     }
 
     
-        // ----- Szekciók mutatása / elrejtése (Kapcsolat full-screen mód) -----
+    // ----- Szekciók mutatása / elrejtése (Kapcsolat full-screen mód) -----
     const mainEl = document.querySelector("main");
     const PAGE_SECTIONS = mainEl ? Array.from(mainEl.querySelectorAll("section")) : [];
 
