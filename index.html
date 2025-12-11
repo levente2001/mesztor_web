@@ -1212,7 +1212,7 @@
   .nav-links.open {
     transform: translateY(0);
     opacity: 1;
-    height: 70vh;
+    height: 50vh;
     pointer-events: auto;
   }
 
@@ -1516,19 +1516,113 @@
 
       <nav class="main-nav">
         <div class="nav-links">
-          <a href="#hero"      data-section="site" data-field="navHome">Kezdőlap</a>
-          <a href="#products"  data-section="site" data-field="navProducts">Termékválaszték</a>
-          <a href="#services"  data-section="site" data-field="navServices">Szolgáltatások</a>
-          <a href="#why-us"    data-section="site" data-field="navWhyUs">Miért  mi?</a>
-          <a href="#references" data-section="site" data-field="navReferences">Referenciák</a>
-          <a href="#contact"   data-section="site" data-field="navContact">Kapcsolat</a>
-          <button class="nav-cta"
-                  onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'});"
-                  data-section="site" data-field="navCtaText">
+
+          <!-- Termékválaszték – dropdown -->
+          <div class="nav-item has-dropdown">
+            <a
+              href="#hero"
+            >
+              Kezdőlap
+            </a>
+
+            <div class="nav-dropdown">
+              <a
+                href="#why-us"
+                class="nav-dd-item"
+              >
+                <span class="nav-dd-icon">👨🏻‍🔧</span>
+                <span class="nav-dd-main">
+                  <span class="nav-dd-title">Miért mi?</span>
+                  <span class="nav-dd-sub">Minőség, szakértelem, hosszú távú biztonság</span>
+                </span>
+              </a>
+              <a
+                href="#services"
+                class="nav-dd-item"
+              >
+                <span class="nav-dd-icon">🧰</span>
+                <span class="nav-dd-main">
+                  <span class="nav-dd-title">Szolgáltatásaink</span>
+                  <span class="nav-dd-sub">Felmérés, tanácsadás, szerviz</span>
+                </span>
+              </a>
+              <a
+                href="#products"
+                class="nav-dd-item"
+              >
+                <span class="nav-dd-icon">🚪</span>
+                <span class="nav-dd-main">
+                  <span class="nav-dd-title">Termékválaszték</span>
+                  <span class="nav-dd-sub">Garázs-, ipari kapuk, sorompók, automatika</span>
+                </span>
+              </a>
+
+              
+              
+            </div>
+          </div>
+
+
+
+          <!-- Kapcsolat -->
+          <div class="nav-item">
+            <a
+              href="#contact"
+              data-section="site"
+              data-field="navContact"
+              data-section-key="contact"
+            >
+              Kapcsolat
+            </a>
+          </div>
+
+          <!-- Szolgáltatások – dropdown -->
+          <div class="nav-item has-dropdown">
+            <a
+              href="#services"
+            >
+              Referenciák
+            </a>
+
+            <div class="nav-dropdown">
+              <a
+                href="#references"
+                class="nav-dd-item"
+              >
+                <span class="nav-dd-icon">📸</span>
+                <span class="nav-dd-main">
+                  <span class="nav-dd-title">Referenciák</span>
+                  <span class="nav-dd-sub">Elkészült garázs- és ipari kapuink, fotókkal.</span>
+                </span>
+              </a>
+              <a
+                href="#top-partners"
+                class="nav-dd-item"
+              >
+                <span class="nav-dd-icon">🏢</span>
+                <span class="nav-dd-main">
+                  <span class="nav-dd-title">Top beszállítók</span>
+                  <span class="nav-dd-sub">Márkák, akikkel együtt dolgozunk</span>
+                </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- CTA – ugyanúgy a Kapcsolat szekcióra mutat, de már a közös nav-logikával -->
+          <button
+            class="nav-cta"
+            type="button"
+            data-section="site"
+            data-field="navCtaText"
+            data-section-key="contact"
+          >
             Ajánlatkérés
           </button>
         </div>
       </nav>
+
+
 
     </div>
   </header>
@@ -2296,16 +2390,23 @@
       sliderSection.addEventListener("focusout", startAutoplay);
     }
 
-        /* ------------ LAYOUT → NAV (layoutBoards alapján) ------------ */
+    /* ------------ LAYOUT → NAV (layoutBoards alapján) ------------ */
+
 
     const navLinksEl = document.querySelector(".main-nav .nav-links");
     let navClickHandlerAttached = false;
 
-    // Tartalom betöltés + adminPreview esetén inline szerkesztés + nav
+    // Tartalom betöltés + adminPreview esetén inline szerkesztés
     if (firebaseEnabled) {
       initContentInline().catch(err => console.warn("Tartalom betöltés hiba:", err));
-      initLayoutNav().catch(err => console.warn("Layout/nav betöltés hiba:", err));
     }
+
+    // Statikus nav: kattintáskezelő + csak desktopon "legördülős" dropdown
+    if (navLinksEl) {
+      attachNavClickHandler();
+      attachDropdownHoverFix();
+    }
+
 
     // layout-kulcs → fallback section ID
     const KEY_FALLBACK_IDS = {
