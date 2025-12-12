@@ -1804,7 +1804,7 @@
       });
 
       try {
-        await dbUpdate(dbRef(dbRealtime, "/"), updatesObj); // root update
+        await dbUpdate(dbRef(dbRealtime, "/"), updatesObj);
         if (sliderStatusEl) {
           sliderStatusEl.textContent = "Sorrend mentve ✅";
           setTimeout(() => (sliderStatusEl.textContent = ""), 1200);
