@@ -3506,7 +3506,6 @@ function buildNavFromBoard(board) {
         navLinks.classList.toggle("open");
       });
 
-      // delegált kattintás, minden A/BUTTON-ra
       navLinks.addEventListener("click", (e) => {
         const t = e.target;
         if (!(t instanceof HTMLElement)) return;
