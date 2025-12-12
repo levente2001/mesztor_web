@@ -3484,7 +3484,6 @@ function buildNavFromBoard(board) {
         userAgent: navigator.userAgent || ""
       }).catch(err => console.warn("[analytics] set hiba:", err));
 
-      // periodikus frissítés
       sendSnapshot();
       const intId = setInterval(sendSnapshot, 15000);
 
@@ -3494,8 +3493,6 @@ function buildNavFromBoard(board) {
       });
     }
   </script>
-
-
 
   <script>
     const navToggle = document.querySelector(".nav-toggle");
