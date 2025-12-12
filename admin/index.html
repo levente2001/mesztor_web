@@ -47,6 +47,10 @@
     .admin-shell{ display:block }
     .container{ padding: 18px }
 
+    .drag-handle{ cursor: grab; user-select:none; }
+    .drag-handle:active{ cursor: grabbing; }
+
+
     /* Sidebar (desktop: fix bal oldalt) */
     .sidebar{
       position:fixed; left:0; top:var(--headerH); bottom:0; width:var(--sidebarW);
@@ -496,6 +500,8 @@
   </div>
 
   <div id="overlay" class="overlay" aria-hidden="true"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
   <!-- Main module -->
   <script type="module">
@@ -1655,7 +1661,15 @@
         const val = snap.val() || {};
         const items = Object.entries(val)
           .map(([id, d]) => ({ id, ...(d || {}) }))
-          .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)); // legrégebbi elöl
+          .sort((a, b) => {
+            const ao = asNum(a.order);
+            const bo = asNum(b.order);
+            if (ao != null && bo != null) return ao - bo;
+            if (ao != null) return -1;
+            if (bo != null) return 1;
+            return (a.createdAt || 0) - (b.createdAt || 0);
+          })
+
 
         sliderListEl.innerHTML = items
           .map((item) => {
@@ -1682,8 +1696,9 @@
                   <div style="font-weight:600;margin-bottom:4px;">${title || "Diakép"}</div>
                   <div class="muted" style="font-size:.8rem;">${subtitle}</div>
                 </div>
-                <div style="flex-shrink:0;">
+                <div style="flex-shrink:0; display:flex; gap:8px; align-items:center;">
                   <button class="btn ghost" data-slide-delete="${item.id}">Törlés</button>
+                  <button type="button" class="btn ghost drag-handle" style="border:none" title="Húzd a sorrendhez" aria-label="Sorrend módosítása">☰</button>
                 </div>
               </div>
             `;
@@ -1711,6 +1726,8 @@
           '<div class="muted">Nem sikerült betölteni a slider képeket.</div>';
       }
     }
+
+    initSliderSortableOnce();
 
     if (sliderForm) {
       sliderForm.addEventListener("submit", async (e) => {
@@ -1745,7 +1762,8 @@
             title,
             subtitle,
             imageDataUrl: dataUrl,
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            order: Date.now()
           };
 
           await set(newRef, payload);
@@ -1764,6 +1782,46 @@
             if (sliderStatusEl) sliderStatusEl.textContent = "";
           }, 2000);
         }
+      });
+    }
+
+
+    const asNum = (v) => {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
+
+    async function persistSliderOrder() {
+      if (!firebaseEnabled || !dbRealtime || !sliderListEl) return;
+
+      const ids = Array.from(sliderListEl.querySelectorAll("[data-slide-id]"))
+        .map(el => el.getAttribute("data-slide-id"))
+        .filter(Boolean);
+
+      const updatesObj = {};
+      ids.forEach((id, idx) => {
+        updatesObj[`heroSlider/${id}/order`] = idx; // 0..n-1
+      });
+
+      try {
+        await dbUpdate(dbRef(dbRealtime, "/"), updatesObj); // root update
+        if (sliderStatusEl) {
+          sliderStatusEl.textContent = "Sorrend mentve ✅";
+          setTimeout(() => (sliderStatusEl.textContent = ""), 1200);
+        }
+      } catch (err) {
+        console.warn("[sliderAdmin] order mentés hiba:", err);
+        alert("Nem sikerült elmenteni a sorrendet.");
+      }
+    }
+
+    function initSliderSortableOnce() {
+      if (!sliderListEl || sliderListEl._sortable || !window.Sortable) return;
+
+      sliderListEl._sortable = Sortable.create(sliderListEl, {
+        animation: 150,
+        handle: ".drag-handle",
+        onEnd: () => persistSliderOrder(),
       });
     }
 

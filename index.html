@@ -994,6 +994,67 @@
       background: rgba(15, 23, 42, 0.9);
     }
 
+    .reference-modal-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      user-select: none;
+    }
+
+    .reference-modal-nav:hover {
+      background: rgba(30, 64, 175, 0.9);
+    }
+
+    .reference-modal-prev {
+      left: 12px;
+    }
+
+    .reference-modal-next {
+      right: 12px;
+    }
+
+    .reference-modal-meta {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0.55rem 0.7rem;
+      border-radius: 0.85rem;
+      background: linear-gradient(to top, rgba(2, 6, 23, 0.78), rgba(2, 6, 23, 0.22));
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      pointer-events: none; /* csak információ, ne fogja meg a kattintást */
+    }
+
+    .reference-modal-title {
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .reference-modal-counter {
+      opacity: 0.85;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
     /* ------------ Főoldali hero slider ------------ */
 
 .hero-slider {
@@ -1613,6 +1674,7 @@
           <button
             class="nav-cta"
             type="button"
+            onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'});"
             data-section="site"
             data-field="navCtaText"
             data-section-key="contact"
@@ -2360,9 +2422,18 @@
             title: d?.title || "",
             subtitle: d?.subtitle || "",
             imageUrl: d?.imageUrl || d?.imageDataUrl || "",
-            createdAt: d?.createdAt || 0
+            createdAt: d?.createdAt || 0,
+            order: d?.order ?? null,
           }))
-          .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+          .sort((a, b) => {
+            const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : null;
+            const bo = Number.isFinite(Number(b.order)) ? Number(b.order) : null;
+            if (ao != null && bo != null) return ao - bo;
+            if (ao != null) return -1;
+            if (bo != null) return 1;
+            return (a.createdAt || 0) - (b.createdAt || 0);
+          });
+
 
         renderHeroSlider(items);
       } catch (err) {
@@ -2474,7 +2545,9 @@
     function showOnlyContactSection() {
       if (!PAGE_SECTIONS.length) return;
       PAGE_SECTIONS.forEach((sec) => {
-        if (sec.id === "contact") {
+        // a contact rész lehet egyetlen section (id="contact"), de ha később több contact rész lesz,
+        // akkor azokat is megtartjuk (pl. kapcsolat-form / kapcsolat-map)
+        if (sec.id === "contact" || isContactKey(sec.id)) {
           sec.style.display = "";
         } else {
           sec.style.display = "none";
@@ -2482,7 +2555,7 @@
       });
     }
 
-    function showAllSections() {
+function showAllSections() {
       if (!PAGE_SECTIONS.length) return;
       PAGE_SECTIONS.forEach((sec) => {
         sec.style.display = "";
@@ -2498,8 +2571,15 @@
           const t = e.target;
           if (!(t instanceof HTMLElement)) return;
 
-          const withKey = t.closest("[data-section-key]");
-          const key = withKey?.dataset.sectionKey;
+          // minden nav linket kezelünk, ami az oldalon belüli hash-re mutat (#...)
+          const a = t.closest("a[href]");
+          if (!a || !navLinksEl.contains(a)) return;
+
+          const href = (a.getAttribute("href") || "").trim();
+          const hashKey = href.startsWith("#") ? href.slice(1) : "";
+
+          // elsődlegesen data-section-key, de ha nincs, akkor a href hash legyen a kulcs
+          const key = (a.dataset.sectionKey || hashKey).trim();
           if (!key) return;
 
           e.preventDefault();
@@ -2515,7 +2595,15 @@
           const secEl = findSectionByKey(key);
           if (secEl) {
             secEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          } else {
+            // ha nincs konkrét szekció, menjünk fel a tetejére
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }
+
+          // URL hash frissítés (ugrás nélkül)
+          try {
+            history.pushState(null, "", "#" + key);
+          } catch (_) {}
 
           // mobil menü zárása kattintás után
           if (navLinksEl.classList.contains("open")) {
@@ -2526,7 +2614,7 @@
         });
       }
 
-          // --- Dropdown hover javítás: kis késleltetéssel zárjuk csak be ---
+// --- Dropdown hover javítás: kis késleltetéssel zárjuk csak be ---
     function attachDropdownHoverFix() {
       if (!navLinksEl) return;
 
@@ -2897,23 +2985,72 @@ function buildNavFromBoard(board) {
       initInlineEditing();
     }
 
-        /* ------------ Referencia kép modal (csak desktopon) ------------ */
+            /* ------------ Referencia kép modal (csak desktopon) ------------ */
     const referenceModalBackdrop = document.getElementById("reference-modal");
     const referenceModalImage    = document.getElementById("reference-modal-image");
     const referenceModalCloseBtn = document.getElementById("reference-modal-close");
+    const referenceModalPrevBtn  = document.getElementById("reference-modal-prev");
+    const referenceModalNextBtn  = document.getElementById("reference-modal-next");
+    const referenceModalTitleEl  = document.getElementById("reference-modal-title");
+    const referenceModalCountEl  = document.getElementById("reference-modal-counter");
 
     function isDesktop() {
       return window.matchMedia("(min-width: 801px)").matches;
     }
 
-    function openReferenceModal(src, alt) {
+    // A modalban lapozható referencia-galéria (csak képpel rendelkező elemek)
+    let referenceGallery = [];
+    let referenceGalleryIndex = 0;
+
+    function isReferenceModalOpen() {
+      return !!referenceModalBackdrop && referenceModalBackdrop.classList.contains("open");
+    }
+
+    function mod(n, m) {
+      return ((n % m) + m) % m;
+    }
+
+    function setReferenceGallery(items) {
+      referenceGallery = (Array.isArray(items) ? items : []).filter(it => it && it.imageUrl);
+      referenceGalleryIndex = 0;
+    }
+
+    function updateReferenceModal() {
+      if (!referenceModalImage) return;
+      if (!referenceGallery.length) return;
+
+      const item = referenceGallery[referenceGalleryIndex];
+
+      referenceModalImage.src = item.imageUrl || "";
+      referenceModalImage.alt = item.title || "Referencia fotó";
+
+      if (referenceModalTitleEl) {
+        referenceModalTitleEl.textContent = item.title || "";
+      }
+      if (referenceModalCountEl) {
+        referenceModalCountEl.textContent = `${referenceGalleryIndex + 1}/${referenceGallery.length}`;
+      }
+
+      const canNav = referenceGallery.length > 1;
+      if (referenceModalPrevBtn) referenceModalPrevBtn.style.display = canNav ? "" : "none";
+      if (referenceModalNextBtn) referenceModalNextBtn.style.display = canNav ? "" : "none";
+    }
+
+    function openReferenceModalAt(index) {
       if (!isDesktop()) return; // csak asztali nézetben
       if (!referenceModalBackdrop || !referenceModalImage) return;
+      if (!referenceGallery.length) return;
 
-      referenceModalImage.src = src;
-      referenceModalImage.alt = alt || "Referencia fotó";
+      referenceGalleryIndex = mod(Number(index) || 0, referenceGallery.length);
       referenceModalBackdrop.classList.add("open");
       referenceModalBackdrop.setAttribute("aria-hidden", "false");
+      updateReferenceModal();
+    }
+
+    function stepReference(delta) {
+      if (!referenceGallery.length) return;
+      referenceGalleryIndex = mod(referenceGalleryIndex + delta, referenceGallery.length);
+      updateReferenceModal();
     }
 
     function closeReferenceModal() {
@@ -2921,6 +3058,8 @@ function buildNavFromBoard(board) {
       referenceModalBackdrop.classList.remove("open");
       referenceModalBackdrop.setAttribute("aria-hidden", "true");
       referenceModalImage.src = "";
+      if (referenceModalTitleEl) referenceModalTitleEl.textContent = "";
+      if (referenceModalCountEl) referenceModalCountEl.textContent = "";
     }
 
     if (referenceModalBackdrop) {
@@ -2938,16 +3077,36 @@ function buildNavFromBoard(board) {
       });
     }
 
-    // ESC-re is zárjuk
+    if (referenceModalPrevBtn) {
+      referenceModalPrevBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        stepReference(-1);
+      });
+    }
+
+    if (referenceModalNextBtn) {
+      referenceModalNextBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        stepReference(+1);
+      });
+    }
+
+    // Billentyűk: ESC = zárás, nyilak = lapozás (csak ha a modal nyitva van)
     document.addEventListener("keydown", (e) => {
+      if (!isReferenceModalOpen()) return;
+
       if (e.key === "Escape") {
         closeReferenceModal();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        stepReference(-1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        stepReference(+1);
       }
     });
 
-
-
-    /* ------------ REFERENCIÁK – Realtime Database-ből ------------ */
+/* ------------ REFERENCIÁK – Realtime Database-ből ------------ */
 
     const demoItems = [
       {
@@ -2986,9 +3145,14 @@ function buildNavFromBoard(board) {
 
       if (!items || !items.length) {
         if (emptyEl) emptyEl.style.display = "block";
+        // modal lapozólista is ürül
+        if (typeof setReferenceGallery === "function") setReferenceGallery([]);
         return;
       }
       if (emptyEl) emptyEl.style.display = "none";
+
+      // A modalhoz: csak a képpel rendelkező referenciák listája, ugyanabban a sorrendben
+      const gallery = [];
 
       items.forEach(item => {
         const card = document.createElement("article");
@@ -3003,14 +3167,17 @@ function buildNavFromBoard(board) {
           img.alt = item.title || "Referencia";
           img.loading = "lazy";
 
+          // felvesszük a galériába, és eltesszük az indexét a lapozáshoz
+          const galleryIndex = gallery.length;
+          gallery.push(item);
+
           // Kattintásra nagy kép modal – csak desktopon nyit ki
           img.addEventListener("click", () => {
-            openReferenceModal(item.imageUrl, item.title || "Referencia fotó");
+            openReferenceModalAt(galleryIndex);
           });
 
           imgWrap.appendChild(img);
         }
-
 
         const info = document.createElement("div");
         info.className = "reference-info";
@@ -3030,6 +3197,9 @@ function buildNavFromBoard(board) {
         card.appendChild(info);
         gridEl.appendChild(card);
       });
+
+      // frissítjük a modal lapozható listáját
+      if (typeof setReferenceGallery === "function") setReferenceGallery(gallery);
     }
 
     async function loadReferences() {
@@ -3351,7 +3521,7 @@ function buildNavFromBoard(board) {
 
   <!-- Referencia kép nagy nézet (csak desktopon) -->
   <div id="reference-modal" class="reference-modal-backdrop" aria-hidden="true">
-    <div class="reference-modal" role="dialog" aria-modal="true">
+    <div class="reference-modal" role="dialog" aria-modal="true" aria-label="Referencia fotó">
       <button
         type="button"
         id="reference-modal-close"
@@ -3360,6 +3530,32 @@ function buildNavFromBoard(board) {
       >
         ×
       </button>
+
+      <button
+        type="button"
+        id="reference-modal-prev"
+        class="reference-modal-nav reference-modal-prev"
+        aria-label="Előző referencia"
+        title="Előző (←)"
+      >
+        ‹
+      </button>
+
+      <button
+        type="button"
+        id="reference-modal-next"
+        class="reference-modal-nav reference-modal-next"
+        aria-label="Következő referencia"
+        title="Következő (→)"
+      >
+        ›
+      </button>
+
+      <div class="reference-modal-meta" aria-live="polite">
+        <div id="reference-modal-title" class="reference-modal-title"></div>
+        <div id="reference-modal-counter" class="reference-modal-counter"></div>
+      </div>
+
       <img id="reference-modal-image" src="" alt="Referencia nagyban" />
     </div>
   </div>
