@@ -63,3 +63,6 @@ A repo gyökerében ekkor legalább ezeknek a fájloknak kell látszódniuk:
 
 - `npm run dev:index` → `index.html` automatikus megnyitása
 - `npm run dev:admin` → `admin.html` automatikus megnyitása
+
+
+Kaput3chn1ka_423!

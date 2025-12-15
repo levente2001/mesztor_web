@@ -678,6 +678,49 @@
       padding: 1.1rem 1.2rem;
     }
 
+    /* Services admin UI */
+    .icon-card { position: relative; }
+
+    .svc-admin-actions{
+      position:absolute;
+      top:12px;
+      right:12px;
+      display:flex;
+      gap:6px;
+    }
+
+    .svc-admin-btn{
+      width:32px;
+      height:32px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.92);
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    .svc-admin-btn:hover{
+      background:#fff;
+      box-shadow: 0 10px 24px rgba(15,23,42,.10);
+    }
+
+    .icon-card-add{
+      border:2px dashed rgba(148,163,184,.85);
+      background: rgba(248,250,252,.75);
+      cursor:pointer;
+    }
+
+    .icon-badge-add{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: transparent;
+      border:2px dashed rgba(148,163,184,.85);
+      font-size:28px;
+      line-height:1;
+    }
+
+
     .icon-badge {
       width: 32px;
       height: 32px;
@@ -810,17 +853,118 @@
       color: var(--color-muted);
     }
 
+    /* From Uiverse.io by Smit-Prajapati */ 
+.orange {
+  color: #ff7a01;
+}
+
+.form-container {
+  max-width: 100%;
+  background-color: #001925;
+  padding: 30px;
+  border-radius: 24px 0px 0px 24px;
+  border-right: 5px solid #ff7a01;
+}
+
+.heading {
+  display: block;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.form-container .form .input {
+  color: #87a4b6;
+  width: 100%;
+  background-color: #002733;
+  border: none;
+  outline: none;
+  padding: 10px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+  border-left: 1px solid transparent;
+}
+
+.form-container .form .input:focus {
+  border-left: 5px solid #ff7a01;
+}
+
+.form-container .form .textarea {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  outline: none;
+  background-color: #002733;
+  color: #ff7a01;
+  font-weight: bold;
+  resize: none;
+  max-height: 150px;
+  margin-bottom: 20px;
+  border-left: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-container .form .textarea:focus {
+  border-left: 5px solid #ff7a01;
+}
+
+.form-container .form .button-container {
+  display: flex;
+  gap: 10px;
+}
+
+.form-container .form .button-container .send-button {
+  flex-basis: 100%;
+  background: #ff7a01;
+  padding: 10px;
+  color: #001925;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid transparent;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  transition: all 0.2s ease-in-out;
+}
+
+.form-container .form .button-container .send-button:hover {
+  background: transparent;
+  border: 1px solid #ff7a01;
+  color: #ff7a01;
+}
+
+.form-container .form .button-container .reset-button-container {
+  filter: drop-shadow(1px 1px 0px #ff7a01);
+  flex-basis: 30%;
+}
+
+.form-container .form .button-container .reset-button-container .reset-button {
+  position: relative;
+  text-align: center;
+  padding: 10px;
+  color: #ff7a01;
+  font-weight: bold;
+  background: #001925;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  transition: all 0.2s ease-in-out;
+}
+
+.form-container .form .button-container .reset-button-container .reset-button:hover {
+  background: #ff7a01;
+  color: #001925;
+}
+
     /* Contact */
 
     .contact-grid {
       display: grid;
       grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-      gap: 2rem;
+      gap: 0rem;
     }
 
     .contact-card {
       background: var(--color-surface);
-      border-radius: 24px;
+      border-radius: 0px 24px 24px 0px;
       padding: 1.7rem 1.7rem;
     }
 
@@ -1171,6 +1315,28 @@
 }
 
 @media (max-width: 700px) {
+
+  .form-container {
+    max-width: 100%;
+    background-color: #001925;
+    padding: 30px;
+    border-radius: 24px 24px 0px 0px;
+    border-bottom: 5px solid #ff7a01;
+    border-right: none;
+  }
+
+  .contact-card {
+      background: var(--color-surface);
+      border-radius: 0px 0px 24px 24px;
+      padding: 1.7rem 1.7rem;
+  }
+
+  .contact-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 0rem;
+    }
+
   .hero-slider {
     padding-top: 1.8rem;
   }
@@ -1959,55 +2125,7 @@
           </p>
         </div>
 
-        <div class="icon-grid">
-          <article class="icon-card">
-            <div class="icon-badge" data-section="services" data-field="ajan_badge">📝</div>
-            <h3 class="icon-card-title" data-section="services" data-field="ajan_title">Ajánlat készítés</h3>
-            <p class="icon-card-body" data-section="services" data-field="ajan_text">
-              Gyors, személyre szabott, díjmentes árajánlat készítése az Ön igényeire szabva.
-            </p>
-          </article>
-
-          <article class="icon-card">
-            <div class="icon-badge" data-section="services" data-field="felmer_badge">📐</div>
-            <h3 class="icon-card-title" data-section="services" data-field="felmer_title">Felmérés</h3>
-            <p class="icon-card-body" data-section="services" data-field="felmer_text">
-              Precíz helyszíni felmérés szakképzett munkatársunk által, a legjobb műszaki megoldás érdekében.
-            </p>
-          </article>
-
-          <article class="icon-card">
-            <div class="icon-badge" data-section="services" data-field="tanacs_badge">💬</div>
-            <h3 class="icon-card-title" data-section="services" data-field="tanacs_title">Szaktanácsadás</h3>
-            <p class="icon-card-body" data-section="services" data-field="tanacs_text">
-              Hozzáértő kollégáink segítenek eligazodni a termékek, méretek és műszaki lehetőségek között.
-            </p>
-          </article>
-
-          <article class="icon-card">
-            <div class="icon-badge" data-section="services" data-field="szallit_badge">🚚</div>
-            <h3 class="icon-card-title" data-section="services" data-field="szallit_title">Szállítás</h3>
-            <p class="icon-card-body" data-section="services" data-field="szallit_text">
-              Szakszerű, sérülésmentes szállítás a kaputechnikai termékek sajátosságainak figyelembevételével.
-            </p>
-          </article>
-
-          <article class="icon-card">
-            <div class="icon-badge" data-section="services" data-field="uzem_badge">🛠️</div>
-            <h3 class="icon-card-title" data-section="services" data-field="uzem_title">Beüzemelés</h3>
-            <p class="icon-card-body" data-section="services" data-field="uzem_text">
-              Magas színvonalú beszerelés és beüzemelés, hogy az új kapu hosszú távon megbízhatóan működjön.
-            </p>
-          </article>
-
-          <article class="icon-card">
-            <div class="icon-badge" data-section="services" data-field="szerviz_badge">🔧</div>
-            <h3 class="icon-card-title" data-section="services" data-field="szerviz_title">Szervizelés, javítás</h3>
-            <p class="icon-card-body" data-section="services" data-field="szerviz_text">
-              Márkafüggetlen kaputechnikai termékek javítása, karbantartása, gyors reakcióval.
-            </p>
-          </article>
-        </div>
+        <div id="services-grid" class="icon-grid"></div>
       </div>
     </section>
 
@@ -2126,14 +2244,14 @@
         <div class="section-header">
           <div class="section-kicker" data-section="contact" data-field="contact_kicker">Kapcsolat</div>
           <h2 class="section-title" data-section="contact" data-field="contact_title">Vegye fel velünk a kapcsolatot</h2>
-          <p class="section-lead" data-section="contact" data-field="contact_text">
+          <p class="section-lead" data-section="contact" data-field="contact_text_main">
             Ha termékeinkkel vagy szolgáltatásainkkal kapcsolatban kérdése van, vagy szaktanácsra lenne szüksége,
             forduljon hozzánk bizalommal – szívesen segítünk.
           </p>
         </div>
 
         <div class="contact-grid">
-          <div class="contact-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <!--<div class="contact-card" style="display: flex; flex-direction: column; justify-content: space-between;">
               <div>
                 <p class="icon-card-body" style="margin-bottom:1.2rem;" data-section="contact" data-field="contact_text">
                   Küldje el elképzelését, és kollégáink rövid időn belül felveszik Önnel a kapcsolatot
@@ -2155,6 +2273,25 @@
                   Tipp: csatoljon fotót, méreteket és rövid leírást, így gyorsabban tudunk pontos ajánlatot adni.
                 </p>
               </div>
+          </div>-->
+
+          <div class="form-container">
+              <div class="form">
+                  <span class="heading">Lépjen velünk kapcsolatba!</span>
+                  <p class="icon-card-body" style="margin-bottom:1.2rem;" data-section="contact" data-field="contact_text">
+                    Küldje el elképzelését, és kollégáink rövid időn belül felveszik Önnel a kapcsolatot
+                    egy személyre szabott ajánlattal. Az alábbi elérhetőségeken is rendelkezésére állunk.
+                  </p>
+                  <input placeholder="Név" type="text" class="input">
+                  <input placeholder="Email" id="mail" type="email" class="input">
+                  <textarea placeholder="Üzenet" rows="10" cols="30" id="message" name="message" class="textarea"></textarea>
+                  <p class="contact-highlight" data-section="contact" data-field="contact_highlight">
+                    Tipp: csatoljon fotót, méreteket és rövid leírást, így gyorsabban tudunk pontos ajánlatot adni.
+                  </p>
+                  <div class="button-container">
+                  <div class="send-button" style="cursor: pointer;">Küldés</div>
+              </div>
+          </div>
           </div>
 
           <div class="contact-card">
@@ -2197,10 +2334,7 @@
                 <div data-section="contact" data-field="contact_f_address">/mesztorkaputechnika</div>
               </div>
             </div>
-          </div>
-        </div>
-
-          <div class="contact-card-map">
+            <div class="contact-card-map">
             <div class="contact-map">
               <div class="contact-map-frame">
                 <iframe
@@ -2213,6 +2347,10 @@
               </div>
             </div>
           </div>
+          </div>
+        </div>
+
+          
 
       </div>
     </section>
@@ -2235,6 +2373,7 @@
     <script type="module">
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, update, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZUGCJkn9L4xH_M8L0fZYTUresZ9qYPqo",
@@ -2256,30 +2395,20 @@
 
     let app;
     let db;
+    let fs;
     let firebaseEnabled = false;
-
-
 
     try {
       if (firebaseConfig.apiKey) {
         app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-        db  = getDatabase(app);
+        db  = getDatabase(app);      // RTDB: csak ha használod (pl. analitika)
+        fs  = getFirestore(app);     // Firestore: tartalom innen jön
         firebaseEnabled = true;
       }
-    } catch (e) {
-      console.warn("[firebase] init hiba – demo mód:", e);
-      firebaseEnabled = false;
-    }
-
-    try {
-      app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-      db = getDatabase(app);
-      firebaseEnabled = true;
     } catch (err) {
-      console.warn("[heroSlider] Firebase init hiba:", err);
+      console.warn("[firebase] init hiba – demo mód:", err);
       firebaseEnabled = false;
     }
-
     const sliderSection = document.getElementById("hero-slider");
     const trackEl       = document.getElementById("heroSliderTrack");
     const dotsEl        = document.getElementById("heroSliderDots");
@@ -2403,27 +2532,29 @@
     async function loadHeroSlider() {
       if (!sliderSection || !trackEl) return;
 
-      if (!firebaseEnabled || !db) {
+      if (!firebaseEnabled || !fs) {
         sliderSection.style.display = "none";
         return;
       }
 
       try {
-        const snap = await get(ref(db, "heroSlider"));
-        if (!snap.exists()) {
+        const snap = await getDocs(collection(fs, "heroSlider"));
+        if (snap.empty) {
           sliderSection.style.display = "none";
           return;
         }
 
-        const val = snap.val() || {};
-        const items = Object.entries(val)
-          .map(([id, d]) => ({
-            id,
-            title: d?.title || "",
-            subtitle: d?.subtitle || "",
-            imageUrl: d?.imageUrl || d?.imageDataUrl || "",
-            createdAt: d?.createdAt || 0,
-            order: d?.order ?? null,
+        const items = snap.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...(docSnap.data() || {})
+          }))
+          .map((d) => ({
+            id: d.id,
+            title: d.title || "",
+            subtitle: d.subtitle || "",
+            imageUrl: d.imageUrl || d.imageDataUrl || "",
+            createdAt: d.createdAt || 0,
+            order: d.order ?? null,
           }))
           .sort((a, b) => {
             const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : null;
@@ -2691,6 +2822,206 @@ const NAV_CARD_META = {
   }
 };
 
+/* ------------ SZOLGÁLTATÁSAINK – kártyák Firestore-ból ------------ */
+
+const servicesGrid = document.getElementById("services-grid");
+let servicesCache = [];
+
+const demoServices = [
+  { badge:"📝", title:"Ajánlat készítés", body:"Gyors, személyre szabott, díjmentes árajánlat készítése az Ön igényeire szabva." },
+  { badge:"📐", title:"Felmérés", body:"Precíz helyszíni felmérés szakképzett munkatársunk által, a legjobb műszaki megoldás érdekében." },
+  { badge:"💬", title:"Szaktanácsadás", body:"Hozzáértő kollégáink segítenek eligazodni a termékek, méretek és műszaki lehetőségek között." },
+  { badge:"🚚", title:"Szállítás", body:"Szakszerű, sérülésmentes szállítás a kaputechnikai termékek sajátosságainak figyelembevételével." },
+  { badge:"🛠", title:"Beüzemelés", body:"Magas színvonalú beszerelés és beüzemelés, hogy az új kapu hosszú távon megbízhatóan működjön." },
+  { badge:"🔧", title:"Szervizelés, javítás", body:"Márkafüggetlen kaputechnikai termékek javítása, karbantartása, gyors reakcióval." }
+];
+
+const isAdminPreview = new URLSearchParams(location.search).has("adminPreview");
+
+function normalizeService(d){
+  return {
+    id: d.id || null,
+    badge: d.badge || d.icon || "🔧",
+    title: d.title || "",
+    body: d.body || d.text || "",
+    orderIndex: typeof d.orderIndex === "number" ? d.orderIndex : 0,
+    createdAt: d.createdAt || 0
+  };
+}
+
+async function addService(){
+  if(!firebaseEnabled || !fs) return;
+
+  const badge = (prompt("Ikon (emoji):", "🔧") || "").trim();
+  if(!badge) return;
+
+  const title = (prompt("Cím:", "") || "").trim();
+  if(!title) return;
+
+  const body = (prompt("Leírás:", "") || "").trim();
+  if(!body) return;
+
+  const maxOrder = servicesCache.reduce(
+    (m,it)=>Math.max(m, (typeof it.orderIndex==="number"? it.orderIndex : 0)),
+    -1
+  );
+
+  const id = doc(collection(fs, "services")).id;
+  const payload = {
+    badge, title, body,
+    orderIndex: maxOrder + 1,
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+
+  try{
+    await setDoc(doc(fs, "services", id), payload);
+    await loadServices();
+  }catch(err){
+    console.warn("[services] mentés hiba:", err);
+    alert("Nem sikerült menteni.");
+  }
+}
+
+async function editService(item){
+  if(!firebaseEnabled || !fs || !item?.id) return;
+
+  const badge = prompt("Ikon (emoji):", item.badge || "🔧");
+  if(badge === null) return;
+
+  const title = prompt("Cím:", item.title || "");
+  if(title === null) return;
+
+  const body = prompt("Leírás:", item.body || "");
+  if(body === null) return;
+
+  try{
+    await setDoc(
+      doc(fs, "services", item.id),
+      { badge: badge.trim(), title: title.trim(), body: body.trim(), updatedAt: Date.now() },
+      { merge:true }
+    );
+    await loadServices();
+  }catch(err){
+    console.warn("[services] szerkesztés hiba:", err);
+    alert("Nem sikerült menteni.");
+  }
+}
+
+function createServiceCard(item, {admin=false}={}){
+  const card = document.createElement("article");
+  card.className = "icon-card";
+
+  const badge = document.createElement("div");
+  badge.className = "icon-badge";
+  badge.textContent = item.badge || "🔧";
+
+  const title = document.createElement("div");
+  title.className = "icon-card-title";
+  title.textContent = item.title || "";
+
+  const body = document.createElement("div");
+  body.className = "icon-card-text";
+  body.textContent = item.body || "";
+
+  card.appendChild(badge);
+  card.appendChild(title);
+  card.appendChild(body);
+
+  if (admin && item.id && firebaseEnabled && fs){
+    const actions = document.createElement("div");
+    actions.className = "svc-admin-actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.type="button";
+    editBtn.className="svc-admin-btn";
+    editBtn.textContent="✏️";
+    editBtn.title="Szerkesztés";
+    editBtn.addEventListener("click", async (ev)=>{
+      ev.stopPropagation();
+      await editService(item);
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.type="button";
+    delBtn.className="svc-admin-btn";
+    delBtn.textContent="🗑️";
+    delBtn.title="Törlés";
+    delBtn.addEventListener("click", async (ev)=>{
+      ev.stopPropagation();
+      if (!confirm("Biztosan törlöd ezt a szolgáltatás kártyát?")) return;
+
+      try{
+        await deleteDoc(doc(fs, "services", item.id));
+        await loadServices();
+      }catch(err){
+        console.warn("[services] törlés hiba:", err);
+        alert("Nem sikerült törölni.");
+      }
+    });
+
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+    card.appendChild(actions);
+  }
+
+  return card;
+}
+
+function createAddServiceCard(){
+  const add = document.createElement("article");
+  add.className="icon-card icon-card-add";
+  add.innerHTML = `
+    <div class="icon-badge icon-badge-add">+</div>
+    <div class="icon-card-title">Új kártya</div>
+    <div class="icon-card-text">Kattints a hozzáadáshoz</div>
+  `;
+  add.addEventListener("click", addService);
+  return add;
+}
+
+function renderServices(items, {admin=false}={}){
+  if(!servicesGrid) return;
+
+  servicesGrid.innerHTML = "";
+  servicesCache = (items || []).map(normalizeService);
+
+  servicesCache.sort((a,b)=>{
+    if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
+    return (a.createdAt || 0) - (b.createdAt || 0);
+  });
+
+  servicesCache.forEach(it => servicesGrid.appendChild(createServiceCard(it, {admin})));
+
+  if (admin) servicesGrid.appendChild(createAddServiceCard());
+}
+
+async function loadServices(){
+  if(!servicesGrid) return;
+
+  // nincs Firebase → demo
+  if(!firebaseEnabled || !fs){
+    renderServices(demoServices, {admin:false});
+    return;
+  }
+
+  try{
+    const snap = await getDocs(collection(fs,"services"));
+    if(snap.empty){
+      // ha még üres a kollekció, maradjon a demo – adminPreview-ben megjelenik a + kártya
+      renderServices(demoServices, {admin:isAdminPreview});
+      return;
+    }
+
+    const items = snap.docs.map(d => ({ id:d.id, ...(d.data() || {}) }));
+    renderServices(items, {admin:isAdminPreview});
+  }catch(err){
+    console.warn("[services] betöltés hiba:", err);
+    renderServices(demoServices, {admin:false});
+  }
+}
+
+
 
 
 
@@ -2877,13 +3208,13 @@ function buildNavFromBoard(board) {
     }
 
     async function initLayoutNav() {
-      if (!firebaseEnabled || !db || !navLinksEl) return;
+      if (!firebaseEnabled || !fs || !navLinksEl) return;
       try {
         // Itt volt a bug: /board végű útvonalat olvastunk,
         // de az admin közvetlenül settings/layoutBoards alá menti a boardot.
-        const snap = await get(ref(db, "settings/layoutBoards"));
+        const snap = await getDoc(doc(fs, "settings", "layoutBoards"));
         if (!snap.exists()) return;
-        const board = snap.val();
+        const board = snap.data();
         if (board && Array.isArray(board.lists) && board.lists.length) {
           buildNavFromBoard(board);
           reorderSectionsFromBoard(board);
@@ -2903,10 +3234,12 @@ function buildNavFromBoard(board) {
     let sectionsCache = {};
 
     async function loadContentSections() {
-      if (!firebaseEnabled || !db) return;
+      if (!firebaseEnabled || !fs) return;
       try {
-        const snap = await get(ref(db, "content/sections"));
-        sectionsCache = snap.exists() ? (snap.val() || {}) : {};
+        const snap = await getDocs(collection(fs, "contentSections"));
+        const tmp = {};
+        snap.forEach(d => { tmp[d.id] = d.data() || {}; });
+        sectionsCache = tmp;
       } catch (err) {
         console.warn("[content] betöltés hiba:", err);
         sectionsCache = {};
@@ -2965,7 +3298,7 @@ function buildNavFromBoard(board) {
           sectionsCache[section].updatedAt = Date.now();
 
           try {
-            await set(ref(db, `content/sections/${section}`), sectionsCache[section]);
+            await setDoc(doc(fs, "contentSections", section), sectionsCache[section]);
             el.style.outlineColor = "#16a34a";
             setTimeout(() => { el.style.outlineColor = ""; }, 800);
           } catch (err) {
@@ -3205,21 +3538,21 @@ function buildNavFromBoard(board) {
     async function loadReferences() {
       if (!gridEl) return;
 
-      if (!firebaseEnabled || !db) {
+      if (!firebaseEnabled || !fs) {
         renderReferences(demoItems);
         return;
       }
 
       try {
-        const snap = await get(ref(db, "references"));
-        if (!snap.exists()) {
+        const snap = await getDocs(collection(fs, "references"));
+        if (snap.empty) {
           renderReferences(demoItems);
           return;
         }
 
-        const val = snap.val() || {};
-        const items = Object.entries(val)
-          .map(([key, d]) => ({
+        const items = snap.docs
+          .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() || {}) }))
+          .map((d) => ({
             title: d.title || "",
             description: d.description || "",
             imageUrl: d.imageUrl || d.imageDataUrl || "",
@@ -3275,22 +3608,22 @@ function buildNavFromBoard(board) {
       if (!suppliersGrid) return;
 
       // Ha nincs Firebase (demo mód), akkor csak a neveket mutatjuk
-      if (!firebaseEnabled || !db) {
+      if (!firebaseEnabled || !fs) {
         renderSuppliers(demoSuppliers);
         return;
       }
 
       try {
-        const snap = await get(ref(db, "suppliers"));
-        if (!snap.exists()) {
+        const snap = await getDocs(collection(fs, "suppliers"));
+        if (snap.empty) {
           renderSuppliers(demoSuppliers);
           return;
         }
 
-        const val = snap.val() || {};
-        const items = Object.entries(val)
-          .map(([id, d]) => ({
-            id,
+        const items = snap.docs
+          .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() || {}) }))
+          .map((d) => ({
+            id: d.id,
             name: d.name || "",
             subtitle: d.subtitle || "",
             imageUrl: d.imageUrl || d.imageDataUrl || "",
@@ -3380,22 +3713,22 @@ function buildNavFromBoard(board) {
       if (!termekGrid) return;
 
       // Ha nincs Firebase (demo mód), csak üres lista
-      if (!firebaseEnabled || !db) {
+      if (!firebaseEnabled || !fs) {
         renderProducts([]);
         return;
       }
 
       try {
-        const snap = await get(ref(db, "products"));
-        if (!snap.exists()) {
+        const snap = await getDocs(collection(fs, "products"));
+        if (snap.empty) {
           renderProducts([]);
           return;
         }
 
-        const val = snap.val() || {};
-        const items = Object.entries(val)
-          .map(([id, d]) => ({
-            id,
+        const items = snap.docs
+          .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() || {}) }))
+          .map((d) => ({
+            id: d.id,
             name: d.name || "",
             shortDescription: d.shortDescription || d.tagline || "",
             longDescription: d.longDescription || d.description || "",
@@ -3414,6 +3747,7 @@ function buildNavFromBoard(board) {
 
     loadSuppliers();
     loadProducts();
+    loadServices();
 
     /* ------------ ANALITIKA – ugyanaz a logika, mint eddig ------------ */
 
@@ -3514,6 +3848,155 @@ function buildNavFromBoard(board) {
       });
     }
   </script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // --- EmailJS azonosítók (IDE ÍRD BE A SAJÁTJAID) ---
+  const EMAILJS_PUBLIC_KEY  = "tTB4VQzyRgCLmFqu_";
+  const EMAILJS_SERVICE_ID  = "service_kmotyjg";
+  const EMAILJS_TEMPLATE_ID = "template_yuao2x9";
+
+  // --- Form elemek megfogása ---
+  const formWrap = document.querySelector(".form-container");
+  if (!formWrap) return;
+
+  const nameEl  = formWrap.querySelector('input[placeholder="Név"]') || formWrap.querySelector("#name");
+  const mailEl  = formWrap.querySelector("#mail") || formWrap.querySelector('input[type="email"]');
+  const msgEl   = formWrap.querySelector("#message") || formWrap.querySelector("textarea");
+  const sendBtn = formWrap.querySelector(".send-button");
+  const resetBtn = formWrap.querySelector("#reset-btn");
+
+  // Ha a "Küldés" div, legyen keyboard-barát is
+  if (sendBtn) {
+    sendBtn.setAttribute("role", "button");
+    sendBtn.tabIndex = 0;
+  }
+
+  // Státusz sor
+  let statusEl = formWrap.querySelector(".form-status");
+  if (!statusEl) {
+    statusEl = document.createElement("div");
+    statusEl.className = "form-status";
+    statusEl.style.cssText = "margin-top:10px;font-size:14px;";
+    formWrap.appendChild(statusEl);
+  }
+
+  // Honeypot (alap spam ellen)
+  const hp = document.createElement("input");
+  hp.type = "text";
+  hp.name = "company";
+  hp.autocomplete = "off";
+  hp.tabIndex = -1;
+  hp.style.cssText = "position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;";
+  formWrap.appendChild(hp);
+
+  const setStatus = (txt, kind = "info") => {
+    statusEl.textContent = txt || "";
+    statusEl.style.color =
+      kind === "ok"  ? "#16a34a" :
+      kind === "err" ? "#dc2626" : "#475569";
+  };
+
+  const disableSend = (disabled) => {
+    if (!sendBtn) return;
+    sendBtn.style.pointerEvents = disabled ? "none" : "auto";
+    sendBtn.style.opacity = disabled ? "0.6" : "1";
+  };
+
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  async function emailjsSend(templateParams) {
+    // EmailJS REST API (nincs külső lib)
+    const payload = {
+      service_id: EMAILJS_SERVICE_ID,
+      template_id: EMAILJS_TEMPLATE_ID,
+      user_id: EMAILJS_PUBLIC_KEY,
+      template_params: templateParams
+    };
+
+    const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      throw new Error("EmailJS HTTP " + res.status);
+    }
+  }
+
+  async function handleSend() {
+    // bot check
+    if (hp.value && hp.value.trim()) return;
+
+    const from_name = (nameEl?.value || "").trim();
+    const reply_to  = (mailEl?.value || "").trim();
+    const message   = (msgEl?.value || "").trim();
+
+    if (!from_name || !reply_to || !message) {
+      setStatus("Kérlek töltsd ki a Név, Email és Üzenet mezőket.", "err");
+      return;
+    }
+    if (!isValidEmail(reply_to)) {
+      setStatus("Kérlek érvényes email címet adj meg.", "err");
+      return;
+    }
+
+    // egyszerű throttle (1 üzenet / 60 mp / böngésző)
+    const key = "contact_last_send_ts";
+    const last = Number(localStorage.getItem(key) || 0);
+    if (Date.now() - last < 60_000) {
+      setStatus("Kérlek várj egy percet két üzenet között.", "err");
+      return;
+    }
+
+    if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
+      setStatus("Hiányzik az EmailJS PUBLIC_KEY / SERVICE_ID / TEMPLATE_ID a kódból.", "err");
+      return;
+    }
+
+    disableSend(true);
+    setStatus("Küldés folyamatban…");
+
+    try {
+      await emailjsSend({
+        from_name,
+        reply_to,
+        message,
+        page_url: location.href,
+        sent_at: new Date().toISOString()
+      });
+
+      localStorage.setItem(key, String(Date.now()));
+      setStatus("Elküldve ✅ Köszönjük! Hamarosan jelentkezünk.", "ok");
+
+      if (nameEl) nameEl.value = "";
+      if (mailEl) mailEl.value = "";
+      if (msgEl) msgEl.value = "";
+    } catch (e) {
+      console.warn("[contactForm] küldés hiba:", e);
+      setStatus("Sikertelen küldés. Próbáld újra, vagy írj e-mailt közvetlenül.", "err");
+    } finally {
+      disableSend(false);
+    }
+  }
+
+  // kattintás + billentyű
+  sendBtn?.addEventListener("click", (e) => { e.preventDefault(); handleSend(); });
+  sendBtn?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSend(); }
+  });
+
+  resetBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (nameEl) nameEl.value = "";
+    if (mailEl) mailEl.value = "";
+    if (msgEl) msgEl.value = "";
+    setStatus("");
+  });
+});
+</script>
+
 
   <!-- Referencia kép nagy nézet (csak desktopon) -->
   <div id="reference-modal" class="reference-modal-backdrop" aria-hidden="true">

@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
+    html, body{height:100%}
     :root{
       --headerH: 64px;
       --sidebarW: 260px;
@@ -25,7 +26,9 @@
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%}
+    body{opacity:0; transition:opacity .15s ease;}
+    body.authed{opacity:1;}
+    body{height:100%}
     body{
       margin:0; background:var(--bg); color:var(--txt);
       font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -105,7 +108,7 @@
 
     .btn{
       display:inline-flex; align-items:center; gap:.45rem;
-      padding:.55rem .8rem; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer
+      padding:.55rem .8rem; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer;
     }
     .btn.primary{ background:var(--primary); color:#fff; border-color:var(--primary) }
     .btn.danger{ background:#fff; color:var(--danger); border-color:#f3d3d3 }
@@ -152,6 +155,8 @@
     <button id="sidebarToggle" class="hamburger" aria-label="Menü" aria-expanded="false">☰</button>
     <div class="brand">Mesztor Admin</div>
     <div id="envBadge" class="badge"><span class="dot"></span><span class="label">Demo mód</span></div>
+    <div id="userBadge" class="muted" style="font-size:12px;"></div>
+    <button id="logoutBtn" class="btn secondary" style="margin-left:8px;">Kilépés</button>
   </header>
 
   <div class="admin-shell">
@@ -283,7 +288,6 @@
           <div class="panel-body">
             <p class="muted" style="margin-bottom:10px">
               Itt tudod beállítani a <b>„Megbízható beszállító partnereink”</b> blokkban megjelenő logókat.
-              A logók a Firebase Realtime Database-ben tárolódnak base64 formában, külön tárhely nélkül.
             </p>
 
             <form id="supplierForm" class="stack gap" style="max-width:480px;">
@@ -507,6 +511,8 @@
   <script type="module">
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref as dbRef, get, set, update as dbUpdate, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import Sortable from "https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/modular/sortable.esm.js";
 
     /* ---------- Firebase config ---------- */
@@ -521,11 +527,12 @@
       measurementId: "G-4L7YN2X9YL"
     };
 
-    let app, dbRealtime, firebaseEnabled = false;
+    let app, dbRealtime, dbFirestore, fs, firebaseEnabled = false;
     const envBadgeEl = document.getElementById("envBadge");
     try{
       app = getApps().length ? getApp() : initializeApp(firebaseConfig);
       dbRealtime = getDatabase(app);
+      dbFirestore = getFirestore(app);
       firebaseEnabled = true;
       envBadgeEl.classList.add("ok");
       envBadgeEl.querySelector(".label").textContent = "Firebase aktív";
@@ -535,6 +542,36 @@
       envBadgeEl.classList.remove("ok");
       envBadgeEl.querySelector(".label").textContent = "Demo mód";
     }
+
+/* ---------- Auth guard (admin csak bejelentkezve) ---------- */
+    const auth = getAuth(app);
+    try { await setPersistence(auth, browserLocalPersistence); } catch {}
+
+    const LOGIN_URL = "./login.html";
+    const next = encodeURIComponent(location.pathname + location.search + location.hash);
+
+    const userBadgeEl = document.getElementById("userBadge");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // Várjuk meg az auth állapotot, mielőtt bármit megjelenítünk
+    await new Promise((resolve) => {
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          // nincs bejelentkezés -> login
+          location.replace(`${LOGIN_URL}?next=${next}`);
+          return;
+        }
+        if (userBadgeEl) userBadgeEl.textContent = user.email ? `Bejelentkezve: ${user.email}` : "Bejelentkezve";
+        document.body.classList.add("authed");
+        resolve();
+      });
+    });
+
+    logoutBtn?.addEventListener("click", async () => {
+      try { await signOut(auth); } finally {
+        location.replace(`${LOGIN_URL}?next=${next}`);
+      }
+    });
 
     /* ---------- Sidebar / Tabs / Hamburger ---------- */
     const tabs  = document.querySelectorAll('.tab-btn');
@@ -562,7 +599,245 @@
     const slug = s => (s||"").toLowerCase().trim().replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"").replace(/\-+/g,"-");
     const toHHMMSS = (sec)=>{ const s=Math.max(0,Math.round(+sec||0)); const m=Math.floor(s/60), r=s%60; return `${m}p ${String(r).padStart(2,"0")}s`; };
 
-    /* ---------- Analitika (Realtime DB -> aggregálás) ---------- */
+    
+    /* ---------- Firestore + képtömörítés beállítások ---------- */
+
+    // Átmeneti kompatibilitás: ha a publikus oldal még RTDB-ből olvas, akkor ideiglenesen állítsd true-ra.
+    // Ha már a publikus oldal is Firestore-ból olvas, maradjon false (így nem írsz több adatot RTDB-be).
+    const WRITE_RTD_BK = false;
+
+    const hasFS = () => firebaseEnabled && !!dbFirestore;
+    const hasRTDB = () => firebaseEnabled && !!dbRealtime;
+
+    async function fsGetSingleton(col, id){
+      if(!hasFS()) return null;
+      const s = await getDoc(doc(dbFirestore, col, id));
+      return s.exists() ? (s.data() || null) : null;
+    }
+
+    async function fsSetSingleton(col, id, data, { merge=true } = {}){
+      if(!hasFS()) return;
+      await setDoc(doc(dbFirestore, col, id), data, { merge });
+    }
+
+    async function fsListAll(col){
+      if(!hasFS()) return [];
+      const snap = await getDocs(collection(dbFirestore, col));
+      return snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
+    }
+
+    async function fsUpsert(col, id, data, { merge=true } = {}){
+      if(!hasFS()) return;
+      await setDoc(doc(dbFirestore, col, id), data, { merge });
+    }
+
+    async function fsDelete(col, id){
+      if(!hasFS()) return;
+      await deleteDoc(doc(dbFirestore, col, id));
+    }
+
+    // Kép tömörítés + átméretezés: drasztikusan csökkenti a letöltött MB-okat.
+    // Firestore limit: egy dokumentum max ~1 MiB. Ha túl nagy, jelezni fogjuk.
+    async function fileToOptimizedDataUrl(file, { maxW=1200, maxH=1200, mime="image/webp", quality=0.78 } = {}){
+      if(!file) return null;
+
+      const blobUrl = URL.createObjectURL(file);
+      try{
+        const img = await new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = (e) => reject(e);
+          im.src = blobUrl;
+        });
+
+        const w = img.naturalWidth || img.width;
+        const h = img.naturalHeight || img.height;
+        const scale = Math.min(1, maxW / w, maxH / h);
+
+        const cw = Math.max(1, Math.round(w * scale));
+        const ch = Math.max(1, Math.round(h * scale));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = cw;
+        canvas.height = ch;
+
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, cw, ch);
+
+        const dataUrl = canvas.toDataURL(mime, quality);
+
+        // Durva korlát: ~950k karakter felett már könnyen Firestore 1MiB fölé csúszik (base64 overhead miatt).
+        if (dataUrl && dataUrl.length > 950000) {
+          throw new Error("A kép még tömörítés után is túl nagy. Próbáld kisebb képpel, vagy csökkentsd a felbontást/minőséget.");
+        }
+
+        return dataUrl;
+      } finally {
+        URL.revokeObjectURL(blobUrl);
+      }
+    }
+
+    // Egyszeri migráció: RTDB -> Firestore (adatok másolása, törlés nélkül)
+    async function migrateRtdbToFirestore(){
+      if(!hasFS() || !hasRTDB()){
+        alert("Firebase nincs inicializálva (Firestore/RTDB).");
+        return;
+      }
+
+      const ok = confirm("RTDB → Firestore migráció indul. (Nem törlünk RTDB-ből.)\n\nOK = indul, Mégse = kilép.");
+      if(!ok) return;
+
+      const status = (msg)=>console.log("[migrate]", msg);
+
+      // ---- Firestore méret limitek: 10 MiB / request, 1 MiB / doc ----
+      // https://firebase.google.com/docs/firestore/quotas
+      const SAFE_MAX_REQUEST_BYTES = 7_500_000; // tartsunk bőven 10 MiB alatt
+      const SAFE_MAX_OPS = 200;                 // bőven 500 alatt
+
+      const estBytes = (obj) => {
+        try { return new TextEncoder().encode(JSON.stringify(obj)).length; }
+        catch { return (JSON.stringify(obj) || "").length; }
+      };
+
+      const isDataUrl = (v) => typeof v === "string" && v.startsWith("data:image/");
+
+      const compressDataUrl = async (dataUrl, maxW=1200, quality=0.78) => {
+        // Visszaad egy (jó eséllyel) kisebb webp dataURL-t
+        return await new Promise((resolve) => {
+          try{
+            const img = new Image();
+            img.onload = () => {
+              const scale = Math.min(1, maxW / (img.width || maxW));
+              const w = Math.max(1, Math.round((img.width || maxW) * scale));
+              const h = Math.max(1, Math.round((img.height || maxW) * scale));
+              const canvas = document.createElement("canvas");
+              canvas.width = w; canvas.height = h;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, w, h);
+              // webp tömörítés
+              const out = canvas.toDataURL("image/webp", quality);
+              resolve(out || dataUrl);
+            };
+            img.onerror = () => resolve(dataUrl);
+            img.src = dataUrl;
+          }catch(_e){
+            resolve(dataUrl);
+          }
+        });
+      };
+
+      const normalizeImagesDeep = async (obj, maxW=1200, quality=0.78) => {
+        if(Array.isArray(obj)){
+          for(let i=0;i<obj.length;i++) obj[i] = await normalizeImagesDeep(obj[i], maxW, quality);
+          return obj;
+        }
+        if(obj && typeof obj === "object"){
+          for(const k of Object.keys(obj)) obj[k] = await normalizeImagesDeep(obj[k], maxW, quality);
+          return obj;
+        }
+        if(isDataUrl(obj)){
+          // csak a nagyon nagyokat tömörítsük – gyorsabb
+          if(obj.length > 120_000) return await compressDataUrl(obj, maxW, quality);
+          return obj;
+        }
+        return obj;
+      };
+
+      const migrateEntriesToCollection = async (entries, fsCol) => {
+        let batch = writeBatch(dbFirestore);
+        let ops = 0;
+        let bytes = 0;
+        let migrated = 0;
+        let skipped = 0;
+
+        for(const [id, raw] of entries){
+          // clone (nehogy a memóriában felülírjuk az eredetit)
+          let data = raw || {};
+          try { data = JSON.parse(JSON.stringify(data)); } catch {}
+
+          // 1) alaptömörítés (webp + resize)
+          data = await normalizeImagesDeep(data, 1200, 0.78);
+
+          // 2) ha még mindig nagy, agresszívebben
+          let dbytes = estBytes(data);
+          if(dbytes > 950_000){
+            data = await normalizeImagesDeep(data, 800, 0.70);
+            dbytes = estBytes(data);
+          }
+
+          // 3) ha még mindig túl nagy: kihagyjuk (Firestore 1MiB/doc limit)
+          if(dbytes >= 1_048_000){
+            skipped++;
+            status(`⚠️ SKIP ${fsCol}/${id} túl nagy (~${dbytes} byte). Ilyet Firestore nem tud tárolni (1MiB/doc).`);
+            continue;
+          }
+
+          // ha a következő művelet túl nagy request-et csinálna, commit
+          if(ops >= SAFE_MAX_OPS || (bytes + dbytes) >= SAFE_MAX_REQUEST_BYTES){
+            await batch.commit();
+            batch = writeBatch(dbFirestore);
+            ops = 0; bytes = 0;
+          }
+
+          batch.set(doc(dbFirestore, fsCol, id), data, { merge:false });
+          ops++; bytes += dbytes; migrated++;
+        }
+
+        if(ops > 0) await batch.commit();
+        status(`✅ ${fsCol}: migrálva=${migrated}, kihagyva=${skipped}`);
+      };
+
+      try{
+        // Settings: email
+        status("settings/email");
+        const emailSnap = await get(dbRef(dbRealtime, "settings/email"));
+        if(emailSnap.exists()){
+          await fsSetSingleton("settings", "email", emailSnap.val() || {}, { merge:false });
+        }
+
+        // Settings: layoutBoards
+        status("settings/layoutBoards");
+        const boardSnap = await get(dbRef(dbRealtime, "settings/layoutBoards"));
+        if(boardSnap.exists()){
+          await fsSetSingleton("settings", "layoutBoards", boardSnap.val() || {}, { merge:false });
+        }
+
+        // Content sections
+        status("content/sections -> contentSections/*");
+        const contentSnap = await get(dbRef(dbRealtime, "content/sections"));
+        if(contentSnap.exists()){
+          const all = contentSnap.val() || {};
+          await migrateEntriesToCollection(Object.entries(all), "contentSections");
+        }
+
+        // Collections
+        async function migrateCollection(rtdbPath, fsCol){
+          status(`${rtdbPath} -> ${fsCol}/*`);
+          const snap = await get(dbRef(dbRealtime, rtdbPath));
+          if(!snap.exists()) return;
+          const val = snap.val() || {};
+          await migrateEntriesToCollection(Object.entries(val), fsCol);
+        }
+
+        await migrateCollection("suppliers", "suppliers");
+        await migrateCollection("references", "references");
+        await migrateCollection("products", "products");
+        await migrateCollection("heroSlider", "heroSlider");
+
+        status("✅ Migráció kész.");
+        alert("Kész! RTDB → Firestore migráció befejezve.\n\nMost állítsd át az admin mentéseket Firestore-ra (ez a fájl már így van), és a publikus oldalt is érdemes Firestore betöltésre refaktorálni.");
+      }catch(err){
+        console.warn("[migrate] hiba:", err);
+        alert("Migráció közben hiba történt. Nézd meg a console-t.");
+      }
+    }
+
+    // Futás DevTools-ból: window.migrateRtdbToFirestore()
+    window.migrateRtdbToFirestore = migrateRtdbToFirestore;
+
+/* ---------- Analitika (Realtime DB -> aggregálás) ---------- */
     const kpiSessionsEl     = document.getElementById("kpiSessions");
     const kpiUsersEl        = document.getElementById("kpiUsers");
     const kpiAvgDurationEl  = document.getElementById("kpiAvgDuration");
@@ -703,7 +978,7 @@
       renderTopPages(d);
     }
 
-    /* ---------- Layout (Trello board, Realtime DB) ---------- */
+    /* ---------- Layout (Trello board, Firestore) ---------- */
     const listsWrap = document.getElementById("listsWrap");
     const addListBtn = document.getElementById("addListBtn");
     const saveBtnBoards = document.getElementById("layoutSaveBtnBoards");
@@ -783,11 +1058,26 @@
     }
 
     async function saveBoard(){
-      if(!firebaseEnabled || !dbRealtime){
-        saveStatusEl.textContent="Demo módban lokálisan frissítve."; setTimeout(()=>saveStatusEl.textContent="",1200); return;
+      if(!firebaseEnabled || !dbFirestore){
+        saveStatusEl.textContent="Demo módban lokálisan frissítve."; 
+        setTimeout(()=>saveStatusEl.textContent="",1200); 
+        return;
       }
-      try{ await set(dbRef(dbRealtime,"settings/layoutBoards"), board); saveStatusEl.textContent="Mentve ✅"; setTimeout(()=>saveStatusEl.textContent="",1200); }
-      catch(e){ console.warn("[layoutBoards] mentési hiba:", e); saveStatusEl.textContent="Hiba a mentésnél."; }
+      try{ 
+        const payload = { ...(board||{}), updatedAt: Date.now() };
+        await setDoc(doc(dbFirestore,"settings","layoutBoards"), payload, { merge:false });
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime,"settings/layoutBoards"), payload);
+        }
+
+        saveStatusEl.textContent="Mentve ✅"; 
+        setTimeout(()=>saveStatusEl.textContent="",1200); 
+      }
+      catch(e){ 
+        console.warn("[layoutBoards] mentési hiba:", e); 
+        saveStatusEl.textContent="Hiba a mentésnél."; 
+      }
     }
     async function loadBoard(){
       const seed={
@@ -798,32 +1088,84 @@
           { id:uid(), title:"Referenciák", path:"/referenciak", cards:[ {id:uid(),key:"referenciak",title:"referenciák"}, {id:uid(),key:"top-termekek",title:"top termékek"}, {id:uid(),key:"top-beszallitok",title:"top beszállítók"} ]}
         ]
       };
-      if(!firebaseEnabled || !dbRealtime){ board=seed; renderBoard(); return; }
-      try{
-        const snap=await get(dbRef(dbRealtime,"settings/layoutBoards"));
-        board = snap.exists()? (snap.val()||seed) : seed;
-      }catch(e){ console.warn("[layoutBoards] betöltési hiba, seed indul:", e); board=seed; }
+      let loaded=null;
+
+      // 1) Firestore az elsődleges
+      if(firebaseEnabled && dbFirestore){
+        try{
+          const fsSnap = await getDoc(doc(dbFirestore,"settings","layoutBoards"));
+          if(fsSnap.exists()) loaded = fsSnap.data() || null;
+        }catch(e){
+          console.warn("[layoutBoards] Firestore betöltési hiba:", e);
+        }
+      }
+
+      // 2) Ha Firestore üres, fallback RTDB-re (migráció előtti állapothoz)
+      if(!loaded && firebaseEnabled && dbRealtime){
+        try{
+          const snap = await get(dbRef(dbRealtime,"settings/layoutBoards"));
+          if(snap.exists()) loaded = snap.val() || null;
+        }catch(e){
+          console.warn("[layoutBoards] RTDB betöltési hiba:", e);
+        }
+      }
+
+      board = (loaded && loaded.lists) ? loaded : seed;
       renderBoard();
     }
     document.getElementById("addListBtn").addEventListener("click", ()=>{ board.lists.push({id:uid(),title:"Új lista",path:"/",cards:[]}); renderBoard(); autoSave(); });
     document.getElementById("layoutSaveBtnBoards").addEventListener("click", saveBoard);
 
-    /* ---------- Email beállítás ---------- */
+    /* ---------- Email beállítás (Firestore) ---------- */
     const emailForm = document.getElementById("emailForm");
     const emailRecipient = document.getElementById("emailRecipient");
     const emailStatus = document.getElementById("emailStatus");
+
     async function loadEmail(){
-      if(!firebaseEnabled || !dbRealtime) return;
-      try{ const snap=await get(dbRef(dbRealtime,"settings/email")); if(snap.exists()) emailRecipient.value=(snap.val()?.recipient)||""; }catch{}
+      if(!emailRecipient) return;
+
+      let data = null;
+
+      // Firestore az elsődleges
+      if (firebaseEnabled && dbFirestore) {
+        try {
+          const s = await getDoc(doc(dbFirestore, "settings", "email"));
+          if (s.exists()) data = s.data() || null;
+        } catch (e) {
+          console.warn("[email] Firestore betöltési hiba:", e);
+        }
+      }
+
+      // fallback RTDB (migráció előtt)
+      if (!data && firebaseEnabled && dbRealtime) {
+        try {
+          const snap = await get(dbRef(dbRealtime,"settings/email"));
+          if (snap.exists()) data = snap.val() || null;
+        } catch (e) {}
+      }
+
+      emailRecipient.value = (data?.recipient) ? String(data.recipient) : "";
     }
-    emailForm.addEventListener("submit", async (e)=>{
+
+    emailForm?.addEventListener("submit", async (e)=>{
       e.preventDefault();
-      const recipient=emailRecipient.value.trim();
-      if(firebaseEnabled && dbRealtime){ await set(dbRef(dbRealtime,"settings/email"), { recipient, updatedAt: Date.now() }); }
-      emailStatus.textContent="Mentve ✅"; setTimeout(()=>emailStatus.textContent="",1500);
+      const recipient = (emailRecipient?.value || "").trim();
+
+      if(firebaseEnabled && dbFirestore){
+        await setDoc(doc(dbFirestore,"settings","email"), { recipient, updatedAt: Date.now() }, { merge:true });
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime,"settings/email"), { recipient, updatedAt: Date.now() });
+        }
+      }
+
+      if(emailStatus){
+        emailStatus.textContent="Mentve ✅";
+        setTimeout(()=>emailStatus.textContent="",1500);
+      }
     });
 
-    /* ---------- Tartalom szerkesztők ---------- */
+/* ---------- Tartalom szerkesztők ---------- */
     const contentFormsWrap = document.getElementById("contentForms");
 
     // Itt adjuk meg, hogy szekciónként milyen mezőket tud beállítani az admin.
@@ -1078,9 +1420,24 @@
       const order = getSectionKeys();
       let all = {};
 
-      if (firebaseEnabled && dbRealtime) {
-        const snap = await get(dbRef(dbRealtime,"content/sections"));
-        all = snap.exists() ? (snap.val() || {}) : {};
+      // 1) Firestore az elsődleges
+      if (firebaseEnabled && dbFirestore) {
+        try{
+          const snap = await getDocs(collection(dbFirestore, "contentSections"));
+          if (!snap.empty) {
+            snap.forEach(d => { all[d.id] = d.data() || {}; });
+          }
+        }catch(e){
+          console.warn("[content] Firestore betöltési hiba:", e);
+        }
+      }
+
+      // 2) fallback RTDB (migráció előtt)
+      if (Object.keys(all).length === 0 && firebaseEnabled && dbRealtime) {
+        try{
+          const snap = await get(dbRef(dbRealtime,"content/sections"));
+          all = snap.exists() ? (snap.val() || {}) : {};
+        }catch(e){}
       }
 
       contentFormsWrap.innerHTML = order
@@ -1093,15 +1450,18 @@
 
         const imgInput = card.querySelector('input[type=file][data-img]');
         if (imgInput) {
-          imgInput.addEventListener("change", ()=>{
-            const f = imgInput.files?.[0]; if (!f) return;
-            const r = new FileReader();
-            r.onload = ()=>{
-              imageDataUrl = r.result;
+          imgInput.addEventListener("change", async ()=>{
+            const f = imgInput.files?.[0]; 
+            if (!f) return;
+
+            try{
+              imageDataUrl = await fileToOptimizedDataUrl(f, { maxW: 1400, maxH: 1400, quality: 0.78 });
               const prev = card.querySelector(".preview");
               if (prev) prev.textContent = "Kép kiválasztva (mentés után elérhető).";
-            };
-            r.readAsDataURL(f);
+            }catch(err){
+              console.warn("[content] kép hiba:", err);
+              alert(err?.message || "Nem sikerült a képet feldolgozni.");
+            }
           });
         }
 
@@ -1116,8 +1476,12 @@
           const payload = { ...fields, updatedAt: Date.now() };
           if (imageDataUrl) payload.imageDataUrl = imageDataUrl;
 
-          if (firebaseEnabled && dbRealtime) {
-            await set(dbRef(dbRealtime, `content/sections/${key}`), payload);
+          if (firebaseEnabled && dbFirestore) {
+            await setDoc(doc(dbFirestore, "contentSections", key), payload, { merge:true });
+
+            if (WRITE_RTD_BK && dbRealtime) {
+              await set(dbRef(dbRealtime, `content/sections/${key}`), payload);
+            }
           }
 
           const st = card.querySelector("[data-status]");
@@ -1129,7 +1493,7 @@
       });
     }
 
-        /* ---------- Beszállító partnerek admin ---------- */
+        /* ---------- Beszállító partnerek admin (Firestore) ---------- */
     const supplierForm = document.getElementById("supplierForm");
     const supplierNameInput = document.getElementById("supplierName");
     const supplierSubtitleInput = document.getElementById("supplierSubtitle");
@@ -1140,7 +1504,7 @@
     async function loadSuppliersAdmin() {
       if (!suppliersListEl) return;
 
-      if (!firebaseEnabled || !dbRealtime) {
+      if (!firebaseEnabled || !dbFirestore) {
         suppliersListEl.innerHTML =
           '<div class="muted">Demo mód – a beszállítók nem kerülnek mentésre.</div>';
         return;
@@ -1149,22 +1513,21 @@
       suppliersListEl.innerHTML = '<div class="muted">Betöltés...</div>';
 
       try {
-        const snap = await get(dbRef(dbRealtime, "suppliers"));
-        if (!snap.exists()) {
+        const items = await fsListAll("suppliers");
+
+        if (!items.length) {
           suppliersListEl.innerHTML =
             '<div class="muted">Még nincs rögzített beszállító partner.</div>';
           return;
         }
 
-        const val = snap.val() || {};
-        const items = Object.entries(val)
-          .map(([id, d]) => ({ id, ...(d || {}) }))
-          .sort((a, b) => {
-            const ai = typeof a.orderIndex === "number" ? a.orderIndex : 0;
-            const bi = typeof b.orderIndex === "number" ? b.orderIndex : 0;
-            if (ai !== bi) return ai - bi;
-            return (b.createdAt || 0) - (a.createdAt || 0);
-          });
+        // Rendezés: orderIndex (növekvő), majd createdAt (csökkenő)
+        items.sort((a, b) => {
+          const ai = (a.orderIndex ?? 999999999999);
+          const bi = (b.orderIndex ?? 999999999999);
+          if (ai !== bi) return ai - bi;
+          return (b.createdAt || 0) - (a.createdAt || 0);
+        });
 
         const pendingImages = new Map();
 
@@ -1182,13 +1545,15 @@
                   ${
                     imgSrc
                       ? `<img src="${imgSrc}" alt="Beszállító logó"
-                               style="width:100%;height:60px;object-fit:contain;border-radius:4px;background:#fff;">`
-                      : `<div style="width:100%;height:60px;border-radius:4px;border:1px dashed #cbd5e1;
-                                   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#94a3b8;">
-                           Nincs logó
-                         </div>`
+                               style="width:100%;height:60px;object-fit:cover;border-radius:10px;border:1px solid rgba(15,23,42,.08);" />`
+                      : `<div class="muted" style="font-size:.8rem;">Nincs kép</div>`
                   }
+                  <div style="margin-top:25px;">
+                    <input type="file" accept="image/*" data-supplier-image
+                           style="display:inline-block;margin-left:0;" />
+                  </div>
                 </div>
+
                 <div style="flex:1 1 auto;min-width:0;">
                   <input type="text"
                          data-supplier-name
@@ -1199,40 +1564,40 @@
                          value="${subtitle}"
                          placeholder="Alcím (opcionális)"
                          style="width:100%;padding:.35rem .5rem;border-radius:8px;border:1px solid #e5e7eb;font-size:.8rem;" />
-                  <div style="margin-top:.35rem;font-size:.78rem;color:#64748b;">
-                    Logó csere:
-                    <input type="file" accept="image/*" data-supplier-image
-                           style="display:inline-block;margin-left:4px;" />
+                  <div class="muted" style="font-size:.75rem;margin-top:4px;">
                   </div>
                 </div>
+
                 <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-                  <button class="btn primary" data-supplier-save>Mentés</button>
-                  <button class="btn ghost" data-supplier-delete>Törlés</button>
+                  <button class="btn primary" style="" data-supplier-save>Mentés</button>
+                  <button class="btn primary" style="background: #CC4223; color: white;border: none;" data-supplier-delete>Törlés</button>
                 </div>
               </div>
             `;
           })
           .join("");
 
-        // Kép csere – FileReader -> pendingImages
+        // Kép csere -> pendingImages (tömörítve)
         suppliersListEl.querySelectorAll("[data-supplier-image]").forEach((input) => {
-          input.addEventListener("change", () => {
+          input.addEventListener("change", async () => {
             const wrap = input.closest("[data-supplier-id]");
-            const id = wrap?.dataset.supplierId;
-            const file = input.files?.[0];
-            if (!id || !file) return;
+            const id = wrap?.dataset?.supplierId;
+            const f = input.files?.[0];
+            if (!id || !f) return;
 
-            const r = new FileReader();
-            r.onload = () => {
-              pendingImages.set(id, r.result);
-              const imgEl = wrap.querySelector("img");
-              if (imgEl) imgEl.src = r.result;
-            };
-            r.readAsDataURL(file);
+            try{
+              const dataUrl = await fileToOptimizedDataUrl(f, { maxW: 700, maxH: 700, quality: 0.78 });
+              pendingImages.set(id, dataUrl);
+              supplierStatusEl.textContent = "Kép kiválasztva (mentés után frissül).";
+              setTimeout(()=> supplierStatusEl.textContent="", 1500);
+            }catch(err){
+              console.warn("[suppliersAdmin] kép hiba:", err);
+              alert(err?.message || "Nem sikerült a képet feldolgozni.");
+            }
           });
         });
 
-        // Mentés (név + subtitle + opcionális új kép)
+        // Mentés gomb (név/alcím/kép)
         suppliersListEl.querySelectorAll("[data-supplier-save]").forEach((btn) => {
           btn.addEventListener("click", async () => {
             const wrap = btn.closest("[data-supplier-id]");
@@ -1245,29 +1610,36 @@
             const name = nameInput?.value?.trim() || "";
             const subtitle = subtitleInput?.value?.trim() || "";
 
-            const baseRef = dbRef(dbRealtime, "suppliers/" + id);
-            const snapCur = await get(baseRef);
-            if (!snapCur.exists()) return;
+            try{
+              const base = await getDoc(doc(dbFirestore, "suppliers", id));
+              if(!base.exists()) return;
 
-            const current = snapCur.val() || {};
-            const payload = {
-              ...current,
-              name,
-              subtitle,
-              updatedAt: Date.now()
-            };
+              const current = base.data() || {};
+              const payload = {
+                ...current,
+                name,
+                subtitle,
+                updatedAt: Date.now()
+              };
 
-            if (pendingImages.has(id)) {
-              payload.imageDataUrl = pendingImages.get(id); // base64 mentés
-              delete payload.imageUrl;
-            }
+              if (pendingImages.has(id)) {
+                payload.imageDataUrl = pendingImages.get(id); 
+                delete payload.imageUrl;
+              }
 
-            try {
-              await set(baseRef, payload);
-              alert("Mentve ✅");
-            } catch (err) {
+              await setDoc(doc(dbFirestore, "suppliers", id), payload, { merge:false });
+
+              if (WRITE_RTD_BK && dbRealtime) {
+                await set(dbRef(dbRealtime, "suppliers/" + id), payload);
+              }
+
+              await loadSuppliersAdmin();
+              supplierStatusEl.textContent = "Mentve ✅";
+            }catch(err){
               console.warn("[suppliersAdmin] mentés hiba:", err);
-              alert("Nem sikerült menteni a beszállítót.");
+              supplierStatusEl.textContent = "Hiba mentés közben.";
+            }finally{
+              setTimeout(() => { if (supplierStatusEl) supplierStatusEl.textContent = ""; }, 2000);
             }
           });
         });
@@ -1276,87 +1648,89 @@
         suppliersListEl.querySelectorAll("[data-supplier-delete]").forEach((btn) => {
           btn.addEventListener("click", async () => {
             const wrap = btn.closest("[data-supplier-id]");
-            const id = wrap?.dataset.supplierId;
+            const id = wrap?.dataset?.supplierId;
             if (!id) return;
             if (!confirm("Biztosan törlöd ezt a beszállítót?")) return;
 
-            try {
-              await remove(dbRef(dbRealtime, "suppliers/" + id));
+            try{
+              await deleteDoc(doc(dbFirestore, "suppliers", id));
+              if (WRITE_RTD_BK && dbRealtime) {
+                await remove(dbRef(dbRealtime, "suppliers/" + id));
+              }
               await loadSuppliersAdmin();
-            } catch (err) {
+              supplierStatusEl.textContent = "Törölve ✅";
+            }catch(err){
               console.warn("[suppliersAdmin] törlés hiba:", err);
-              alert("Nem sikerült törölni a beszállítót.");
+              supplierStatusEl.textContent = "Hiba törlés közben.";
+            }finally{
+              setTimeout(() => { if (supplierStatusEl) supplierStatusEl.textContent = ""; }, 2000);
             }
           });
         });
+
       } catch (err) {
         console.warn("[suppliersAdmin] betöltés hiba:", err);
         suppliersListEl.innerHTML =
-          '<div class="muted">Nem sikerült betölteni a beszállítókat.</div>';
+          '<div class="muted">Hiba a beszállítók betöltésekor.</div>';
       }
     }
 
-    if (supplierForm) {
-      supplierForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    supplierForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-        if (!firebaseEnabled || !dbRealtime) {
-          alert("Firebase nincs bekapcsolva (demo mód). A mentés nem lehetséges.");
-          return;
+      if (!firebaseEnabled || !dbFirestore) return;
+
+      const name = supplierNameInput?.value?.trim() || "";
+      const subtitle = supplierSubtitleInput?.value?.trim() || "";
+      const file = supplierImageInput?.files?.[0];
+
+      if (!name) {
+        alert("Add meg a beszállító nevét.");
+        return;
+      }
+
+      if (!file) {
+        alert("Válassz egy logót.");
+        return;
+      }
+
+      supplierStatusEl.textContent = "Feldolgozás...";
+
+      try {
+        const dataUrl = await fileToOptimizedDataUrl(file, { maxW: 700, maxH: 700, quality: 0.78 });
+
+        const id = doc(collection(dbFirestore, "suppliers")).id;
+
+        const payload = {
+          name,
+          subtitle,
+          imageDataUrl: dataUrl,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          orderIndex: Date.now()
+        };
+
+        await setDoc(doc(dbFirestore, "suppliers", id), payload);
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime, "suppliers/" + id), payload);
         }
 
-        const name = (supplierNameInput.value || "").trim();
-        const subtitle = (supplierSubtitleInput.value || "").trim();
-        const file = supplierImageInput?.files?.[0];
-
-        if (!name) {
-          alert("Add meg a beszállító nevét.");
-          return;
-        }
-
-        if (!file) {
-          alert("Válassz egy logót.");
-          return;
-        }
-
-        supplierStatusEl.textContent = "Feltöltés folyamatban...";
-
-        try {
-          const dataUrl = await new Promise((resolve, reject) => {
-            const r = new FileReader();
-            r.onload = () => resolve(r.result);
-            r.onerror = () => reject(r.error || new Error("FileReader hiba"));
-            r.readAsDataURL(file);
-          });
-
-          const newRef = push(dbRef(dbRealtime, "suppliers"));
-          await set(newRef, {
-            name,
-            subtitle,
-            imageDataUrl: dataUrl,
-            orderIndex: Date.now(),
-            createdAt: Date.now()
-          });
-
-          supplierNameInput.value = "";
-          supplierSubtitleInput.value = "";
-          supplierImageInput.value = "";
-          supplierStatusEl.textContent = "Mentve ✅";
-
-          await loadSuppliersAdmin();
-        } catch (err) {
-          console.warn("[suppliersAdmin] mentés hiba:", err);
-          supplierStatusEl.textContent = "Hiba mentés közben.";
-        } finally {
-          setTimeout(() => {
-            if (supplierStatusEl) supplierStatusEl.textContent = "";
-          }, 2000);
-        }
-      });
-    }
+        supplierForm.reset();
+        supplierStatusEl.textContent = "Mentve ✅";
+        await loadSuppliersAdmin();
+      } catch (err) {
+        console.warn("[suppliersAdmin] mentés hiba:", err);
+        supplierStatusEl.textContent = "Hiba mentés közben.";
+      } finally {
+        setTimeout(() => {
+          if (supplierStatusEl) supplierStatusEl.textContent = "";
+        }, 2000);
+      }
+    });
 
 
-        /* ---------- Referencia fotók admin ---------- */
+/* ---------- Referencia fotók admin (Firestore) ---------- */
     const referencesForm = document.getElementById("referencesForm");
     const referencesStatusEl = document.getElementById("referencesStatus");
     const referencesListEl = document.getElementById("referencesList");
@@ -1367,7 +1741,7 @@
     async function loadReferencesAdmin(){
       if (!referencesListEl) return;
 
-      if (!firebaseEnabled || !dbRealtime) {
+      if (!firebaseEnabled || !dbFirestore) {
         referencesListEl.innerHTML = '<div class="muted">Demo mód – a referenciák nem kerülnek mentésre.</div>';
         return;
       }
@@ -1375,109 +1749,111 @@
       referencesListEl.innerHTML = '<div class="muted">Betöltés...</div>';
 
       try{
-        const snap = await get(dbRef(dbRealtime, "references"));
-        if (!snap.exists()) {
+        const items = await fsListAll("references");
+
+        if (!items.length) {
           referencesListEl.innerHTML = '<div class="muted">Még nincs feltöltött referencia.</div>';
           return;
         }
 
-        const val = snap.val() || {};
-        const items = Object.entries(val)
-          .map(([id, d]) => ({ id, ...(d || {}) }))
-          .sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+        items.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 
         referencesListEl.innerHTML = items.map(item => {
           const imgSrc = item.imageUrl || item.imageDataUrl || "";
+          const title = (item.title || "").replace(/</g,"&lt;");
+          const desc  = (item.desc  || "").replace(/</g,"&lt;");
+
           return `
-            <div class="kpi panel" style="padding:10px; display:flex; gap:10px; align-items:center; margin-top: 10px;">
+            <div class="kpi panel" style="padding:10px; display:flex; gap:10px; align-items:center; margin-top:10px;"
+                 data-ref-id="${item.id}">
               <div style="width:80px; flex-shrink:0;">
-                ${imgSrc ? `<img src="${imgSrc}" alt="Referencia" style="width:100%;height:60px;object-fit:cover;border-radius:4px;">` : ""}
+                ${imgSrc ? `<img src="${imgSrc}" alt="Referencia" style="width:100%;height:60px;object-fit:cover;border-radius:10px;border:1px solid rgba(15,23,42,.08);" />`
+                        : `<div class="muted" style="font-size:.8rem;">Nincs kép</div>`}
               </div>
+
               <div style="flex:1 1 auto;min-width:0;">
-                <div style="font-weight:600; margin-bottom:4px;">${item.title || "Referencia"}</div>
-                <div class="muted" style="font-size:.8rem;">${item.description || ""}</div>
+                <div style="font-weight:700;">${title || "(cím nélkül)"}</div>
+                <div class="muted" style="font-size:.85rem;">${desc || ""}</div>
+                <div class="muted" style="font-size:.75rem;margin-top:4px;">ID: ${item.id}</div>
               </div>
-              <div style="flex-shrink:0;">
-                <button class="btn ghost" data-ref-delete="${item.id}">Törlés</button>
+
+              <div style="flex-shrink:0; display:flex; gap:8px; align-items:center;">
+                <button class="btn ghost" data-ref-delete>Törlés</button>
               </div>
             </div>
           `;
         }).join("");
 
         referencesListEl.querySelectorAll("[data-ref-delete]").forEach(btn => {
-          btn.addEventListener("click", async ()=>{
-            const id = btn.getAttribute("data-ref-delete");
+          btn.addEventListener("click", async () => {
+            const wrap = btn.closest("[data-ref-id]");
+            const id = wrap?.dataset?.refId;
             if (!id) return;
             if (!confirm("Biztosan törlöd ezt a referenciát?")) return;
+
             try{
-              await remove(dbRef(dbRealtime, "references/" + id));
+              await deleteDoc(doc(dbFirestore, "references", id));
+              if (WRITE_RTD_BK && dbRealtime) {
+                await remove(dbRef(dbRealtime, "references/" + id));
+              }
               await loadReferencesAdmin();
             }catch(err){
               console.warn("[referencesAdmin] törlés hiba:", err);
-              alert("Nem sikerült törölni a referenciát.");
+              alert("Nem sikerült törölni.");
             }
           });
         });
+
       }catch(err){
         console.warn("[referencesAdmin] betöltés hiba:", err);
-        referencesListEl.innerHTML = '<div class="muted">Nem sikerült betölteni a referenciákat.</div>';
+        referencesListEl.innerHTML = '<div class="muted">Hiba a referenciák betöltésekor.</div>';
       }
     }
 
-    if (referencesForm) {
-      referencesForm.addEventListener("submit", async (e)=>{
-        e.preventDefault();
+    referencesForm?.addEventListener("submit", async (e)=>{
+      e.preventDefault();
 
-        if (!firebaseEnabled || !dbRealtime) {
-          alert("Firebase nincs bekapcsolva (demo mód). A mentés nem lehetséges.");
-          return;
+      if (!firebaseEnabled || !dbFirestore) return;
+
+      const title = refTitleInput?.value?.trim() || "";
+      const desc  = refDescInput?.value?.trim() || "";
+      const file  = refImageInput?.files?.[0];
+
+      if (!file) { alert("Válassz egy képet."); return; }
+
+      referencesStatusEl.textContent = "Feldolgozás...";
+
+      try{
+        const dataUrl = await fileToOptimizedDataUrl(file, { maxW: 1600, maxH: 1600, quality: 0.78 });
+
+        const id = doc(collection(dbFirestore, "references")).id;
+        const payload = {
+          title,
+          desc,
+          imageDataUrl: dataUrl,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+
+        await setDoc(doc(dbFirestore, "references", id), payload);
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime, "references/" + id), payload);
         }
 
-        const title = (refTitleInput.value || "").trim();
-        const description = (refDescInput.value || "").trim();
-        const file = refImageInput?.files?.[0];
+        referencesForm.reset();
+        referencesStatusEl.textContent = "Mentve ✅";
+        await loadReferencesAdmin();
+      }catch(err){
+        console.warn("[referencesAdmin] mentés hiba:", err);
+        referencesStatusEl.textContent = "Hiba mentés közben.";
+      }finally{
+        setTimeout(()=>{ if(referencesStatusEl) referencesStatusEl.textContent=""; }, 2000);
+      }
+    });
 
-        if (!file) {
-          alert("Kérlek válassz egy képfájlt.");
-          return;
-        }
 
-        referencesStatusEl.textContent = "Feltöltés folyamatban...";
-
-        try{
-          const dataUrl = await new Promise((resolve, reject)=>{
-            const r = new FileReader();
-            r.onload = () => resolve(r.result);
-            r.onerror = () => reject(r.error || new Error("FileReader hiba"));
-            r.readAsDataURL(file);
-          });
-
-          const newRef = push(dbRef(dbRealtime, "references"));
-          const payload = {
-            title,
-            description,
-            imageDataUrl: dataUrl,
-            createdAt: Date.now()
-          };
-
-          await set(newRef, payload);
-
-          refTitleInput.value = "";
-          refDescInput.value = "";
-          refImageInput.value = "";
-          referencesStatusEl.textContent = "Mentve ✅";
-
-          await loadReferencesAdmin();
-        }catch(err){
-          console.warn("[referencesAdmin] mentés hiba:", err);
-          referencesStatusEl.textContent = "Hiba mentés közben.";
-        }finally{
-          setTimeout(()=>{ if (referencesStatusEl) referencesStatusEl.textContent = ""; }, 2000);
-        }
-      });
-    }
-
-    /* ---------- Termékek admin ---------- */
+/* ---------- Termékek admin (Firestore) ---------- */
 
     const productForm       = document.getElementById("productForm");
     const productNameInput  = document.getElementById("productName");
@@ -1490,7 +1866,7 @@
     async function loadProductsAdmin() {
       if (!productsListEl) return;
 
-      if (!firebaseEnabled || !dbRealtime) {
+      if (!firebaseEnabled || !dbFirestore) {
         productsListEl.innerHTML =
           '<div class="muted">Demo mód – a termékek nem kerülnek mentésre.</div>';
         return;
@@ -1499,150 +1875,130 @@
       productsListEl.innerHTML = '<div class="muted">Betöltés...</div>';
 
       try {
-        const snap = await get(dbRef(dbRealtime, "products"));
-        if (!snap.exists()) {
+        const items = await fsListAll("products");
+
+        if (!items.length) {
           productsListEl.innerHTML =
-            '<div class="muted">Még nincs rögzített termék.</div>';
+            '<div class="muted">Még nincs feltöltött termék.</div>';
           return;
         }
 
-        const val = snap.val() || {};
-        const items = Object.entries(val)
-          .map(([id, d]) => ({ id, ...(d || {}) }))
-          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-          .reverse(); // legújabb felül
+        items.sort((a,b)=> (b.createdAt || 0) - (a.createdAt || 0));
 
-        productsListEl.innerHTML = items
-          .map((item) => {
-            const imgSrc = item.imageUrl || item.imageDataUrl || "";
-            const name = (item.name || "").replace(/"/g, "&quot;");
-            const short = (item.shortDescription || item.tagline || "").replace(/"/g, "&quot;");
-            const detailUrl = `details.html?id=${encodeURIComponent(item.id)}`;
+        productsListEl.innerHTML = items.map(item => {
+          const imgSrc = item.imageUrl || item.imageDataUrl || "";
+          const name = (item.name || "").replace(/</g,"&lt;");
+          const short = (item.short || "").replace(/</g,"&lt;");
 
-            return `
-              <div class="kpi panel"
-                   style="padding:10px; display:flex; gap:10px; align-items:flex-start; margin-top:10px;"
-                   data-product-id="${item.id}">
-                <div style="width:80px; flex-shrink:0;">
-                  ${
-                    imgSrc
-                      ? `<img src="${imgSrc}" alt="Termék kép"
-                               style="width:100%;height:60px;object-fit:cover;border-radius:4px;">`
-                      : `<div style="width:100%;height:60px;border-radius:4px;border:1px dashed #cbd5e1;
-                                   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#94a3b8;">
-                           Nincs kép
-                         </div>`
-                  }
-                </div>
-                <div style="flex:1 1 auto;min-width:0;">
-                  <div style="font-weight:600;margin-bottom:4px;">${name || "Termék"}</div>
-                  <div class="muted" style="font-size:.8rem;margin-bottom:4px;">${short}</div>
-                  <a href="${detailUrl}" target="_blank" class="muted" style="font-size:.78rem;">
-                    Részletek megnyitása új lapon ↗
-                  </a>
-                </div>
-                <div style="flex-shrink:0;">
-                  <button class="btn ghost" data-product-delete="${item.id}">Törlés</button>
-                </div>
+          return `
+            <div class="kpi panel" style="padding:10px; display:flex; gap:10px; align-items:center; margin-top:10px;"
+                 data-product-id="${item.id}">
+              <div style="width:80px; flex-shrink:0;">
+                ${imgSrc ? `<img src="${imgSrc}" alt="Termék" style="width:100%;height:60px;object-fit:cover;border-radius:10px;border:1px solid rgba(15,23,42,.08);" />`
+                        : `<div class="muted" style="font-size:.8rem;">Nincs kép</div>`}
               </div>
-            `;
-          })
-          .join("");
 
-        productsListEl.querySelectorAll("[data-product-delete]").forEach((btn) => {
+              <div style="flex:1 1 auto;min-width:0;">
+                <div style="font-weight:700;">${name || "(név nélkül)"}</div>
+                <div class="muted" style="font-size:.85rem;">${short || ""}</div>
+                <div class="muted" style="font-size:.75rem;margin-top:4px;">ID: ${item.id}</div>
+              </div>
+
+              <div style="flex-shrink:0; display:flex; gap:8px; align-items:center;">
+                <button class="btn ghost" data-product-delete>Törlés</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        productsListEl.querySelectorAll("[data-product-delete]").forEach(btn => {
           btn.addEventListener("click", async () => {
-            const id = btn.getAttribute("data-product-delete");
+            const wrap = btn.closest("[data-product-id]");
+            const id = wrap?.dataset?.productId;
             if (!id) return;
             if (!confirm("Biztosan törlöd ezt a terméket?")) return;
 
-            try {
-              await remove(dbRef(dbRealtime, "products/" + id));
+            try{
+              await deleteDoc(doc(dbFirestore, "products", id));
+              if (WRITE_RTD_BK && dbRealtime) {
+                await remove(dbRef(dbRealtime, "products/" + id));
+              }
               await loadProductsAdmin();
-            } catch (err) {
+            }catch(err){
               console.warn("[productsAdmin] törlés hiba:", err);
-              alert("Nem sikerült törölni a terméket.");
+              alert("Nem sikerült törölni.");
             }
           });
         });
+
       } catch (err) {
         console.warn("[productsAdmin] betöltés hiba:", err);
         productsListEl.innerHTML =
-          '<div class="muted">Nem sikerült betölteni a termékeket.</div>';
+          '<div class="muted">Hiba a termékek betöltésekor.</div>';
       }
     }
 
-    if (productForm) {
-      productForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    productForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-        if (!firebaseEnabled || !dbRealtime) {
-          alert("Firebase nincs bekapcsolva (demo mód). A mentés nem lehetséges.");
-          return;
+      if (!firebaseEnabled || !dbFirestore) return;
+
+      const name  = productNameInput?.value?.trim() || "";
+      const short = productShortInput?.value?.trim() || "";
+      const long  = productLongInput?.value?.trim() || "";
+      const file  = productImageInput?.files?.[0];
+
+      if (!name) { alert("Add meg a termék nevét."); return; }
+      if (!file) { alert("Válassz egy képet."); return; }
+
+      productStatusEl.textContent = "Feldolgozás...";
+
+      try {
+        const dataUrl = await fileToOptimizedDataUrl(file, { maxW: 1600, maxH: 1600, quality: 0.78 });
+
+        const id = doc(collection(dbFirestore, "products")).id;
+
+        const payload = {
+          name,
+          short,
+          long,
+          imageDataUrl: dataUrl,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+
+        await setDoc(doc(dbFirestore, "products", id), payload);
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime, "products/" + id), payload);
         }
 
-        const name  = (productNameInput.value || "").trim();
-        const short = (productShortInput.value || "").trim();
-        const long  = (productLongInput.value || "").trim();
-        const file  = productImageInput?.files?.[0] || null;
+        productForm.reset();
+        productStatusEl.textContent = "Mentve ✅";
+        await loadProductsAdmin();
+      } catch (err) {
+        console.warn("[productsAdmin] mentés hiba:", err);
+        productStatusEl.textContent = "Hiba mentés közben.";
+      } finally {
+        setTimeout(() => { if (productStatusEl) productStatusEl.textContent = ""; }, 2000);
+      }
+    });
 
-        if (!name) {
-          alert("Add meg a termék nevét.");
-          return;
-        }
 
-        productStatusEl.textContent = "Feltöltés folyamatban...";
-
-        try {
-          let dataUrl = "";
-          if (file) {
-            dataUrl = await new Promise((resolve, reject) => {
-              const r = new FileReader();
-              r.onload = () => resolve(r.result);
-              r.onerror = () => reject(r.error || new Error("FileReader hiba"));
-              r.readAsDataURL(file);
-            });
-          }
-
-          const newRef = push(dbRef(dbRealtime, "products"));
-          await set(newRef, {
-            name,
-            shortDescription: short,
-            longDescription: long,
-            imageDataUrl: dataUrl || null,
-            createdAt: Date.now()
-          });
-
-          productNameInput.value = "";
-          productShortInput.value = "";
-          productLongInput.value = "";
-          productImageInput.value = "";
-          productStatusEl.textContent = "Mentve ✅";
-
-          await loadProductsAdmin();
-        } catch (err) {
-          console.warn("[productsAdmin] mentés hiba:", err);
-          productStatusEl.textContent = "Hiba mentés közben.";
-        } finally {
-          setTimeout(() => {
-            if (productStatusEl) productStatusEl.textContent = "";
-          }, 2000);
-        }
-      });
-    }
-
-        /* ---------- Főoldali slider admin ---------- */
-
-    const sliderForm       = document.getElementById("sliderForm");
-    const slideTitleInput  = document.getElementById("slideTitle");
-    const slideSubtitleInput = document.getElementById("slideSubtitle");
-    const slideImageInput  = document.getElementById("slideImage");
-    const sliderStatusEl   = document.getElementById("sliderStatus");
-    const sliderListEl     = document.getElementById("sliderList");
+/* ---------- Főoldali slider admin (Firestore) ---------- */
+    const sliderForm = document.getElementById("sliderForm");
+    const sliderTitleInput = document.getElementById("sliderTitle");
+    const sliderSubtitleInput = document.getElementById("sliderSubtitle");
+    const sliderImageInput = document.getElementById("sliderImage");
+    const sliderStatusEl = document.getElementById("sliderStatus");
+    const sliderListEl = document.getElementById("sliderList");
+    const sliderSaveOrderBtn = document.getElementById("sliderSaveOrderBtn");
+    let sliderMaxOrder = 0;
 
     async function loadSliderAdmin() {
       if (!sliderListEl) return;
 
-      if (!firebaseEnabled || !dbRealtime) {
+      if (!firebaseEnabled || !dbFirestore) {
         sliderListEl.innerHTML =
           '<div class="muted">Demo mód – a slider képek nem kerülnek mentésre.</div>';
         return;
@@ -1651,183 +2007,179 @@
       sliderListEl.innerHTML = '<div class="muted">Betöltés...</div>';
 
       try {
-        const snap = await get(dbRef(dbRealtime, "heroSlider"));
-        if (!snap.exists()) {
+        let items = await fsListAll("heroSlider");
+
+        // fallback RTDB, ha Firestore még üres
+        if (!items.length && firebaseEnabled && dbRealtime) {
+          try{
+            const snap = await get(dbRef(dbRealtime, "heroSlider"));
+            if (snap.exists()) {
+              const val = snap.val() || {};
+              items = Object.entries(val).map(([id,d]) => ({ id, ...(d || {}) }));
+            }
+          }catch(e){}
+        }
+
+        if (!items.length) {
           sliderListEl.innerHTML =
             '<div class="muted">Még nincs feltöltött slider kép.</div>';
           return;
         }
 
-        const val = snap.val() || {};
-        const items = Object.entries(val)
-          .map(([id, d]) => ({ id, ...(d || {}) }))
-          .sort((a, b) => {
-            const ao = asNum(a.order);
-            const bo = asNum(b.order);
-            if (ao != null && bo != null) return ao - bo;
-            if (ao != null) return -1;
-            if (bo != null) return 1;
-            return (a.createdAt || 0) - (b.createdAt || 0);
-          })
+        items.sort((a,b) => (a.order ?? 999999) - (b.order ?? 999999));
 
+        sliderMaxOrder = items.reduce((m,it)=>Math.max(m, (typeof it.order==="number"? it.order : -1)), -1);
+        if (sliderMaxOrder < 0) sliderMaxOrder = items.length - 1;
 
         sliderListEl.innerHTML = items
           .map((item) => {
             const imgSrc = item.imageUrl || item.imageDataUrl || "";
-            const title = (item.title || "").replace(/"/g, "&quot;");
-            const subtitle = (item.subtitle || "").replace(/"/g, "&quot;");
+            const title = (item.title || "").replace(/</g,"&lt;");
+            const subtitle = (item.subtitle || "").replace(/</g,"&lt;");
 
             return `
               <div class="kpi panel"
                    style="padding:10px; display:flex; gap:10px; align-items:center; margin-top:10px;"
                    data-slide-id="${item.id}">
+                <div class="drag-handle" title="Húzd a sorrendhez"
+                     style="cursor:grab; user-select:none; font-size:18px; padding:0 6px; opacity:.7;">⠿</div>
+
                 <div style="width:80px; flex-shrink:0;">
-                  ${
-                    imgSrc
-                      ? `<img src="${imgSrc}" alt="Slider kép"
-                               style="width:100%;height:60px;object-fit:cover;border-radius:4px;">`
-                      : `<div style="width:100%;height:60px;border-radius:4px;border:1px dashed #cbd5e1;
-                                   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#94a3b8;">
-                           Nincs kép
-                         </div>`
-                  }
+                  ${imgSrc ? `<img src="${imgSrc}" alt="Slider"
+                               style="width:100%;height:60px;object-fit:cover;border-radius:10px;border:1px solid rgba(15,23,42,.08);" />`
+                          : `<div class="muted" style="font-size:.8rem;">Nincs kép</div>`}
                 </div>
+
                 <div style="flex:1 1 auto;min-width:0;">
-                  <div style="font-weight:600;margin-bottom:4px;">${title || "Diakép"}</div>
-                  <div class="muted" style="font-size:.8rem;">${subtitle}</div>
+                  <div style="font-weight:700;">${title || "(cím nélkül)"}</div>
+                  <div class="muted" style="font-size:.85rem;">${subtitle || ""}</div>
+                  <div class="muted" style="font-size:.75rem;margin-top:4px;">ID: ${item.id}</div>
                 </div>
+
                 <div style="flex-shrink:0; display:flex; gap:8px; align-items:center;">
-                  <button class="btn ghost" data-slide-delete="${item.id}">Törlés</button>
-                  <button type="button" class="btn ghost drag-handle" style="border:none" title="Húzd a sorrendhez" aria-label="Sorrend módosítása">☰</button>
+                  <button class="btn ghost" data-slide-delete>Törlés</button>
                 </div>
               </div>
             `;
           })
           .join("");
 
-        sliderListEl.querySelectorAll("[data-slide-delete]").forEach((btn) => {
+        // Delete
+        sliderListEl.querySelectorAll("[data-slide-delete]").forEach(btn => {
           btn.addEventListener("click", async () => {
-            const id = btn.getAttribute("data-slide-delete");
+            const wrap = btn.closest("[data-slide-id]");
+            const id = wrap?.dataset?.slideId;
             if (!id) return;
-            if (!confirm("Biztosan törlöd ezt a diaképet?")) return;
+            if (!confirm("Biztosan törlöd ezt a slider képet?")) return;
 
-            try {
-              await remove(dbRef(dbRealtime, "heroSlider/" + id));
+            try{
+              await deleteDoc(doc(dbFirestore, "heroSlider", id));
+              if (WRITE_RTD_BK && dbRealtime) {
+                await remove(dbRef(dbRealtime, "heroSlider/" + id));
+              }
               await loadSliderAdmin();
-            } catch (err) {
+            }catch(err){
               console.warn("[sliderAdmin] törlés hiba:", err);
-              alert("Nem sikerült törölni a diaképet.");
+              alert("Nem sikerült törölni.");
             }
           });
         });
+
+        // Sortable
+        if (window.Sortable) {
+          new Sortable(sliderListEl, {
+            animation: 150,
+            handle: ".drag-handle",
+            ghostClass: "sortable-ghost",
+          });
+        }
+
       } catch (err) {
         console.warn("[sliderAdmin] betöltés hiba:", err);
         sliderListEl.innerHTML =
-          '<div class="muted">Nem sikerült betölteni a slider képeket.</div>';
+          '<div class="muted">Hiba a slider képek betöltésekor.</div>';
       }
     }
 
-    initSliderSortableOnce();
-
-    if (sliderForm) {
-      sliderForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        if (!firebaseEnabled || !dbRealtime) {
-          alert("Firebase nincs bekapcsolva (demo mód). A mentés nem lehetséges.");
-          return;
-        }
-
-        const title = (slideTitleInput.value || "").trim();
-        const subtitle = (slideSubtitleInput.value || "").trim();
-        const file = slideImageInput?.files?.[0];
-
-        if (!file) {
-          alert("Kérlek válassz egy képfájlt.");
-          return;
-        }
-
-        sliderStatusEl.textContent = "Feltöltés folyamatban...";
-
-        try {
-          const dataUrl = await new Promise((resolve, reject) => {
-            const r = new FileReader();
-            r.onload = () => resolve(r.result);
-            r.onerror = () => reject(r.error || new Error("FileReader hiba"));
-            r.readAsDataURL(file);
-          });
-
-          const newRef = push(dbRef(dbRealtime, "heroSlider"));
-          const payload = {
-            title,
-            subtitle,
-            imageDataUrl: dataUrl,
-            createdAt: Date.now(),
-            order: Date.now()
-          };
-
-          await set(newRef, payload);
-
-          slideTitleInput.value = "";
-          slideSubtitleInput.value = "";
-          slideImageInput.value = "";
-          sliderStatusEl.textContent = "Mentve ✅";
-
-          await loadSliderAdmin();
-        } catch (err) {
-          console.warn("[sliderAdmin] mentés hiba:", err);
-          sliderStatusEl.textContent = "Hiba mentés közben.";
-        } finally {
-          setTimeout(() => {
-            if (sliderStatusEl) sliderStatusEl.textContent = "";
-          }, 2000);
-        }
-      });
-    }
-
-
-    const asNum = (v) => {
-      const n = Number(v);
-      return Number.isFinite(n) ? n : null;
-    };
-
-    async function persistSliderOrder() {
-      if (!firebaseEnabled || !dbRealtime || !sliderListEl) return;
+    async function persistSliderOrder(){
+      if (!firebaseEnabled || !dbFirestore) return;
 
       const ids = Array.from(sliderListEl.querySelectorAll("[data-slide-id]"))
         .map(el => el.getAttribute("data-slide-id"))
         .filter(Boolean);
 
-      const updatesObj = {};
-      ids.forEach((id, idx) => {
-        updatesObj[`heroSlider/${id}/order`] = idx; 
-      });
+      try{
+        const batch = writeBatch(dbFirestore);
+        ids.forEach((id, idx) => {
+          batch.set(doc(dbFirestore, "heroSlider", id), { order: idx, updatedAt: Date.now() }, { merge:true });
+        });
+        await batch.commit();
 
-      try {
-        await dbUpdate(dbRef(dbRealtime, "/"), updatesObj);
+        if (WRITE_RTD_BK && dbRealtime) {
+          const updatesObj = {};
+          ids.forEach((id, idx) => { updatesObj[`heroSlider/${id}/order`] = idx; });
+          await dbUpdate(dbRef(dbRealtime, "/"), updatesObj);
+        }
+
         if (sliderStatusEl) {
           sliderStatusEl.textContent = "Sorrend mentve ✅";
-          setTimeout(() => (sliderStatusEl.textContent = ""), 1200);
+          setTimeout(() => (sliderStatusEl.textContent = ""), 1500);
         }
-      } catch (err) {
+      }catch(err){
         console.warn("[sliderAdmin] order mentés hiba:", err);
-        alert("Nem sikerült elmenteni a sorrendet.");
+        if (sliderStatusEl) sliderStatusEl.textContent = "Hiba a sorrend mentésnél.";
+        setTimeout(() => (sliderStatusEl.textContent = ""), 2000);
       }
     }
 
-    function initSliderSortableOnce() {
-      if (!sliderListEl || sliderListEl._sortable || !window.Sortable) return;
+    sliderSaveOrderBtn?.addEventListener("click", persistSliderOrder);
 
-      sliderListEl._sortable = Sortable.create(sliderListEl, {
-        animation: 150,
-        handle: ".drag-handle",
-        onEnd: () => persistSliderOrder(),
-      });
-    }
+    sliderForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!firebaseEnabled || !dbFirestore) return;
+
+      const title = sliderTitleInput?.value?.trim() || "";
+      const subtitle = sliderSubtitleInput?.value?.trim() || "";
+      const file = sliderImageInput?.files?.[0];
+
+      if (!file) { alert("Válassz egy képet."); return; }
+
+      sliderStatusEl.textContent = "Feldolgozás...";
+
+      try{
+        const dataUrl = await fileToOptimizedDataUrl(file, { maxW: 2000, maxH: 2000, quality: 0.78 });
+
+        const id = doc(collection(dbFirestore, "heroSlider")).id;
+
+        const payload = {
+          title,
+          subtitle,
+          imageDataUrl: dataUrl,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          order: ++sliderMaxOrder
+        };
+
+        await setDoc(doc(dbFirestore, "heroSlider", id), payload);
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime, "heroSlider/" + id), payload);
+        }
+
+        sliderForm.reset();
+        sliderStatusEl.textContent = "Mentve ✅";
+        await loadSliderAdmin();
+      }catch(err){
+        console.warn("[sliderAdmin] mentés hiba:", err);
+        sliderStatusEl.textContent = "Hiba mentés közben.";
+      }finally{
+        setTimeout(()=>{ if(sliderStatusEl) sliderStatusEl.textContent=""; }, 2000);
+      }
+    });
 
 
-
-    /* ---------- Start ---------- */
+/* ---------- Start ---------- */
     await loadBoard();
     await loadEmail();
     await loadContent();
