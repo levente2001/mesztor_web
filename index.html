@@ -2374,6 +2374,8 @@
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, update, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
     import { getFirestore, collection, getDocs, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZUGCJkn9L4xH_M8L0fZYTUresZ9qYPqo",
@@ -2409,6 +2411,13 @@
       console.warn("[firebase] init hiba – demo mód:", err);
       firebaseEnabled = false;
     }
+
+    let auth;
+    let currentUser = null;
+
+    auth = getAuth(app);
+    onAuthStateChanged(auth, (u)=> currentUser = u);
+
     const sliderSection = document.getElementById("hero-slider");
     const trackEl       = document.getElementById("heroSliderTrack");
     const dotsEl        = document.getElementById("heroSliderDots");
@@ -3002,6 +3011,7 @@ async function loadServices(){
   // nincs Firebase → demo
   if(!firebaseEnabled || !fs){
     renderServices(demoServices, {admin:false});
+    renderServices(demoServices, {admin:isAdminPreview});
     return;
   }
 
@@ -3018,6 +3028,7 @@ async function loadServices(){
   }catch(err){
     console.warn("[services] betöltés hiba:", err);
     renderServices(demoServices, {admin:false});
+    renderServices(demoServices, {admin:isAdminPreview});
   }
 }
 
