@@ -1924,29 +1924,9 @@
           
           <div class="hero-card">
 
-            <img src="IMG-9242.jpg" alt="Mesztor-image">
-            <!--<div class="hero-card-badge" data-section="hero" data-field="herobadge">Kaputechnikai megoldások</div>
-            <div class="hero-card-main">
-              <span data-section="hero" data-field="herosoanleft">Lakossági &amp; ipari kapuk</span>
-              <span style="font-size:0.85rem;color:var(--color-muted);" data-section="hero" data-field="herospanright">tanácsadás · kivitelezés · szerviz</span>
-            </div>
-            <div class="hero-pill-row">
-              <span class="pill" data-section="hero" data-field="herocard1">Garázskapuk</span>
-              <span class="pill" data-section="hero" data-field="herocard2">Ipari kapuk</span>
-              <span class="pill" data-section="hero" data-field="herocard3">Kapumozgató motorok</span>
-              <span class="pill" data-section="hero" data-field="herocard4">Sorompók</span>
-            </div>
-            <div class="hero-stats">
-              <div>
-                <div class="hero-stat-label" data-section="hero" data-field="heroctexttitleleft">Szolgáltatásaink</div>
-                <div class="hero-stat-value" data-section="hero" data-field="heroctexttitleright">Ajánlatkészítéstől a szervizig</div>
-              </div>
-              <div>
-                <div class="hero-stat-label" data-section="hero" data-field="heroctextleft">Megbízható beszállítók</div>
-                <div class="hero-stat-value" data-section="hero" data-field="heroctextright">Hörmann és további kiemelt partnerek</div>
-              </div>
-            </div>
-          </div>-->
+            <img id="hero-image" src="IMG-9242.jpg" alt="Mesztor-image">
+            
+          </div>
         </div>
 
       
@@ -2141,7 +2121,7 @@
           </p>
         </div>
 
-        <div class="icon-grid">
+        <!--<div class="icon-grid">
           <article class="icon-card">
             <div class="icon-badge" data-section="why-us" data-field="minoseg_badge">⭐</div>
             <h3 class="icon-card-title" data-section="why-us" data-field="minoseg_title">Magas minőségű termékek</h3>
@@ -2189,7 +2169,10 @@
               A leggyakrabban használt termékekből mindig tartunk raktáron a gyors kiszolgálás érdekében.
             </p>
           </article>
-        </div>
+        </div>-->
+
+        <div id="whyus-grid" class="icon-grid"></div>
+
       </div>
     </section>
 
@@ -2277,7 +2260,7 @@
 
           <div class="form-container">
               <div class="form">
-                  <span class="heading">Lépjen velünk kapcsolatba!</span>
+                  <span class="heading" data-section="contact" data-field="contact_heading">Lépjen velünk kapcsolatba!</span>
                   <p class="icon-card-body" style="margin-bottom:1.2rem;" data-section="contact" data-field="contact_text">
                     Küldje el elképzelését, és kollégáink rövid időn belül felveszik Önnel a kapcsolatot
                     egy személyre szabott ajánlattal. Az alábbi elérhetőségeken is rendelkezésére állunk.
@@ -2330,7 +2313,7 @@
                 </svg>
               </div>
               <div>
-                <div class="contact-label" data-section="contact" data-field="contact_f_label"><a href="https://facebook.com/mesztorkaputechnika">Facebook</a></div>
+                <div class="contact-label" data-section="contact" data-field="contact_f_label"><a style="cursor: pointer;" href="https://facebook.com/mesztorkaputechnika">Facebook</a></div>
                 <div data-section="contact" data-field="contact_f_address">/mesztorkaputechnika</div>
               </div>
             </div>
@@ -2831,6 +2814,309 @@ const NAV_CARD_META = {
   }
 };
 
+/* ------------ WHY-US – kártyák Firestore-ból ------------ */
+
+const whyUsGrid = document.getElementById("whyus-grid");
+let whyUsCache = [];
+
+const demoWhyUs = [
+  { id:"whyus1", badge:"⭐", title:"Magas minőségű termékek", body:"Minőségi kaputechnikai megoldások, hosszú élettartammal." },
+  { id:"whyus2", badge:"🧱", title:"Széles választék", body:"Garázskapu, ipari kapu, sorompó, kiegészítők — több gyártótól." },
+  { id:"whyus3", badge:"🛡️", title:"Kiemelt garanciák", body:"Megbízható beszállítói háttér és garanciális támogatás." },
+  { id:"whyus4", badge:"🤝", title:"Vevőbarát ügyfélszolgálat", body:"Segítünk választani, tervezni, és végigkísérjük a folyamatot." },
+  { id:"whyus5", badge:"👷", title:"Tapasztalt csapat", body:"Szakértelem felméréstől a kivitelezésig és szervizig." },
+  { id:"whyus6", badge:"📦", title:"Raktár / gyors beszerzés", body:"Népszerű termékek elérhetők, egyediekre gyors beszerzést adunk." }
+];
+
+// FONTOS: ezt nálatok már használja a services is – ne definiáld duplán!
+/* const isAdminPreview = new URLSearchParams(location.search).has("adminPreview"); */
+
+function normalizeWhyUs(d){
+  return {
+    id: d?.id ?? null,
+    badge: d?.badge || "⭐",
+    title: d?.title || "",
+    body: d?.body || "",
+    orderIndex: (typeof d?.orderIndex === "number") ? d.orderIndex : 0,
+    createdAt: d?.createdAt || 0,
+    updatedAt: d?.updatedAt || 0
+  };
+}
+
+function renderWhyUs(items, { admin=false } = {}){
+  if(!whyUsGrid) return;
+
+  const arr = (items || [])
+    .map(normalizeWhyUs)
+    .sort((a,b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0) || (a.createdAt ?? 0) - (b.createdAt ?? 0));
+
+  whyUsCache = arr;
+  whyUsGrid.innerHTML = "";
+
+  arr.forEach(item => whyUsGrid.appendChild(createWhyUsCard(item, { admin })));
+  if(admin) whyUsGrid.appendChild(createAddWhyUsCard());
+}
+
+function createWhyUsCard(item, { admin=false } = {}){
+  const card = document.createElement("article");
+  card.className = "icon-card";
+
+  const badge = document.createElement("div");
+  badge.className = "icon-badge";
+  badge.textContent = item.badge || "⭐";
+
+  const title = document.createElement("div");
+  title.className = "icon-card-title";
+  title.textContent = item.title || "";
+
+  const body = document.createElement("div");
+  body.className = "icon-card-text";
+  body.textContent = item.body || "";
+
+  card.append(badge, title, body);
+
+  // ugyanaz a CSS/UX, mint a services-nél (új CSS nem kell)
+  if(admin && firebaseEnabled && fs && item.id){
+    const actions = document.createElement("div");
+    actions.className = "svc-admin-actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "svc-admin-btn";
+    editBtn.textContent = "✏️";
+    editBtn.title = "Szerkesztés";
+    editBtn.onclick = () => editWhyUs(item);
+
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "svc-admin-btn danger";
+    delBtn.textContent = "🗑️";
+    delBtn.title = "Törlés";
+    delBtn.onclick = () => deleteWhyUs(item);
+
+    actions.append(editBtn, delBtn);
+    card.append(actions);
+  }
+
+  return card;
+}
+
+function createAddWhyUsCard(){
+  const card = document.createElement("article");
+  card.className = "icon-card icon-card-add";
+
+  const badge = document.createElement("div");
+  badge.className = "icon-badge icon-badge-add";
+  badge.textContent = "+";
+
+  const title = document.createElement("div");
+  title.className = "icon-card-title";
+  title.textContent = "Új kártya";
+
+  const text = document.createElement("div");
+  text.className = "icon-card-text";
+  text.textContent = "Kattints ide a hozzáadáshoz.";
+
+  card.append(badge, title, text);
+  card.onclick = () => addWhyUs();
+
+  return card;
+}
+
+async function addWhyUs(){
+  if(!firebaseEnabled || !fs) return alert("A Firebase nincs inicializálva / nincs bejelentkezés.");
+
+  const badge = prompt("Ikon (emoji):", "✨");
+  if(badge === null) return;
+
+  const title = prompt("Cím:", "");
+  if(title === null) return;
+
+  const body = prompt("Leírás:", "");
+  if(body === null) return;
+
+  const maxOrder = whyUsCache.reduce((m,it)=>Math.max(m, (typeof it.orderIndex==="number" ? it.orderIndex : 0)), -1);
+  const id = doc(collection(fs, "whyUs")).id;
+
+  const payload = { badge, title, body, orderIndex: maxOrder + 1, createdAt: Date.now(), updatedAt: Date.now() };
+
+  try{
+    await setDoc(doc(fs, "whyUs", id), payload);
+    await loadWhyUs();
+  }catch(err){
+    console.warn("[whyUs] mentés hiba:", err);
+    alert("Nem sikerült menteni.");
+  }
+}
+
+async function editWhyUs(item){
+  if(!firebaseEnabled || !fs || !item?.id) return;
+
+  const badge = prompt("Ikon (emoji):", item.badge || "✨");
+  if(badge === null) return;
+
+  const title = prompt("Cím:", item.title || "");
+  if(title === null) return;
+
+  const body = prompt("Leírás:", item.body || "");
+  if(body === null) return;
+
+  try{
+    await setDoc(doc(fs, "whyUs", item.id), { badge, title, body, updatedAt: Date.now() }, { merge:true });
+    await loadWhyUs();
+  }catch(err){
+    console.warn("[whyUs] szerkesztés hiba:", err);
+    alert("Nem sikerült menteni.");
+  }
+}
+
+async function deleteWhyUs(item){
+  if(!firebaseEnabled || !fs || !item?.id) return;
+  if(!confirm("Biztosan törlöd ezt a kártyát?")) return;
+
+  try{
+    await deleteDoc(doc(fs, "whyUs", item.id));
+    await loadWhyUs();
+  }catch(err){
+    console.warn("[whyUs] törlés hiba:", err);
+    alert("Nem sikerült törölni.");
+  }
+}
+
+async function loadWhyUs(){
+  if(!whyUsGrid) return;
+
+  if(!firebaseEnabled || !fs){
+    renderWhyUs(demoWhyUs, { admin: isAdminPreview });
+    return;
+  }
+
+  try{
+    const snap = await getDocs(collection(fs, "whyUs"));
+    const items = snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
+
+    // ha üres a collection, legyen demo (adminban így “seedelhető” szerkesztéssel)
+    renderWhyUs(items.length ? items : demoWhyUs, { admin: isAdminPreview });
+  }catch(err){
+    console.warn("[whyUs] betöltés hiba:", err);
+    renderWhyUs(demoWhyUs, { admin: isAdminPreview });
+  }
+}
+
+function applyHeroImageFromContent() {
+  const img = document.getElementById("hero-image");
+  if (!img) return;
+
+  // contentSections/hero -> heroImageSrc
+  const src = sectionsCache?.hero?.heroImageSrc || sectionsCache?.hero?.heroImage || "";
+  if (src) img.src = src;
+}
+
+function pickImageFile() {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = () => resolve(input.files?.[0] || null);
+    input.click();
+  });
+}
+
+function estimateBase64Bytes(dataUrl) {
+  const i = dataUrl.indexOf("base64,");
+  if (i < 0) return dataUrl.length;
+  const b64 = dataUrl.slice(i + 7);
+  return Math.floor((b64.length * 3) / 4); // közelítés
+}
+
+async function fileToResizedJpegDataUrl(file, maxW, quality) {
+  const dataUrl = await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+
+  const img = await new Promise((resolve, reject) => {
+    const im = new Image();
+    im.onload = () => resolve(im);
+    im.onerror = reject;
+    im.src = dataUrl;
+  });
+
+  const w0 = img.width || 1;
+  const h0 = img.height || 1;
+  const ratio = Math.min(maxW / w0, 1);
+  const w = Math.round(w0 * ratio);
+  const h = Math.round(h0 * ratio);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, w, h);
+
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
+async function compressForFirestore(file) {
+  // Firestore doc limit ~1MiB, hagyjunk tartalékot
+  const LIMIT = 900_000;
+
+  const widths = [1400, 1200, 1000, 900, 800];
+  const qualities = [0.85, 0.75, 0.65, 0.55];
+
+  for (const maxW of widths) {
+    for (const q of qualities) {
+      const out = await fileToResizedJpegDataUrl(file, maxW, q);
+      if (estimateBase64Bytes(out) <= LIMIT) return out;
+    }
+  }
+  return null;
+}
+
+function setupHeroImageAdminEdit() {
+  const img = document.getElementById("hero-image");
+  if (!img) return;
+  if (!inlineEditMode || !firebaseEnabled || !fs) return;
+
+  img.style.cursor = "pointer";
+  img.title = "Kattints a kép cseréjéhez (admin)";
+
+  img.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!currentUser) {
+      alert("A kép cseréjéhez be kell jelentkezned (admin).");
+      return;
+    }
+
+    const file = await pickImageFile();
+    if (!file) return;
+
+    try {
+      const dataUrl = await compressForFirestore(file);
+      if (!dataUrl) {
+        alert("A kép túl nagy. Válassz kisebb fájlt, vagy vágd/mentésd le kisebbre.");
+        return;
+      }
+
+      await setDoc(
+        doc(fs, "contentSections", "hero"),
+        { heroImageSrc: dataUrl, updatedAt: Date.now() },
+        { merge: true }
+      );
+
+      img.src = dataUrl;
+    } catch (err) {
+      console.warn("[hero-image] mentés hiba:", err);
+      alert("Nem sikerült menteni a képet (lehet adblock / jogosultság / hálózat).");
+    }
+  });
+}
+
+
 /* ------------ SZOLGÁLTATÁSAINK – kártyák Firestore-ból ------------ */
 
 const servicesGrid = document.getElementById("services-grid");
@@ -3326,7 +3612,9 @@ function buildNavFromBoard(board) {
       if (!firebaseEnabled || !db) return;
       await loadContentSections();
       applyContentSectionsToDom();
+      applyHeroImageFromContent(); 
       initInlineEditing();
+      setupHeroImageAdminEdit();
     }
 
             /* ------------ Referencia kép modal (csak desktopon) ------------ */
@@ -3759,6 +4047,7 @@ function buildNavFromBoard(board) {
     loadSuppliers();
     loadProducts();
     loadServices();
+    loadWhyUs();
 
     /* ------------ ANALITIKA – ugyanaz a logika, mint eddig ------------ */
 

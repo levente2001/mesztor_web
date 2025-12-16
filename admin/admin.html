@@ -274,9 +274,18 @@
 
             <iframe
               id="sitePreview"
-              src="https://mesztor.netlify.app/index.html?adminPreview=1"
+              src=""
               style="width:100%; min-height:700px; border:1px solid #e5e7eb; border-radius:16px; background:#fff;"
             ></iframe>
+
+            <script>
+              (function () {
+                const iframe = document.getElementById("sitePreview");
+                const inAdminFolder = location.pathname.includes("/admin/");
+                const publicPath = inAdminFolder ? "../index.html" : "./index.html";
+                iframe.src = new URL(publicPath + "?adminPreview=1", location.href).toString();
+              })();
+            </script>
           </div>
         </div>
       </section>
