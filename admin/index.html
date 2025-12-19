@@ -583,6 +583,73 @@
       envBadgeEl.querySelector(".label").textContent = "Demo mód";
     }
 
+    // --- Auto logout 30 perc inaktivitás után + 1 perces figyelmeztetés ---
+// Feltételezi, hogy van `auth` (getAuth(app)) és importálva van a `signOut`.
+// Ha nincs, a lenti importot használd (VAGY egészítsd ki a meglévő importodat).
+
+// import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+// const auth = getAuth(app);
+
+(function idleAutoLogout() {
+  const IDLE_MINUTES = 30;
+  const WARN_BEFORE_SECONDS = 60;
+
+  const IDLE_MS = IDLE_MINUTES * 60 * 1000;
+  const WARN_MS = IDLE_MS - WARN_BEFORE_SECONDS * 1000;
+
+  let warnTimer = null;
+  let logoutTimer = null;
+  let warned = false;
+
+  const resetTimers = () => {
+    if (warnTimer) clearTimeout(warnTimer);
+    if (logoutTimer) clearTimeout(logoutTimer);
+    warned = false;
+
+    // 29. perc körül figyelmeztetés
+    warnTimer = setTimeout(() => {
+      // csak ha még be van jelentkezve
+      if (!auth?.currentUser) return;
+
+      warned = true;
+      alert("1 perc inaktivitás után automatikusan kijelentkeztetünk biztonsági okból.");
+    }, WARN_MS);
+
+    // 30 perc után logout
+    logoutTimer = setTimeout(async () => {
+      try {
+        if (auth?.currentUser) await signOut(auth);
+      } finally {
+        // átirányítás a login oldalra (módosítsd, ha nálad más)
+        const loginUrl = new URL("./login.html", location.href).toString();
+        location.href = loginUrl;
+      }
+    }, IDLE_MS);
+  };
+
+  // Aktivitás események
+  const onActivity = () => {
+    // ha már felugrott a warning, és a user mozog -> ne logoljuk ki
+    if (warned) {
+      // (opcionális) ide tehetsz egy halk status üzenetet
+    }
+    resetTimers();
+  };
+
+  ["mousemove", "mousedown", "keydown", "touchstart", "scroll"].forEach((evt) => {
+    window.addEventListener(evt, onActivity, { passive: true });
+  });
+
+  // ha visszajön a tabra, az is aktivitás
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) onActivity();
+  });
+
+  // induláskor indítjuk a timereket
+  resetTimers();
+})();
+
+
 
 const changePwForm = document.getElementById("changePwForm");
 const currentPwEl  = document.getElementById("currentPw");
