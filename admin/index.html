@@ -258,7 +258,28 @@
               <button class="btn primary" type="submit">Mentés</button>
             </form>
             <div id="emailStatus" class="muted" style="margin-top:10px"></div>
+
+            <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb;" />
+
+            <div class="muted" style="margin-bottom:8px;">
+              Jelszó csere
+            </div>
+
+            <form id="changePwForm" class="grid" style="grid-template-columns:1fr 1fr auto; gap:10px; align-items:center;">
+              <input type="password" style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:12px;" id="currentPw" placeholder="Régi jelszó" autocomplete="current-password" required />
+              <input type="password" style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:12px;" id="newPw" placeholder="Új jelszó (min. 8 karakter)" autocomplete="new-password" minlength="8" required />
+              <button class="btn" type="submit">Jelszó csere</button>
+            </form>
+
+            <div class="muted" style="margin-top:8px;">
+              <input type="password" id="newPw2" placeholder="Új jelszó újra" autocomplete="new-password" minlength="8" style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:12px;" />
+            </div>
+
+            <div id="changePwStatus" class="muted" style="margin-top:10px"></div>
+
           </div>
+          
+
         </div>
       </section>
 
@@ -280,11 +301,17 @@
             <script>
               (function () {
                 const iframe = document.getElementById("sitePreview");
-                const inAdminFolder = location.pathname.includes("/admin/");
-                const publicPath = inAdminFolder ? "../index.html" : "./index.html";
-                iframe.src = new URL(publicPath + "?adminPreview=1", location.href).toString();
+                const isAdminSubdomain = location.hostname.startsWith("admin.");
+
+                const targetUrl = isAdminSubdomain
+                  ? `${location.origin}/site/index.html?adminPreview=1`
+                  : new URL("../index.html?adminPreview=1", location.href).toString();
+
+                iframe.src = targetUrl;
               })();
             </script>
+
+
           </div>
         </div>
       </section>
@@ -520,7 +547,7 @@
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref as dbRef, get, set, update as dbUpdate, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
     import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import Sortable from "https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/modular/sortable.esm.js";
 
     /* ---------- Firebase config ---------- */
@@ -550,6 +577,75 @@
       envBadgeEl.classList.remove("ok");
       envBadgeEl.querySelector(".label").textContent = "Demo mód";
     }
+
+
+const changePwForm = document.getElementById("changePwForm");
+const currentPwEl  = document.getElementById("currentPw");
+const newPwEl      = document.getElementById("newPw");
+const newPw2El     = document.getElementById("newPw2");
+const changePwStatus = document.getElementById("changePwStatus");
+
+changePwForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const user = auth.currentUser;
+  if (!user?.email) {
+    changePwStatus.textContent = "Nem vagy bejelentkezve.";
+    return;
+  }
+
+  // FONTOS: nincs trim()
+  const currentPw = (currentPwEl?.value ?? "");
+  const newPw  = (newPwEl?.value ?? "");
+  const newPw2 = (newPw2El?.value ?? "");
+
+  if (!currentPw || !newPw || !newPw2) {
+    changePwStatus.textContent = "Tölts ki minden mezőt.";
+    return;
+  }
+  if (newPw.length < 8) {
+    changePwStatus.textContent = "Az új jelszó legyen legalább 8 karakter.";
+    return;
+  }
+  if (newPw !== newPw2) {
+    changePwStatus.textContent = "Az új jelszavak nem egyeznek.";
+    return;
+  }
+  if (currentPw === newPw) {
+    changePwStatus.textContent = "Az új jelszó nem lehet ugyanaz, mint a régi.";
+    return;
+  }
+
+  changePwStatus.textContent = "Régi jelszó ellenőrzése…";
+
+  try {
+    const cred = EmailAuthProvider.credential(user.email, currentPw);
+    await reauthenticateWithCredential(user, cred);
+
+    changePwStatus.textContent = "Jelszó mentése…";
+    await updatePassword(user, newPw);
+
+    changePwStatus.textContent = "Sikeres jelszócsere ✅";
+    currentPwEl.value = "";
+    newPwEl.value = "";
+    newPw2El.value = "";
+  } catch (err) {
+    console.warn("[changePassword] hiba:", err);
+    const code = err?.code || "";
+
+    if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+      changePwStatus.textContent = "Hibás régi jelszó.";
+    } else if (code === "auth/too-many-requests") {
+      changePwStatus.textContent = "Túl sok próbálkozás. Próbáld később.";
+    } else if (code === "auth/requires-recent-login") {
+      changePwStatus.textContent = "Kérlek lépj ki és be újra, majd próbáld meg.";
+    } else {
+      changePwStatus.textContent = "Nem sikerült a jelszót cserélni. (" + code + ")";
+    }
+  }
+});
+
+
 
 /* ---------- Auth guard (admin csak bejelentkezve) ---------- */
     const auth = getAuth(app);
