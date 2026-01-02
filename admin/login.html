@@ -65,6 +65,60 @@ span.psw a {
   color: #061ac8;
 }
 
+/* hogy "text" módban is ugyanúgy nézzen ki */
+input[type=email], input[type=password], input[type=text] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
+/* szem ikon elhelyezése */
+.password-wrap {
+  position: relative;
+}
+
+
+.toggle-password svg { fill: #222; display: none; }
+.toggle-password .icon-eye { display: inline; } /* alap: mutatás ikon */
+.password-wrap.is-visible .icon-eye { display: none; }
+.password-wrap.is-visible .icon-eye-off { display: inline; }
+
+.password-wrap { position: relative; }
+
+.password-wrap input {
+  padding-right: 52px; /* legyen hely a szemnek */
+}
+
+/* felülírjuk a globális button stílust CSAK a szem gombra */
+.toggle-password{
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 40px;         /* <-- ez a kulcs (ne legyen 100%) */
+  height: 40px;
+  margin: 0;           /* <-- ne legyen 8px 0 */
+  padding: 0;          /* <-- ne legyen 14px 20px */
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0.75;
+}
+
+.toggle-password:hover { opacity: 1; }
+
+
+
 /* Change styles for span and cancel button on extra small screens */
 @media screen and (max-width: 300px) {
   span.psw {
@@ -90,7 +144,23 @@ span.psw a {
     <input type="email" id="email" placeholder="Email címed" name="uname" required>
 
     <label for="psw"><b>Jelszó</b></label>
-    <input type="password" id="password" placeholder="Jelszó" name="psw" required>
+
+    <div class="password-wrap">
+      <input type="password" id="password" placeholder="Jelszó" name="psw" required autocomplete="current-password">
+
+      <button type="button" id="togglePassword" class="toggle-password"
+              aria-label="Jelszó megjelenítése" aria-pressed="false" title="Jelszó megjelenítése">
+        <!-- eye -->
+        <svg class="icon-eye" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M12 5c5.5 0 9.5 5.2 9.5 7s-4 7-9.5 7S2.5 14.8 2.5 12 6.5 5 12 5zm0 2C7.8 7 4.6 11.1 4.6 12S7.8 17 12 17s7.4-4.1 7.4-5S16.2 7 12 7zm0 2.5A2.5 2.5 0 1 1 9.5 12 2.5 2.5 0 0 1 12 9.5z"></path>
+        </svg>
+        <!-- eye-off -->
+        <svg class="icon-eye-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M2.3 3.7 3.7 2.3 21.7 20.3 20.3 21.7l-3.1-3.1c-1.5.9-3.3 1.4-5.2 1.4C6.5 20 2.5 14.8 2.5 13c0-1 1.4-3.1 3.6-4.8L2.3 3.7zm8.2 8.2a2.5 2.5 0 0 0 3.6 3.6l-3.6-3.6zM12 6c5.5 0 9.5 5.2 9.5 7 0 .8-.9 2.4-2.4 3.9l-1.4-1.4c1.1-1.1 1.8-2.2 1.8-2.5 0-.9-3.2-5-7.4-5-1.2 0-2.3.3-3.2.8L7.5 7.4C8.8 6.5 10.3 6 12 6z"></path>
+        </svg>
+      </button>
+    </div>
+
 
     <div style="display: grid; grid-template-rows: 1fr 1fr; margin-top: 20px;">
       <div>
@@ -135,6 +205,21 @@ span.psw a {
   const passEl  = document.getElementById("password");
   const msgEl   = document.getElementById("authMsg");
   const resetLink = document.getElementById("resetLink");
+
+    const toggleBtn = document.getElementById("togglePassword");
+  const passWrap = document.querySelector(".password-wrap");
+
+  toggleBtn?.addEventListener("click", () => {
+    const isHidden = passEl.type === "password";
+    passEl.type = isHidden ? "text" : "password";
+
+    // UI/ARIA
+    passWrap?.classList.toggle("is-visible", isHidden);
+    toggleBtn.setAttribute("aria-pressed", String(isHidden));
+    toggleBtn.setAttribute("aria-label", isHidden ? "Jelszó elrejtése" : "Jelszó megjelenítése");
+    toggleBtn.title = isHidden ? "Jelszó elrejtése" : "Jelszó megjelenítése";
+  });
+
 
   const params = new URLSearchParams(location.search);
   const next = params.get("next") || "./index.html";

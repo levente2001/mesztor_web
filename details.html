@@ -319,110 +319,128 @@
 
   <!-- Firebase + betöltés -->
   <script type="module">
-    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref as rtdbRef, get as rtdbGet } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAZUGCJkn9L4xH_M8L0fZYTUresZ9qYPqo",
-      authDomain: "flymeto-696d0.firebaseapp.com",
-      databaseURL: "https://flymeto-696d0-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "flymeto-696d0",
-      storageBucket: "flymeto-696d0.firebasestorage.app",
-      messagingSenderId: "651204605205",
-      appId: "1:651204605205:web:d5dfbf3698be7ac6ee251c",
-      measurementId: "G-4L7YN2X9YL"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyAZUGCJkn9L4xH_M8L0fZYTUresZ9qYPqo",
+    authDomain: "flymeto-696d0.firebaseapp.com",
+    databaseURL: "https://flymeto-696d0-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "flymeto-696d0",
+    storageBucket: "flymeto-696d0.firebasestorage.app",
+    messagingSenderId: "651204605205",
+    appId: "1:651204605205:web:d5dfbf3698be7ac6ee251c",
+    measurementId: "G-4L7YN2X9YL"
+  };
 
-    let app, db, firebaseEnabled = false;
+  let app, rtdb, fsdb, firebaseEnabled = false;
 
+  try {
+    app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    rtdb = getDatabase(app);
+    fsdb = getFirestore(app);
+    firebaseEnabled = true;
+  } catch (err) {
+    console.warn("[details] Firebase init hiba:", err);
+    firebaseEnabled = false;
+  }
+
+  const titleEl  = document.getElementById("product-detail-title");
+  const shortEl  = document.getElementById("product-detail-short");
+  const longEl   = document.getElementById("product-detail-long");
+  const statusEl = document.getElementById("product-detail-status");
+  const imgEl    = document.getElementById("product-detail-image");
+  const noImgEl  = document.getElementById("product-no-image");
+
+  const escapeHTML = (s) =>
+    String(s ?? "").replace(/[&<>"']/g, (ch) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[ch]));
+
+  async function loadProduct() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    if (!id) {
+      statusEl.textContent = "Hiányzik a termék azonosító az URL-ből.";
+      statusEl.classList.add("error");
+      if (noImgEl) noImgEl.textContent = "Nincs termék azonosító.";
+      return;
+    }
+
+    statusEl.textContent = "Termék betöltése...";
+    statusEl.classList.remove("error");
+
+    if (!firebaseEnabled || !fsdb) {
+      statusEl.textContent = "A termék nem tölthető be (Firebase demó / offline mód).";
+      statusEl.classList.add("error");
+      if (noImgEl) noImgEl.textContent = "Nem érhető el a termékadat.";
+      return;
+    }
+
+    let data = null;
+
+    // 1) Firestore (NÁLAD EZ AZ ELSŐDLEGES)
     try {
-      app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-      db = getDatabase(app);
-      firebaseEnabled = true;
-    } catch (err) {
-      console.warn("[details] Firebase init hiba:", err);
-      firebaseEnabled = false;
+      const s = await getDoc(doc(fsdb, "products", id));
+      if (s.exists()) data = s.data() || null;
+    } catch (e) {
+      console.warn("[details] Firestore betöltési hiba:", e);
     }
 
-    const titleEl    = document.getElementById("product-detail-title");
-    const shortEl    = document.getElementById("product-detail-short");
-    const longEl     = document.getElementById("product-detail-long");
-    const statusEl   = document.getElementById("product-detail-status");
-    const imgWrapEl  = document.getElementById("product-detail-image-wrap");
-    const imgEl      = document.getElementById("product-detail-image");
-    const noImgEl    = document.getElementById("product-no-image");
-
-    async function loadProduct() {
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get("id");
-
-      if (!id) {
-        statusEl.textContent = "Hiányzik a termék azonosító az URL-ből.";
-        statusEl.classList.add("error");
-        if (noImgEl) noImgEl.textContent = "Nincs termék azonosító.";
-        return;
-      }
-
-      statusEl.textContent = "Termék betöltése...";
-      statusEl.classList.remove("error");
-
-      if (!firebaseEnabled || !db) {
-        statusEl.textContent = "A termék nem tölthető be (Firebase demó / offline mód).";
-        statusEl.classList.add("error");
-        if (noImgEl) noImgEl.textContent = "Nem érhető el a termékadat.";
-        return;
-      }
-
+    // 2) RTDB fallback (régi adatokhoz / ha átmenetileg oda mentenél)
+    if (!data && rtdb) {
       try {
-        const snap = await get(ref(db, "products/" + id));
-        if (!snap.exists()) {
-          statusEl.textContent = "A keresett termék nem található.";
-          statusEl.classList.add("error");
-          if (noImgEl) noImgEl.textContent = "Nincs ilyen termék.";
-          titleEl.textContent = "Ismeretlen termék";
-          return;
-        }
-
-        const data = snap.val() || {};
-        const name = data.name || "Termék";
-        const short = data.shortDescription || data.tagline || "";
-        const long = data.longDescription || data.description || "";
-        const imgSrc = data.imageUrl || data.imageDataUrl || "";
-
-        document.title = name + " – Mesz-Tor termék";
-        titleEl.textContent = name;
-        shortEl.textContent = short;
-
-        if (long) {
-          const paragraphs = long.split(/\n\s*\n/);
-          longEl.innerHTML = paragraphs
-            .map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`)
-            .join("");
-        } else {
-          longEl.innerHTML = '<p class="muted">Ehhez a termékhez még nincs hosszabb leírás megadva.</p>';
-        }
-
-        if (imgSrc) {
-          if (noImgEl) noImgEl.style.display = "none";
-          imgEl.src = imgSrc;
-          imgEl.alt = name + " – termék fotó";
-          imgEl.style.display = "block";
-        } else {
-          if (noImgEl) {
-            noImgEl.textContent = "Ehhez a termékhez még nincs kép feltöltve.";
-          }
-        }
-
-        statusEl.textContent = "";
-      } catch (err) {
-        console.warn("[details] Termék betöltési hiba:", err);
-        statusEl.textContent = "Hiba történt a termék betöltésekor.";
-        statusEl.classList.add("error");
-        if (noImgEl) noImgEl.textContent = "Betöltési hiba.";
-      }
+        const snap = await rtdbGet(rtdbRef(rtdb, "products/" + id));
+        if (snap.exists()) data = snap.val() || null;
+      } catch (e) {}
     }
 
-    loadProduct();
-  </script>
+    if (!data) {
+      statusEl.textContent = "A keresett termék nem található.";
+      statusEl.classList.add("error");
+      if (noImgEl) noImgEl.textContent = "Nincs ilyen termék.";
+      titleEl.textContent = "Ismeretlen termék";
+      return;
+    }
+
+    const name = data.name || "Termék";
+    const short = data.short ?? data.shortDescription ?? data.tagline ?? "";
+    const long  = data.long  ?? data.longDescription  ?? data.description ?? "";
+    const imgSrc = data.imageUrl || data.imageDataUrl || "";
+
+    document.title = name + " – Mesz-Tor termék";
+    titleEl.textContent = name;
+    shortEl.textContent = short;
+
+    if (long) {
+      const paragraphs = String(long).split(/\n\s*\n/);
+      longEl.innerHTML = paragraphs
+        .map(p => `<p>${escapeHTML(p).replace(/\n/g, "<br>")}</p>`)
+        .join("");
+    } else {
+      longEl.innerHTML = '<p class="muted">Ehhez a termékhez még nincs hosszabb leírás megadva.</p>';
+    }
+
+    if (imgSrc) {
+      if (noImgEl) noImgEl.style.display = "none";
+      imgEl.src = imgSrc;
+      imgEl.alt = name + " – termék fotó";
+      imgEl.style.display = "block";
+    } else {
+      if (noImgEl) noImgEl.textContent = "Ehhez a termékhez még nincs kép feltöltve.";
+    }
+
+    statusEl.textContent = "";
+  }
+
+  loadProduct();
+</script>
+
 </body>
 </html>

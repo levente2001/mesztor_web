@@ -146,96 +146,6 @@
     .top-num{ font-weight:700 }
 
     .spacer{ height:14px }
-  
-    /* ------------------------------
-       Analytics Dashboard (v2 - no React)
-       ------------------------------ */
-    .ana-wrap{ max-width:1200px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
-    .ana-header{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-    .ana-header h1{ margin:0; font-size:28px; font-weight:800; letter-spacing:-.02em; }
-    .ana-header p{ margin:4px 0 0; color:var(--muted); }
-    .ana-controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .ana-pill{ display:flex; align-items:center; gap:8px; padding:.45rem .65rem; border-radius:999px; border:1px solid var(--border); background:#fff; box-shadow:var(--shadow); font-size:13px; }
-    .ana-live-dot{ width:8px; height:8px; border-radius:50%; background:var(--success); box-shadow:0 0 0 rgba(22,163,74,.35); animation:anaPulse 1.6s infinite; }
-    @keyframes anaPulse{
-      0%{ transform:scale(1); box-shadow:0 0 0 0 rgba(22,163,74,.35) }
-      70%{ transform:scale(1.15); box-shadow:0 0 0 10px rgba(22,163,74,0) }
-      100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(22,163,74,0) }
-    }
-    .ana-select{ display:flex; align-items:center; gap:8px; padding:.45rem .65rem; border-radius:12px; border:1px solid var(--border); background:#fff; box-shadow:var(--shadow); }
-    .ana-select .label{ font-size:12px; color:var(--muted); }
-    .ana-select select{ border:none; background:transparent; outline:none; font:inherit; padding:.15rem .25rem; }
-
-    .ana-grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
-    .ana-grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    .ana-grid-3{ display:grid; grid-template-columns:2fr 1fr; gap:14px; }
-
-    @media (max-width:1100px){
-      .ana-grid-4{ grid-template-columns:repeat(2,1fr); }
-      .ana-grid-3{ grid-template-columns:1fr; }
-    }
-    @media (max-width:640px){
-      .ana-grid-4{ grid-template-columns:1fr; }
-      .ana-grid-2{ grid-template-columns:1fr; }
-    }
-
-    .ana-card{ border:1px solid var(--border); border-radius:16px; background:#fff; box-shadow:var(--shadow); overflow:hidden; }
-    .ana-card .head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .ana-card .title{ font-weight:800; }
-    .ana-card .sub{ font-size:13px; color:var(--muted); margin-top:2px; }
-    .ana-card .body{ padding:16px; }
-
-    .ana-kpi{ position:relative; padding:16px; }
-    .ana-kpi .kpi-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-    .ana-kpi .kpi-label{ font-size:12px; color:var(--muted); font-weight:700; }
-    .ana-kpi .kpi-icon{ width:42px; height:42px; border-radius:14px; background:linear-gradient(135deg, rgba(37,99,235,.9), rgba(37,99,235,.7)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; }
-    .ana-kpi .kpi-value{ font-size:32px; font-weight:900; margin-top:6px; letter-spacing:-.02em; }
-    .ana-kpi .kpi-delta{ margin-top:6px; font-size:12px; font-weight:700; display:flex; gap:6px; align-items:center; }
-    .ana-kpi .kpi-delta small{ font-weight:500; color:var(--muted); }
-    .ana-kpi .pos{ color:var(--success); }
-    .ana-kpi .neg{ color:var(--danger); }
-
-    .ana-hero{ color:#fff; border:0; }
-    .ana-hero.blue{ background:linear-gradient(135deg, #2563eb, #1d4ed8); }
-    .ana-hero.orange{ background:linear-gradient(135deg, #D96C06, #b45309); }
-    .ana-hero .body{ padding:18px; }
-    .ana-hero .big{ font-size:40px; font-weight:900; margin:6px 0 0; letter-spacing:-.03em; }
-    .ana-hero .tiny{ font-size:12px; color:rgba(255,255,255,.75); font-weight:700; }
-    .ana-hero .delta{ margin-top:10px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:8px; color:rgba(255,255,255,.9); }
-
-    .ana-chart-wrap{ padding:8px 16px 16px; }
-    .ana-chart-wrap canvas{ width:100% !important; height:320px !important; }
-
-    .ana-heatmap{ display:flex; flex-direction:column; gap:6px; }
-    .ana-heatmap .hm-header{ display:grid; grid-template-columns:32px repeat(5,1fr); gap:4px; align-items:center; margin-left:0; }
-    .ana-heatmap .hm-header div{ text-align:center; font-size:11px; color:var(--muted); }
-    .ana-heatmap .hm-row{ display:flex; align-items:center; gap:6px; }
-    .ana-heatmap .hm-day{ width:32px; font-size:12px; color:var(--muted); font-weight:800; }
-    .ana-heatmap .hm-cells{ flex:1; display:grid; grid-template-columns:repeat(24,1fr); gap:2px; }
-    .ana-heatmap .hm-cell{ height:22px; border-radius:4px; background:rgba(37,99,235,.08); cursor:pointer; }
-    .ana-heatmap .hm-legend{ display:flex; align-items:center; justify-content:flex-end; gap:8px; margin-top:8px; }
-    .ana-heatmap .hm-legend span{ font-size:11px; color:var(--muted); }
-    .ana-heatmap .hm-scale{ display:flex; gap:2px; }
-    .ana-heatmap .hm-scale i{ width:16px; height:16px; display:inline-block; border-radius:4px; background:rgba(37,99,235,.15); }
-
-    .ana-list{ display:flex; flex-direction:column; gap:8px; }
-    .ana-row{ display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--border); background:#f8fafc; border-radius:14px; }
-    .ana-rank{ width:32px; height:32px; border-radius:12px; background:linear-gradient(135deg, #2563eb, #1d4ed8); color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; }
-    .ana-row .mid{ flex:1; min-width:0; }
-    .ana-row .mid .t{ font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .ana-row .mid .s{ font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
-    .ana-row .right{ text-align:right; }
-    .ana-row .right .n{ font-weight:900; }
-    .ana-row .right .c{ font-size:12px; font-weight:800; }
-    .ana-row .right .c.pos{ color:var(--success); }
-    .ana-row .right .c.neg{ color:var(--danger); }
-
-    .ana-insights{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-    @media (max-width:900px){ .ana-insights{ grid-template-columns:1fr; } }
-    .ana-insight{ background:rgba(255,255,255,.7); border:1px solid var(--border); border-radius:16px; padding:14px; }
-    .ana-insight .h{ font-weight:900; display:flex; align-items:center; gap:8px; }
-    .ana-insight p{ margin:8px 0 0; color:#334155; font-size:13px; }
-
   </style>
 </head>
 
@@ -273,195 +183,51 @@
     <main class="main">
       <!-- Analitika -->
       <section id="pane-analytics" class="tab-pane active container">
-  <div class="ana-wrap">
-    <div class="ana-header">
-      <div>
-        <h1>Analitika Dashboard</h1>
-        <p>MESZ-TOR Kft. weboldal statisztikák</p>
-      </div>
-      <div class="ana-controls">
-        <div class="ana-pill" title="Frissítve a Firebase-ből, ha elérhető">
-          <span class="ana-live-dot"></span>
-          <span>Élő adatok</span>
-          <span id="anaLastUpdated" style="color:var(--muted); font-weight:600;"></span>
-        </div>
+        <div class="panel">
+          <div class="panel-head">Oldal analitika</div>
+          <div class="panel-body">
+            <div class="muted" id="dateRangeLabel">Időszak</div>
+            <div class="spacer"></div>
+            <div class="grid grid-3">
+              <div class="kpi">
+                <div class="label">Munkamenetek</div>
+                <div class="num" id="kpiSessions">0</div>
+                <div class="delta" id="kpiSessionsChange">+0.0%</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Egyedi látogatók</div>
+                <div class="num" id="kpiUsers">0</div>
+                <div class="delta" id="kpiUsersChange">+0.0%</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Átlagos session idő</div>
+                <div class="num" id="kpiAvgDuration">0p 00s</div>
+                <div class="delta" id="kpiDurChange">+0.0%</div>
+              </div>
+            </div>
 
-        <div class="ana-select" title="Válaszd ki az időszakot">
-          <span class="label">Időszak</span>
-          <select id="anaDateRange">
-            <option value="1" >Elmúlt 24 óra</option>
-            <option value="7" selected>Elmúlt 7 nap</option>
-            <option value="14">Elmúlt 14 nap</option>
-            <option value="30" >Elmúlt 30 nap</option>
-            <option value="60">Elmúlt 60 nap</option>
-            <option value="90">Elmúlt 90 nap</option>
-          </select>
-        </div>
-      </div>
-    </div>
+            <div class="spacer"></div>
+            <div class="kpi">
+              <div class="label">Oldalak / session</div>
+              <div class="num" id="kpiPagesPerSession">0.00</div>
+              <div class="delta" id="kpiPpsChange">+0.0%</div>
+            </div>
 
-    <!-- KPI Cards -->
-    <div class="ana-grid-4">
-      <div class="ana-card ana-kpi">
-        <div class="kpi-top">
-          <div>
-            <div class="kpi-label">Munkamenetek</div>
-            <div class="kpi-value" id="anaKpiSessions">0</div>
-            <div class="kpi-delta" id="anaKpiSessionsDelta"><span class="pos">+0.0%</span><small>vs előző időszak</small></div>
-          </div>
-          <div class="kpi-icon">📈</div>
-        </div>
-      </div>
+            <div class="spacer"></div>
+            <div class="panel" style="padding:16px">
+              <canvas id="sessionsChart" height="220"></canvas>
+            </div>
 
-      <div class="ana-card ana-kpi">
-        <div class="kpi-top">
-          <div>
-            <div class="kpi-label">Egyedi látogatók</div>
-            <div class="kpi-value" id="anaKpiUsers">0</div>
-            <div class="kpi-delta" id="anaKpiUsersDelta"><span class="pos">+0.0%</span><small>vs előző időszak</small></div>
-          </div>
-          <div class="kpi-icon" style="background:linear-gradient(135deg, rgba(22,163,74,.9), rgba(22,163,74,.7));">👤</div>
-        </div>
-      </div>
-
-      <div class="ana-card ana-kpi">
-        <div class="kpi-top">
-          <div>
-            <div class="kpi-label">Oldal megtekintések</div>
-            <div class="kpi-value" id="anaKpiPageviews">0</div>
-            <div class="kpi-delta" id="anaKpiPageviewsDelta"><span class="pos">+0.0%</span><small>vs előző időszak</small></div>
-          </div>
-          <div class="kpi-icon" style="background:linear-gradient(135deg, rgba(217,108,6,.95), rgba(217,108,6,.75));">👁</div>
-        </div>
-      </div>
-
-      <div class="ana-card ana-kpi">
-        <div class="kpi-top">
-          <div>
-            <div class="kpi-label">Visszafordulási arány</div>
-            <div class="kpi-value"><span id="anaKpiBounce">0</span>%</div>
-            <div class="kpi-delta" id="anaKpiBounceDelta"><span class="pos">+0.0%</span><small>javulás</small></div>
-          </div>
-          <div class="kpi-icon" style="background:linear-gradient(135deg, rgba(139,92,246,.9), rgba(139,92,246,.7));">🎯</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Secondary KPIs -->
-    <div class="ana-grid-2">
-      <div class="ana-card ana-hero blue">
-        <div class="body">
-          <div class="tiny">Átlagos session idő</div>
-          <div class="big" id="anaAvgDuration">0p 00s</div>
-          <div class="delta" id="anaDurationDelta">+0.0%</div>
-        </div>
-      </div>
-
-      <div class="ana-card ana-hero orange">
-        <div class="body">
-          <div class="tiny">Oldalak / munkamenet</div>
-          <div class="big" id="anaPagesPerSession">0.00</div>
-          <div class="delta" id="anaPpsDelta">+0.0%</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Chart -->
-    <div class="ana-card">
-      <div class="head">
-        <div>
-          <div class="title">Forgalom trend</div>
-          <div class="sub">Napi bontás a kiválasztott időszakra</div>
-        </div>
-        <div class="ana-select" style="box-shadow:none;">
-          <span class="label">Mutató</span>
-          <select id="anaMetric">
-            <option value="sessions" selected>Munkamenetek</option>
-            <option value="users">Egyedi látogatók</option>
-            <option value="pageviews">Oldal megtekintések</option>
-          </select>
-        </div>
-      </div>
-      <div class="ana-chart-wrap">
-        <canvas id="anaMainChart"></canvas>
-      </div>
-    </div>
-
-    <!-- Heatmap + Device -->
-    <div class="ana-grid-3">
-      <div class="ana-card">
-        <div class="head">
-          <div>
-            <div class="title">Aktivitás hőtérkép</div>
-            <div class="sub">Mikor látogatják legtöbben az oldalt</div>
+            <div class="spacer"></div>
+            <div class="panel">
+              <div class="panel-head">Top oldalak</div>
+              <div class="panel-body" id="topPages">
+                <div class="muted">Nincs adat</div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="body">
-          <div id="anaHeatmap" class="ana-heatmap"></div>
-        </div>
-      </div>
-
-      <div class="ana-card">
-        <div class="head">
-          <div class="title">Eszköz megoszlás</div>
-        </div>
-        <div class="body">
-          <div style="height:210px;">
-            <canvas id="anaDeviceChart"></canvas>
-          </div>
-          <div id="anaDeviceLegend" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:8px;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Top Pages + Browser -->
-    <div class="ana-grid-2">
-      <div class="ana-card">
-        <div class="head">
-          <div class="title">Legnépszerűbb oldalak</div>
-        </div>
-        <div class="body">
-          <div id="anaTopPages" class="ana-list"></div>
-        </div>
-      </div>
-
-      <div class="ana-card">
-        <div class="head">
-          <div class="title">Böngésző statisztikák</div>
-        </div>
-        <div class="body">
-          <div style="height:280px;">
-            <canvas id="anaBrowserChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Insights -->
-    <div class="ana-card" style="background:linear-gradient(90deg, rgba(37,99,235,.07), rgba(217,108,6,.07));">
-      <div class="head">
-        <div class="title">Automatikus betekintések</div>
-      </div>
-      <div class="body">
-        <div class="ana-insights">
-          <div class="ana-insight">
-            <div class="h">📈 Pozitív trend</div>
-            <p id="anaInsightTrend">—</p>
-          </div>
-          <div class="ana-insight">
-            <div class="h">⏱ Elkötelezettség</div>
-            <p id="anaInsightEngagement">—</p>
-          </div>
-          <div class="ana-insight">
-            <div class="h">🎯 Optimalizálási tipp</div>
-            <p id="anaInsightTip">—</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
+      </section>
 
       <!-- Layout -->
       <section id="pane-layout" class="tab-pane container">
@@ -809,7 +575,7 @@
       dbFirestore = getFirestore(app);
       firebaseEnabled = true;
       envBadgeEl.classList.add("ok");
-      envBadgeEl.querySelector(".label").textContent = "Adatbázis aktív";
+      envBadgeEl.querySelector(".label").textContent = "Firebase aktív";
     }catch(e){
       console.warn("Firebase init hiba, demó mód:", e);
       firebaseEnabled = false;
@@ -825,10 +591,6 @@
 // const auth = getAuth(app);
 
 (function idleAutoLogout() {
-
-  const ENABLE_IDLE_LOGOUT = false;
-  if (!ENABLE_IDLE_LOGOUT) return;
-
   const IDLE_MINUTES = 30;
   const WARN_BEFORE_SECONDS = 60;
 
@@ -1252,612 +1014,147 @@ changePwForm?.addEventListener("submit", async (e) => {
     window.migrateRtdbToFirestore = migrateRtdbToFirestore;
 
 /* ---------- Analitika (Realtime DB -> aggregálás) ---------- */
-let anaRawSessions = [];
-let anaMainChart = null;
-let anaDeviceChart = null;
-let anaBrowserChart = null;
-let anaUiBound = false;
+    const kpiSessionsEl     = document.getElementById("kpiSessions");
+    const kpiUsersEl        = document.getElementById("kpiUsers");
+    const kpiAvgDurationEl  = document.getElementById("kpiAvgDuration");
+    const kpiPagesPerSessEl = document.getElementById("kpiPagesPerSession");
+    const kpiSessionsChEl   = document.getElementById("kpiSessionsChange");
+    const kpiUsersChEl      = document.getElementById("kpiUsersChange");
+    const kpiDurChEl        = document.getElementById("kpiDurChange");
+    const kpiPpsChEl        = document.getElementById("kpiPpsChange");
+    const dateRangeLabelEl  = document.getElementById("dateRangeLabel");
+    const topPagesEl        = document.getElementById("topPages");
+    let sessionsChart;
 
-const ANA_DAY_LABELS = ["H","K","Sze","Cs","P","Szo","V"];
+    const demoAnalytics = {
+      dateRangeLabel: "Utóbbi 7 nap (demo)",
+      byDay: [
+        { day: "2025-11-14", sessions: 31, users: 26, avgSessionSeconds: 140, pageviews: 81 },
+        { day: "2025-11-15", sessions:  2, users:  2, avgSessionSeconds: 120, pageviews:  5 },
+        { day: "2025-11-16", sessions:  3, users:  3, avgSessionSeconds: 160, pageviews:  7 },
+        { day: "2025-11-17", sessions:  3, users:  3, avgSessionSeconds: 170, pageviews:  8 },
+        { day: "2025-11-18", sessions:  3, users:  3, avgSessionSeconds: 170, pageviews:  8 },
+        { day: "2025-11-19", sessions:  1, users:  1, avgSessionSeconds: 100, pageviews:  2 },
+        { day: "2025-11-20", sessions:  2, users:  2, avgSessionSeconds: 160, pageviews:  6 }
+      ],
+      topPages: [
+        { path:"/", sessions: 18, avgSeconds: 180 },
+        { path:"/szolgaltatasok", sessions: 11, avgSeconds: 160 },
+        { path:"/referenciak", sessions:  8, avgSeconds: 200 },
+        { path:"/kapcsolat", sessions:  6, avgSeconds:  95 },
+      ],
+      prevPeriod: { sessions: 60, users: 50, avgSessionSeconds: 145, pageviewsPerSession: 2.9 },
+      deviceStats: { mobile:60, tablet:15, desktop:25 }
+    };
 
-function anaLocalDateKey(dateLike){
-  const d = (dateLike instanceof Date) ? dateLike : new Date(dateLike);
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,"0");
-  const da = String(d.getDate()).padStart(2,"0");
-  return `${y}-${m}-${da}`;
-}
-function anaLabelFromKey(key){
-  const [y,m,d] = key.split("-").map(Number);
-  const dt = new Date(y, m-1, d);
-  return dt.toLocaleDateString("hu-HU", { month:"short", day:"numeric" });
-}
-function anaFormatInt(n){ return (n||0).toLocaleString("hu-HU"); }
-function anaFormatFloat(n, digits=2){
-  const v = Number.isFinite(n) ? n : 0;
-  return v.toFixed(digits);
-}
-function anaFormatDuration(seconds){
-  const s = Math.max(0, Math.floor(seconds||0));
-  const mins = Math.floor(s/60);
-  const secs = s%60;
-  return `${mins}p ${String(secs).padStart(2,"0")}s`;
-}
-function anaPctChange(curr, prev){
-  if(!prev || prev === 0) return 0;
-  return ((curr - prev) / prev) * 100;
-}
-function anaPctChangeSafe(curr, prev){
-  if(prev === 0){
-    if(curr === 0) return 0;
-    return 100; // induló növekedés
-  }
-  return ((curr - prev) / prev) * 100;
-}
+    function fmtShort(iso){ const d=new Date(iso); if(isNaN(d)) return iso; return d.toLocaleDateString("hu-HU",{month:"2-digit",day:"2-digit"}); }
+    function pct(cur, prev){ if(!prev) return 0; return ((cur-prev)/prev)*100; }
+    function deviceType(ua=""){const u=ua.toLowerCase(); if(/mobile|iphone|ipod|android.*mobile/.test(u))return"mobile"; if(/ipad|tablet|android(?!.*mobile)/.test(u))return"tablet"; return"desktop";}
 
-function anaParseDevice(ua=""){
-  const s = String(ua).toLowerCase();
-  if(/tablet|ipad/.test(s)) return "Tablet";
-  if(/mobi|iphone|android/.test(s)) return "Mobil";
-  return "Desktop";
-}
-function anaParseBrowser(ua=""){
-  const s = String(ua);
-  // egyszerű, de elég jó a dashboardhoz
-  if(/Edg\//.test(s)) return "Edge";
-  if(/Firefox\//.test(s)) return "Firefox";
-  if(/Safari\//.test(s) && !/Chrome\//.test(s) && !/Chromium\//.test(s)) return "Safari";
-  if(/Chrome\//.test(s) || /Chromium\//.test(s)) return "Chrome";
-  return "Egyéb";
-}
-
-function anaComputeMetrics(sessions){
-  const visitors = new Set();
-  let pageviews = 0;
-  let dur = 0;
-  let bounces = 0;
-
-  sessions.forEach((s, i) => {
-    visitors.add(s.visitorId || s.uid || s.userId || `anon_${i}`);
-    const pv = Number(s.pageViews || s.pageviews || 0) || 0;
-    pageviews += pv;
-    const ds = Number(s.durationSec || s.duration || 0) || 0;
-    dur += ds;
-    if(pv <= 1) bounces++;
-  });
-
-  const totalSessions = sessions.length;
-  const avgDuration = totalSessions ? (dur / totalSessions) : 0;
-  const pagesPerSession = totalSessions ? (pageviews / totalSessions) : 0;
-  const bounceRate = totalSessions ? (bounces / totalSessions) * 100 : 0;
-
-  return { totalSessions, users: visitors.size, pageviews, avgDuration, pagesPerSession, bounceRate };
-}
-
-function anaBuildDaySeries(sessions, days){
-  const now = new Date();
-  // endDate = max startedAt, ha van; különben ma
-  let endDate = now;
-  if(sessions.length){
-    const maxTs = Math.max(...sessions.map(s => new Date(s.startedAt || s.ts || Date.now()).getTime()));
-    if(Number.isFinite(maxTs)) endDate = new Date(maxTs);
-  }
-  endDate.setHours(0,0,0,0);
-
-  const startDate = new Date(endDate);
-  startDate.setDate(startDate.getDate() - (days - 1));
-  startDate.setHours(0,0,0,0);
-
-  const inRange = sessions.filter(s => {
-    const t = new Date(s.startedAt || s.ts || Date.now());
-    return t >= startDate && t <= new Date(endDate.getTime() + 24*3600*1000 - 1);
-  });
-
-  const map = new Map(); // dayKey -> {sessions, pageviews, durSum, bounces, visitors:Set}
-  inRange.forEach((s, i) => {
-    const dt = new Date(s.startedAt || s.ts || Date.now());
-    const key = anaLocalDateKey(dt);
-    if(!map.has(key)){
-      map.set(key, { sessions:0, pageviews:0, durSum:0, bounces:0, visitors:new Set() });
-    }
-    const rec = map.get(key);
-    rec.sessions++;
-    const pv = Number(s.pageViews || s.pageviews || 0) || 0;
-    rec.pageviews += pv;
-    const ds = Number(s.durationSec || s.duration || 0) || 0;
-    rec.durSum += ds;
-    if(pv <= 1) rec.bounces++;
-    rec.visitors.add(s.visitorId || s.uid || s.userId || `anon_${i}`);
-  });
-
-  const series = [];
-  for(let i=0;i<days;i++){
-    const d = new Date(startDate);
-    d.setDate(startDate.getDate() + i);
-    const key = anaLocalDateKey(d);
-    const rec = map.get(key);
-    const sessionsN = rec ? rec.sessions : 0;
-    const pageviewsN = rec ? rec.pageviews : 0;
-    const usersN = rec ? rec.visitors.size : 0;
-    const avgDur = sessionsN ? (rec.durSum / sessionsN) : 0;
-    const bounceRate = sessionsN ? (rec.bounces / sessionsN) * 100 : 0;
-
-    series.push({
-      day: key,
-      label: anaLabelFromKey(key),
-      sessions: sessionsN,
-      users: usersN,
-      pageviews: pageviewsN,
-      avgDuration: avgDur,
-      bounceRate
-    });
-  }
-  return { startDate, endDate, inRange, series };
-}
-
-function anaSplitSessionsByMid(startDate, days, sessions){
-  const mid = new Date(startDate);
-  mid.setDate(mid.getDate() + Math.floor(days/2));
-  mid.setHours(0,0,0,0);
-
-  const prev = [];
-  const curr = [];
-  sessions.forEach(s => {
-    const t = new Date(s.startedAt || s.ts || Date.now());
-    if(t < mid) prev.push(s);
-    else curr.push(s);
-  });
-  return { prev, curr };
-}
-
-function anaComputeTopPages(prevSessions, currSessions, limit=5){
-  const sumByPath = (arr) => {
-    const m = new Map();
-    arr.forEach(s=>{
-      const path = (s.lastPage || s.firstPage || s.path || "/") || "/";
-      const pv = Number(s.pageViews || s.pageviews || 1) || 1;
-      m.set(path, (m.get(path)||0) + pv);
-    });
-    return m;
-  };
-  const prevMap = sumByPath(prevSessions);
-  const currMap = sumByPath(currSessions);
-
-  // combine keys
-  const keys = new Set([...prevMap.keys(), ...currMap.keys()]);
-  const combined = Array.from(keys).map(path=>{
-    const prev = prevMap.get(path)||0;
-    const curr = currMap.get(path)||0;
-    const total = prev + curr;
-    return { path, views: total, change: anaPctChangeSafe(curr, prev), currViews: curr };
-  }).sort((a,b)=> b.views - a.views);
-
-  return combined.slice(0, limit);
-}
-
-function anaComputeDeviceShare(sessions){
-  const counts = { Desktop:0, Mobil:0, Tablet:0 };
-  sessions.forEach(s=>{
-    const dev = anaParseDevice(s.userAgent || s.ua || "");
-    counts[dev] = (counts[dev]||0)+1;
-  });
-  const total = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
-  return Object.entries(counts).map(([name, cnt]) => ({
-    name,
-    value: Math.round((cnt/total)*100),
-    count: cnt
-  }));
-}
-
-function anaComputeBrowserShare(sessions){
-  const counts = {};
-  sessions.forEach(s=>{
-    const b = anaParseBrowser(s.userAgent || s.ua || "");
-    counts[b] = (counts[b]||0)+1;
-  });
-  const total = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
-
-  const items = Object.entries(counts).map(([name,cnt])=>({
-    name,
-    value: Math.round((cnt/total)*100),
-    count: cnt
-  })).sort((a,b)=>b.value-a.value);
-
-  // ha sok "Egyéb", összevonás nem kell, elég
-  return items.slice(0,6);
-}
-
-function anaComputeHeatmap(sessions){
-  // dayIndex: H(0) ... V(6)
-  const counts = Array.from({length:7}, ()=> Array.from({length:24}, ()=>0));
-  sessions.forEach(s=>{
-    const d = new Date(s.startedAt || s.ts || Date.now());
-    const jsDay = d.getDay(); // 0=V
-    const dayIndex = (jsDay + 6) % 7; // 0=H
-    const hour = d.getHours();
-    counts[dayIndex][hour] += 1;
-  });
-  let max = 0;
-  counts.forEach(row=> row.forEach(v=>{ if(v>max) max=v; }));
-  max = max || 1;
-  const intensity = counts.map(row=> row.map(v=> v/max));
-  return intensity;
-}
-
-/* ---------- Renderers ---------- */
-function anaSetDelta(el, changePct, positiveIsGood=true){
-  if(!el) return;
-  const good = positiveIsGood ? (changePct >= 0) : (changePct <= 0);
-  const cls = good ? "pos" : "neg";
-  const sign = (changePct >= 0) ? "+" : "";
-  el.innerHTML = `<span class="${cls}">${sign}${changePct.toFixed(1)}%</span> <small>vs előző időszak</small>`;
-}
-
-function anaRenderHeatmap(intensity){
-  const root = document.getElementById("anaHeatmap");
-  if(!root) return;
-  root.innerHTML = "";
-
-  const header = document.createElement("div");
-  header.className = "hm-header";
-  header.innerHTML = `<div></div>
-    <div>0:00</div><div>6:00</div><div>12:00</div><div>18:00</div><div>23:00</div>`;
-  root.appendChild(header);
-
-  ANA_DAY_LABELS.forEach((dayLabel, dayIndex)=>{
-    const row = document.createElement("div");
-    row.className = "hm-row";
-    const day = document.createElement("div");
-    day.className = "hm-day";
-    day.textContent = dayLabel;
-    const cells = document.createElement("div");
-    cells.className = "hm-cells";
-
-    for(let hour=0; hour<24; hour++){
-      const i = intensity?.[dayIndex]?.[hour] ?? 0;
-      const cell = document.createElement("div");
-      cell.className = "hm-cell";
-      cell.style.background = `rgba(37,99,235, ${0.08 + i*0.85})`;
-      cell.title = `${dayLabel} ${hour}:00 • ${Math.round(i*100)}% aktivitás`;
-      cells.appendChild(cell);
+    function buildTopPagesFromSessions(sessions){
+      const map=new Map();
+      sessions.forEach(s=>{
+        const path = s.firstPage || s.lastPage || "/";
+        const dur  = Number(s.durationSec||0);
+        const item = map.get(path)||{path,sessions:0,totalDur:0};
+        item.sessions++; item.totalDur+=dur; map.set(path,item);
+      });
+      return [...map.values()].map(x=>({path:x.path, sessions:x.sessions, avgSeconds:x.totalDur/x.sessions}))
+               .sort((a,b)=>b.sessions-a.sessions).slice(0,5);
     }
 
-    row.appendChild(day);
-    row.appendChild(cells);
-    root.appendChild(row);
-  });
+    function buildAnalyticsFromSessions(sessions){
+      if(!sessions?.length) return demoAnalytics;
+      const byDate=new Map(), visitors=new Set(); let totalDur=0,totalPv=0;
+      sessions.forEach(s=>{
+        const t = s.startedAt || s.lastUpdatedAt || Date.now();
+        const d = new Date(t); if(isNaN(d)) return;
+        const key = d.toISOString().slice(0,10);
+        const rec = byDate.get(key)||{day:key,sessions:0,sumDur:0,pageviews:0,userSet:new Set()};
+        rec.sessions++; const dur=+s.durationSec||0; rec.sumDur+=dur; totalDur+=dur;
+        const pv=+s.pageViews||0; rec.pageviews+=pv; totalPv+=pv;
+        if(s.visitorId) {rec.userSet.add(s.visitorId); visitors.add(s.visitorId);}
+        rec.device = deviceType(s.userAgent||"");
+        byDate.set(key,rec);
+      });
+      const days=[...byDate.values()].sort((a,b)=>a.day.localeCompare(b.day))
+        .map(r=>({day:r.day, sessions:r.sessions, users:r.userSet.size||r.sessions, avgSessionSeconds:r.sumDur/r.sessions, pageviews:r.pageviews}));
+      const totalSessions=days.reduce((s,d)=>s+d.sessions,0);
+      const uniqueVisitors = visitors.size || totalSessions;
+      const avgDur = totalSessions? days.reduce((s,d)=>s+d.avgSessionSeconds*d.sessions,0)/totalSessions : 0;
+      const pps    = totalSessions? totalPv/totalSessions : 0;
+      return {
+        dateRangeLabel: "Összes összegyűjtött adat",
+        byDay: days,
+        topPages: buildTopPagesFromSessions(sessions),
+        prevPeriod: { sessions: totalSessions, users: uniqueVisitors, avgSessionSeconds: avgDur, pageviewsPerSession: pps },
+        deviceStats: {} // opcionális
+      };
+    }
 
-  const legend = document.createElement("div");
-  legend.className = "hm-legend";
-  legend.innerHTML = `<span>Alacsony</span>
-    <div class="hm-scale">
-      <i style="background:rgba(37,99,235,.15)"></i>
-      <i style="background:rgba(37,99,235,.35)"></i>
-      <i style="background:rgba(37,99,235,.55)"></i>
-      <i style="background:rgba(37,99,235,.75)"></i>
-      <i style="background:rgba(37,99,235,.95)"></i>
-    </div>
-    <span>Magas</span>`;
-  root.appendChild(legend);
-}
+    function setDelta(el,value){ const txt=(value>=0?"+":"")+value.toFixed(1)+"%"; el.textContent=txt; el.style.color = value>=0? "var(--success)":"var(--danger)"; }
+    function renderTopPages(data){
+      const pages=data.topPages||[];
+      if(!pages.length){ topPagesEl.innerHTML='<div class="muted">Nincs adat.</div>'; return; }
+      topPagesEl.innerHTML="";
+      pages.forEach(p=>{
+        const row=document.createElement("div"); row.className="top-row";
+        const left=document.createElement("div"); left.innerHTML=`<div class="top-path">${p.path}</div><div class="top-meta">${p.sessions} session · ${toHHMMSS(p.avgSeconds)}</div>`;
+        const right=document.createElement("div"); right.className="top-num"; right.textContent=p.sessions.toLocaleString("hu-HU");
+        row.appendChild(left); row.appendChild(right); topPagesEl.appendChild(row);
+      });
+    }
 
-function anaDestroyChart(ch){ try{ ch?.destroy?.(); }catch(e){} }
-
-function anaRenderMainChart(series, metric){
-  const canvas = document.getElementById("anaMainChart");
-  if(!canvas || !window.Chart) return;
-
-  anaDestroyChart(anaMainChart);
-  const labels = series.map(d=> d.label);
-  const values = series.map(d=> Number(d[metric] || 0));
-
-  anaMainChart = new Chart(canvas.getContext("2d"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: metric,
-        data: values,
-        fill: true,
-        tension: 0.35,
-        borderWidth: 2,
-        borderColor: "rgba(37,99,235,1)",
-        backgroundColor: "rgba(37,99,235,.15)",
-        pointRadius: 2,
-        pointHoverRadius: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display:false },
-        tooltip: { mode:"index", intersect:false }
-      },
-      scales: {
-        x: { grid: { display:false } },
-        y: { grid: { color:"rgba(148,163,184,.25)" }, ticks: { precision:0 } }
+    async function loadAnalytics(){
+      if(!firebaseEnabled || !dbRealtime){
+        const d=demoAnalytics; updateKpisAndChart(d); return;
+      }
+      try{
+        const snap=await get(dbRef(dbRealtime,"analytics/sessions"));
+        if(!snap.exists()){ updateKpisAndChart(demoAnalytics); return; }
+        const sessions = Object.values(snap.val()||{});
+        const d = buildAnalyticsFromSessions(sessions);
+        updateKpisAndChart(d);
+      }catch(e){
+        console.warn("[analytics] hiba:", e);
+        updateKpisAndChart(demoAnalytics);
       }
     }
-  });
-}
 
-function anaRenderDeviceChart(deviceShare){
-  const canvas = document.getElementById("anaDeviceChart");
-  const legend = document.getElementById("anaDeviceLegend");
-  if(!canvas || !window.Chart) return;
+    function updateKpisAndChart(d){
+      const days=d.byDay||[];
+      const totalSessions = days.reduce((s,x)=>s+x.sessions,0);
+      const totalUsers    = days.reduce((s,x)=>s+x.users,0);
+      const totalPv       = days.reduce((s,x)=>s+x.pageviews,0);
+      const avgDur        = totalSessions? days.reduce((s,x)=>s+x.avgSessionSeconds*x.sessions,0)/totalSessions : 0;
+      const pps           = totalSessions? totalPv/totalSessions : 0;
 
-  anaDestroyChart(anaDeviceChart);
+      kpiSessionsEl.textContent = totalSessions.toLocaleString("hu-HU");
+      kpiUsersEl.textContent    = totalUsers.toLocaleString("hu-HU");
+      kpiAvgDurationEl.textContent = toHHMMSS(avgDur);
+      kpiPagesPerSessEl.textContent = pps.toFixed(2);
 
-  const labels = deviceShare.map(d=> d.name);
-  const values = deviceShare.map(d=> d.value);
+      // (demo jellegű) összevetés előző időszakkal
+      setDelta(kpiSessionsChEl, pct(totalSessions, d.prevPeriod?.sessions||totalSessions));
+      setDelta(kpiUsersChEl,    pct(totalUsers,    d.prevPeriod?.users||totalUsers));
+      setDelta(kpiDurChEl,      pct(avgDur,        d.prevPeriod?.avgSessionSeconds||avgDur));
+      setDelta(kpiPpsChEl,      pct(pps,           d.prevPeriod?.pageviewsPerSession||pps));
 
-  anaDeviceChart = new Chart(canvas.getContext("2d"), {
-    type: "doughnut",
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        backgroundColor: [
-          "rgba(37,99,235,1)",
-          "rgba(217,108,6,1)",
-          "rgba(22,163,74,1)"
-        ],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins: { legend:{ display:false }, tooltip:{ callbacks:{
-        label: (ctx)=> `${ctx.label}: ${ctx.parsed}%`
-      }}},
-      cutout: "60%"
+      dateRangeLabelEl.textContent = d.dateRangeLabel||"Időszak";
+
+      const labels = days.map(x=>fmtShort(x.day));
+      const series = days.map(x=>x.sessions);
+      if(sessionsChart) sessionsChart.destroy();
+      sessionsChart = new Chart(document.getElementById("sessionsChart").getContext("2d"), {
+        type:"line",
+        data:{ labels, datasets:[{ label:"Munkamenetek", data:series, tension:.35, borderWidth:2, pointRadius:3, fill:false }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+      });
+
+      renderTopPages(d);
     }
-  });
 
-  if(legend){
-    legend.innerHTML = deviceShare.map((d, idx)=>{
-      const colors = ["rgba(37,99,235,1)","rgba(217,108,6,1)","rgba(22,163,74,1)"];
-      const c = colors[idx] || "rgba(100,116,139,1)";
-      return `<div style="display:flex; align-items:center; gap:8px;">
-        <span style="width:10px; height:10px; border-radius:999px; background:${c}; display:inline-block;"></span>
-        <span style="font-size:13px; color:var(--muted); font-weight:700;">${d.name}</span>
-        <span style="font-size:13px; font-weight:900;">${d.value}%</span>
-      </div>`;
-    }).join("");
-  }
-}
-
-function anaRenderBrowserChart(browserShare){
-  const canvas = document.getElementById("anaBrowserChart");
-  if(!canvas || !window.Chart) return;
-
-  anaDestroyChart(anaBrowserChart);
-
-  anaBrowserChart = new Chart(canvas.getContext("2d"), {
-    type: "bar",
-    data: {
-      labels: browserShare.map(d=> d.name),
-      datasets: [{
-        data: browserShare.map(d=> d.value),
-        backgroundColor: "rgba(37,99,235,1)",
-        borderRadius: 8
-      }]
-    },
-    options: {
-      indexAxis: "y",
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins: { legend:{ display:false } },
-      scales: {
-        x: { grid: { color:"rgba(148,163,184,.25)" }, ticks:{ callback:(v)=> v+"%" } },
-        y: { grid: { display:false } }
-      }
-    }
-  });
-}
-
-function anaRenderTopPages(items){
-  const root = document.getElementById("anaTopPages");
-  if(!root) return;
-  root.innerHTML = "";
-
-  if(!items.length){
-    root.innerHTML = `<div class="small">Nincs megjeleníthető adat.</div>`;
-    return;
-  }
-
-  items.forEach((p, idx)=>{
-    const row = document.createElement("div");
-    row.className = "ana-row";
-    const changeCls = (p.change >= 0) ? "pos" : "neg";
-    const sign = (p.change >= 0) ? "+" : "";
-    row.innerHTML = `
-      <div class="ana-rank">${idx+1}</div>
-      <div class="mid">
-        <div class="t">${p.title || p.path}</div>
-        <div class="s">${p.path}</div>
-      </div>
-      <div class="right">
-        <div class="n">${anaFormatInt(p.views)}</div>
-        <div class="c ${changeCls}">${sign}${p.change.toFixed(1)}%</div>
-      </div>
-    `;
-    root.appendChild(row);
-  });
-}
-
-/* ---------- Main orchestrator ---------- */
-function anaRenderDashboard(){
-  const dateRangeEl = document.getElementById("anaDateRange");
-  const metricEl = document.getElementById("anaMetric");
-
-  const days = parseInt(dateRangeEl?.value || "30", 10) || 30;
-  const metric = metricEl?.value || "sessions";
-
-  const { startDate, endDate, inRange, series } = anaBuildDaySeries(anaRawSessions, days);
-  const { prev, curr } = anaSplitSessionsByMid(startDate, days, inRange);
-
-  const prevM = anaComputeMetrics(prev);
-  const currM = anaComputeMetrics(curr);
-
-  // KPI values (current half)
-  const sessionsEl = document.getElementById("anaKpiSessions");
-  const usersEl = document.getElementById("anaKpiUsers");
-  const pvEl = document.getElementById("anaKpiPageviews");
-  const bounceEl = document.getElementById("anaKpiBounce");
-
-  if(sessionsEl) sessionsEl.textContent = anaFormatInt(currM.totalSessions);
-  if(usersEl) usersEl.textContent = anaFormatInt(currM.users);
-  if(pvEl) pvEl.textContent = anaFormatInt(currM.pageviews);
-  if(bounceEl) bounceEl.textContent = anaFormatFloat(currM.bounceRate, 1);
-
-  // KPI deltas
-  anaSetDelta(document.getElementById("anaKpiSessionsDelta"), anaPctChange(currM.totalSessions, prevM.totalSessions), true);
-  anaSetDelta(document.getElementById("anaKpiUsersDelta"), anaPctChange(currM.users, prevM.users), true);
-  anaSetDelta(document.getElementById("anaKpiPageviewsDelta"), anaPctChange(currM.pageviews, prevM.pageviews), true);
-
-  // Bounce: csökkenés = jó → "javulás"
-  const bounceImprove = prevM.bounceRate ? ((prevM.bounceRate - currM.bounceRate) / prevM.bounceRate) * 100 : 0;
-  const bounceDeltaEl = document.getElementById("anaKpiBounceDelta");
-  if(bounceDeltaEl){
-    const good = bounceImprove >= 0;
-    const cls = good ? "pos" : "neg";
-    const sign = bounceImprove >= 0 ? "+" : "";
-    bounceDeltaEl.innerHTML = `<span class="${cls}">${sign}${bounceImprove.toFixed(1)}%</span> <small>javulás</small>`;
-  }
-
-  // Secondary KPIs
-  const avgDurEl = document.getElementById("anaAvgDuration");
-  const durDeltaEl = document.getElementById("anaDurationDelta");
-  if(avgDurEl) avgDurEl.textContent = anaFormatDuration(currM.avgDuration);
-
-  const durCh = anaPctChange(currM.avgDuration, prevM.avgDuration);
-  if(durDeltaEl) durDeltaEl.textContent = `${durCh>=0?"+":""}${durCh.toFixed(1)}%`;
-
-  const ppsEl = document.getElementById("anaPagesPerSession");
-  const ppsDeltaEl = document.getElementById("anaPpsDelta");
-  if(ppsEl) ppsEl.textContent = anaFormatFloat(currM.pagesPerSession, 2);
-
-  const ppsCh = anaPctChange(currM.pagesPerSession, prevM.pagesPerSession);
-  if(ppsDeltaEl) ppsDeltaEl.textContent = `${ppsCh>=0?"+":""}${ppsCh.toFixed(1)}%`;
-
-  // Charts
-  anaRenderMainChart(series, metric);
-  anaRenderDeviceChart(anaComputeDeviceShare(inRange));
-  anaRenderBrowserChart(anaComputeBrowserShare(inRange));
-  anaRenderHeatmap(anaComputeHeatmap(inRange));
-
-  // Top pages (by pageviews)
-  const top = anaComputeTopPages(prev, curr, 5).map(p => ({
-    ...p,
-    title: (p.path === "/") ? "Főoldal" : p.path
-  }));
-  anaRenderTopPages(top);
-
-  // Insights
-  const usersChange = anaPctChange(currM.users, prevM.users);
-  const trend = document.getElementById("anaInsightTrend");
-  const engagement = document.getElementById("anaInsightEngagement");
-  const tip = document.getElementById("anaInsightTip");
-
-  if(trend){
-    trend.textContent = `A látogatók száma ${usersChange >= 0 ? "növekedett" : "csökkent"} az előző időszakhoz képest (${usersChange>=0?"+":""}${usersChange.toFixed(1)}%).${usersChange >= 5 ? " Kiváló teljesítmény!" : ""}`;
-  }
-  if(engagement){
-    engagement.textContent = `A látogatók átlagosan ${anaFormatDuration(currM.avgDuration)} időt töltenek az oldalon és ${anaFormatFloat(currM.pagesPerSession,2)} oldalt néznek meg egy munkamenetben.`;
-  }
-  if(tip){
-    tip.textContent = `${currM.bounceRate > 50 ? "A visszafordulási arány magas. Érdemes javítani a főoldal első benyomását és a CTA-kat." : "Kiváló visszafordulási arány! A tartalom jól megtartja a látogatókat."}`;
-  }
-}
-
-function anaBindUiOnce(){
-  if(anaUiBound) return;
-  anaUiBound = true;
-
-  const dateRangeEl = document.getElementById("anaDateRange");
-  const metricEl = document.getElementById("anaMetric");
-
-  dateRangeEl?.addEventListener("change", anaRenderDashboard);
-  metricEl?.addEventListener("change", anaRenderDashboard);
-}
-
-function anaGenerateDemoSessions(days=30){
-  const pages = ["/", "/termekek/garazskapuk", "/termekek/ipari-kapuk", "/kapcsolat", "/rolunk"];
-  const uas = [
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
-    "Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36",
-  ];
-
-  const now = new Date();
-  const sessions = [];
-  const total = Math.max(200, days * 20);
-
-  for(let i=0;i<total;i++){
-    const d = new Date(now);
-    d.setDate(now.getDate() - Math.floor(Math.random() * days));
-    d.setHours(Math.floor(Math.random()*24), Math.floor(Math.random()*60), Math.floor(Math.random()*60), 0);
-
-    const pv = 1 + Math.floor(Math.random()*4);
-    const dur = 30 + Math.floor(Math.random()*420);
-
-    sessions.push({
-      startedAt: d.toISOString(),
-      visitorId: "demo_" + (1 + Math.floor(Math.random()*120)),
-      pageViews: pv,
-      durationSec: dur,
-      userAgent: uas[Math.floor(Math.random()*uas.length)],
-      lastPage: pages[Math.floor(Math.random()*pages.length)]
-    });
-  }
-  return sessions;
-}
-
-async function loadAnalytics(){
-  anaBindUiOnce();
-
-  try{
-    if(dbRealtime){
-      const snap = await get(dbRef(dbRealtime, "analytics/sessions"));
-      const val = snap.val();
-      if(val){
-        anaRawSessions = Object.values(val);
-      } else {
-        anaRawSessions = [];
-      }
-    } else {
-      anaRawSessions = [];
-    }
-  }catch(err){
-    console.warn("[analytics] RTDB olvasási hiba:", err);
-    anaRawSessions = [];
-  }
-
-  if(!anaRawSessions.length){
-    // demo fallback
-    const dateRangeEl = document.getElementById("anaDateRange");
-    const days = parseInt(dateRangeEl?.value || "30", 10) || 30;
-    anaRawSessions = anaGenerateDemoSessions(days);
-  }
-
-  const updatedEl = document.getElementById("anaLastUpdated");
-  if(updatedEl){
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2,"0");
-    const mm = String(now.getMinutes()).padStart(2,"0");
-    updatedEl.textContent = `· frissítve: ${hh}:${mm}`;
-  }
-
-  anaRenderDashboard();
-}
-
-/* ---------- Layout (Trello board, Firestore) ---------- */
+    /* ---------- Layout (Trello board, Firestore) ---------- */
     const listsWrap = document.getElementById("listsWrap");
     const addListBtn = document.getElementById("addListBtn");
     const saveBtnBoards = document.getElementById("layoutSaveBtnBoards");
