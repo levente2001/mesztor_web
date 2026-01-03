@@ -3829,7 +3829,7 @@ function buildNavFromBoard(board) {
 
         const descEl = document.createElement("div");
         descEl.className = "reference-desc";
-        descEl.textContent = item.description || "";
+        descEl.textContent = item.description || item.desc || "";
 
         info.appendChild(titleEl);
         info.appendChild(descEl);
