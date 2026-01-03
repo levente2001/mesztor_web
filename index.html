@@ -3829,7 +3829,7 @@ function buildNavFromBoard(board) {
 
         const descEl = document.createElement("div");
         descEl.className = "reference-desc";
-        descEl.textContent = item.description || item.desc || "";
+        descEl.textContent = item.description || "";
 
         info.appendChild(titleEl);
         info.appendChild(descEl);
@@ -3862,7 +3862,7 @@ function buildNavFromBoard(board) {
           .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() || {}) }))
           .map((d) => ({
             title: d.title || "",
-            description: d.description || "",
+            description: d.description || d.desc || "",
             imageUrl: d.imageUrl || d.imageDataUrl || "",
             createdAt: d.createdAt || 0
           }))
