@@ -986,7 +986,6 @@
         <div class="nav-links">
           <a href="#hero"      data-section="site" data-field="navHome">Kezdőlap</a>
           <a href="#products"  data-section="site" data-field="navProducts">Termékválaszték</a>
-          <a href="./shop.html" style="color:#c86904;font-weight:700">Webshop 🛒</a>
           <a href="#services"  data-section="site" data-field="navServices">Szolgáltatások</a>
           <a href="#why-us"    data-section="site" data-field="navWhyUs">Miért  mi?</a>
           <a href="#references" data-section="site" data-field="navReferences">Referenciák</a>
@@ -1692,7 +1691,6 @@
 
     const urlParams = new URLSearchParams(location.search);
     const inlineEditMode = urlParams.has("adminPreview");
-    let inlineEditAuthorized = false;
 
     let sectionsCache = {};
 
@@ -1722,7 +1720,7 @@
     }
 
     function initInlineEditing() {
-      if (!inlineEditMode || !inlineEditAuthorized || !firebaseEnabled || !db) return;
+      if (!inlineEditMode || !firebaseEnabled || !db) return;
 
       const style = document.createElement("style");
       style.textContent = `
@@ -1776,19 +1774,6 @@
       if (!firebaseEnabled || !db) return;
       await loadContentSections();
       applyContentSectionsToDom();
-      if (inlineEditMode) {
-        try {
-          const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-          const auth = getAuth(app);
-          const user = await new Promise(resolve => {
-            const unsub = onAuthStateChanged(auth, u => { unsub(); resolve(u); }, () => resolve(null));
-          });
-          if (user) {
-            const role = await get(ref(db, "admins/" + user.uid));
-            inlineEditAuthorized = role.val() === true;
-          }
-        } catch (err) { console.warn("Inline admin hozzáférés elutasítva", err); }
-      }
       initInlineEditing();
     }
 
