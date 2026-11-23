@@ -157,6 +157,7 @@
         <button class="side-link tab-btn active" data-pane="analytics"><span class="emoji">📈</span>Analitika</button>
         <button class="side-link tab-btn" data-pane="layout"><span class="emoji">🧩</span>Beállítások – Layout</button>
         <button class="side-link tab-btn" data-pane="email"><span class="emoji">✉️</span>Beállítások – Email</button>
+        <a class="side-link" href="./products-admin.html" style="text-decoration:none;color:inherit"><span class="emoji">🛒</span>Webshop – Termékkezelés</a>
         <button class="side-link tab-btn" data-pane="content"><span class="emoji">📝</span>Beállítások – Tartalom</button>
       </nav>
     </aside>
@@ -255,7 +256,7 @@
 
             <iframe
               id="sitePreview"
-              src="../main/index.html?adminPreview=1"
+              src="./index.html?adminPreview=1"
               style="width:100%; min-height:700px; border:1px solid #e5e7eb; border-radius:16px; background:#fff;"
             ></iframe>
           </div>
@@ -273,6 +274,57 @@
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref as dbRef, get, set, update as dbUpdate, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
     import Sortable from "https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/modular/sortable.esm.js";
+
+    /* Admin gate: authentication + explicit admins/{uid} role.
+       Security MUST also be enforced by Firebase Realtime Database rules. */
+    const { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } =
+      await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    const authConfig = {
+      apiKey:"AIzaSyAZUGCJkn9L4xH_M8L0fZYTUresZ9qYPqo",
+      authDomain:"flymeto-696d0.firebaseapp.com",
+      databaseURL:"https://flymeto-696d0-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId:"flymeto-696d0",
+      storageBucket:"flymeto-696d0.firebasestorage.app",
+      messagingSenderId:"651204605205",
+      appId:"1:651204605205:web:d5dfbf3698be7ac6ee251c"
+    };
+    const authApp = getApps().length ? getApp() : initializeApp(authConfig);
+    const auth = getAuth(authApp);
+    const currentUser = await new Promise(resolve => {
+      const unsub = onAuthStateChanged(auth, user => { unsub(); resolve(user); }, () => resolve(null));
+    });
+    let allowed = false;
+    if (currentUser) {
+      try {
+        const securityDb = getDatabase(authApp);
+        const role = await get(dbRef(securityDb, "admins/" + currentUser.uid));
+        allowed = role.val() === true;
+      } catch (error) { console.warn("Admin jogosultságellenőrzés sikertelen", error); }
+    }
+    if (!allowed) {
+      document.body.innerHTML = `
+      <main style="max-width:440px;margin:10vh auto;padding:25px;border-radius:18px;background:#fff;box-shadow:0 12px 35px #0001;font:15px system-ui">
+      <h1>MESZ-TOR Admin</h1>
+      <p>Az adminfelülethez bejelentkezés és adminjogosultság szükséges.</p>
+      <form id="adminSignIn" style="display:grid;gap:12px">
+      <input id="adminEmail" type="email" autocomplete="username" placeholder="E-mail" required style="padding:12px;border:1px solid #ddd;border-radius:8px">
+      <input id="adminPassword" type="password" autocomplete="current-password" placeholder="Jelszó" required style="padding:12px;border:1px solid #ddd;border-radius:8px">
+      <button style="padding:12px;border:0;border-radius:8px;background:#c86904;color:white;cursor:pointer">Belépés</button>
+      </form><p id="loginMessage" style="color:#a33"></p>
+      <button id="adminLogOut" style="padding:10px;border:1px solid #ddd;border-radius:8px">Kijelentkezés</button>
+      <p><a href="./index.html">← Vissza a weboldalra</a></p></main>`;
+      document.getElementById("adminSignIn").addEventListener("submit", async e => {
+        e.preventDefault();
+        const msg = document.getElementById("loginMessage");
+        try {
+          await signInWithEmailAndPassword(auth, document.getElementById("adminEmail").value,
+            document.getElementById("adminPassword").value);
+          location.reload();
+        } catch { msg.textContent = "Sikertelen belépés vagy hiányzó adminjogosultság."; }
+      });
+      document.getElementById("adminLogOut").onclick = async () => { await signOut(auth); location.reload(); };
+      throw new Error("Admin access denied");
+    }
 
     /* ---------- Firebase config ---------- */
     const firebaseConfig = {
