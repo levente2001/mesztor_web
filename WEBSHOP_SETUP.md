@@ -4,8 +4,8 @@ A master ág és az eredeti dizájn megőrzésével hozzáadott oldalak:
 
 - `shop.html`: publikus termékkatalógus, keresés, kategória, kosár / ajánlatkérés
 - `products-admin.html`: védett termék CRUD, termékkép feltöltéssel
-- `admin.html`: bejelentkezési és adminjogosultsági ellenőrzés, webshop menüpont
-- `index.html`: webshop link, adminPreview csak ellenőrzött adminnal
+- `admin.html`: **változatlan**, az eredeti master verzió
+- `index.html`: **változatlan**, az eredeti master verzió
 - `vite.config.js`: mind a négy oldal bekerül a Vite buildbe
 
 ## Közvetlen rendelés jelenlegi jelentése
@@ -45,3 +45,7 @@ npm run build
 **Telepítés / élesítés előtt** tesztelendő: admin login és kijelentkezés; nem-admin hozzáférés; jogosulatlan API-írás tiltása; a meglévő analitika / tartalomszerkesztés / referenciák; mobilnézet; kép feltöltés, rendelés és ajánlatkérés, hibás hálózat, dupla rendelés.
 
 Nem került sor fizetési szolgáltatás vagy Firebase Rules automatikus élesítésére.
+
+## Dizájn és meglévő funkciók megőrzése
+
+A `master` eredeti `index.html` és `admin.html` fájlját bájtra pontosan visszaállítottuk a fejlesztői ágon. **Ne módosítsd őket a webshop integráció részeként.** A webshop külön `shop.html` oldalon, a termékadmin külön `products-admin.html` oldalon van. A főoldalról még nincs új webshop menüpont (a meglévő navigáció változatlan marad). A régi `admin.html` Firebase-auth védelmét visszavontuk, mert az belenyúlt a korábbi felületbe; ennek biztonságos, nem regresszív kialakítása külön feladat.
