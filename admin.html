@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Mesztor Admin</title>
-  <!-- Chart.js (globálisan, nem modul) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
+    html, body{height:100%}
     :root{
       --headerH: 64px;
       --sidebarW: 260px;
@@ -25,7 +25,9 @@
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%}
+    body{opacity:0; transition:opacity .15s ease;}
+    body.authed{opacity:1;}
+    body{height:100%}
     body{
       margin:0; background:var(--bg); color:var(--txt);
       font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -46,6 +48,10 @@
     /* shell */
     .admin-shell{ display:block }
     .container{ padding: 18px }
+
+    .drag-handle{ cursor: grab; user-select:none; }
+    .drag-handle:active{ cursor: grabbing; }
+
 
     /* Sidebar (desktop: fix bal oldalt) */
     .sidebar{
@@ -101,7 +107,7 @@
 
     .btn{
       display:inline-flex; align-items:center; gap:.45rem;
-      padding:.55rem .8rem; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer
+      padding:.55rem .8rem; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer;
     }
     .btn.primary{ background:var(--primary); color:#fff; border-color:var(--primary) }
     .btn.danger{ background:#fff; color:var(--danger); border-color:#f3d3d3 }
@@ -140,13 +146,106 @@
     .top-num{ font-weight:700 }
 
     .spacer{ height:14px }
+  
+    /* ------------------------------
+       Analytics Dashboard (v2 - no React)
+       ------------------------------ */
+    .ana-wrap{ max-width:1200px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
+    .ana-header{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .ana-header h1{ margin:0; font-size:28px; font-weight:800; letter-spacing:-.02em; }
+    .ana-header p{ margin:4px 0 0; color:var(--muted); }
+    .ana-controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .ana-pill{ display:flex; align-items:center; gap:8px; padding:.45rem .65rem; border-radius:999px; border:1px solid var(--border); background:#fff; box-shadow:var(--shadow); font-size:13px; }
+    .ana-live-dot{ width:8px; height:8px; border-radius:50%; background:var(--success); box-shadow:0 0 0 rgba(22,163,74,.35); animation:anaPulse 1.6s infinite; }
+    @keyframes anaPulse{
+      0%{ transform:scale(1); box-shadow:0 0 0 0 rgba(22,163,74,.35) }
+      70%{ transform:scale(1.15); box-shadow:0 0 0 10px rgba(22,163,74,0) }
+      100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(22,163,74,0) }
+    }
+    .ana-select{ display:flex; align-items:center; gap:8px; padding:.45rem .65rem; border-radius:12px; border:1px solid var(--border); background:#fff; box-shadow:var(--shadow); }
+    .ana-select .label{ font-size:12px; color:var(--muted); }
+    .ana-select select{ border:none; background:transparent; outline:none; font:inherit; padding:.15rem .25rem; }
+
+    .ana-grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+    .ana-grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .ana-grid-3{ display:grid; grid-template-columns:2fr 1fr; gap:14px; }
+
+    @media (max-width:1100px){
+      .ana-grid-4{ grid-template-columns:repeat(2,1fr); }
+      .ana-grid-3{ grid-template-columns:1fr; }
+    }
+    @media (max-width:640px){
+      .ana-grid-4{ grid-template-columns:1fr; }
+      .ana-grid-2{ grid-template-columns:1fr; }
+    }
+
+    .ana-card{ border:1px solid var(--border); border-radius:16px; background:#fff; box-shadow:var(--shadow); overflow:hidden; }
+    .ana-card .head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .ana-card .title{ font-weight:800; }
+    .ana-card .sub{ font-size:13px; color:var(--muted); margin-top:2px; }
+    .ana-card .body{ padding:16px; }
+
+    .ana-kpi{ position:relative; padding:16px; }
+    .ana-kpi .kpi-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .ana-kpi .kpi-label{ font-size:12px; color:var(--muted); font-weight:700; }
+    .ana-kpi .kpi-icon{ width:42px; height:42px; border-radius:14px; background:linear-gradient(135deg, rgba(37,99,235,.9), rgba(37,99,235,.7)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; }
+    .ana-kpi .kpi-value{ font-size:32px; font-weight:900; margin-top:6px; letter-spacing:-.02em; }
+    .ana-kpi .kpi-delta{ margin-top:6px; font-size:12px; font-weight:700; display:flex; gap:6px; align-items:center; }
+    .ana-kpi .kpi-delta small{ font-weight:500; color:var(--muted); }
+    .ana-kpi .pos{ color:var(--success); }
+    .ana-kpi .neg{ color:var(--danger); }
+
+    .ana-hero{ color:#fff; border:0; }
+    .ana-hero.blue{ background:linear-gradient(135deg, #2563eb, #1d4ed8); }
+    .ana-hero.orange{ background:linear-gradient(135deg, #D96C06, #b45309); }
+    .ana-hero .body{ padding:18px; }
+    .ana-hero .big{ font-size:40px; font-weight:900; margin:6px 0 0; letter-spacing:-.03em; }
+    .ana-hero .tiny{ font-size:12px; color:rgba(255,255,255,.75); font-weight:700; }
+    .ana-hero .delta{ margin-top:10px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:8px; color:rgba(255,255,255,.9); }
+
+    .ana-chart-wrap{ padding:8px 16px 16px; }
+    .ana-chart-wrap canvas{ width:100% !important; height:320px !important; }
+
+    .ana-heatmap{ display:flex; flex-direction:column; gap:6px; }
+    .ana-heatmap .hm-header{ display:grid; grid-template-columns:32px repeat(5,1fr); gap:4px; align-items:center; margin-left:0; }
+    .ana-heatmap .hm-header div{ text-align:center; font-size:11px; color:var(--muted); }
+    .ana-heatmap .hm-row{ display:flex; align-items:center; gap:6px; }
+    .ana-heatmap .hm-day{ width:32px; font-size:12px; color:var(--muted); font-weight:800; }
+    .ana-heatmap .hm-cells{ flex:1; display:grid; grid-template-columns:repeat(24,1fr); gap:2px; }
+    .ana-heatmap .hm-cell{ height:22px; border-radius:4px; background:rgba(37,99,235,.08); cursor:pointer; }
+    .ana-heatmap .hm-legend{ display:flex; align-items:center; justify-content:flex-end; gap:8px; margin-top:8px; }
+    .ana-heatmap .hm-legend span{ font-size:11px; color:var(--muted); }
+    .ana-heatmap .hm-scale{ display:flex; gap:2px; }
+    .ana-heatmap .hm-scale i{ width:16px; height:16px; display:inline-block; border-radius:4px; background:rgba(37,99,235,.15); }
+
+    .ana-list{ display:flex; flex-direction:column; gap:8px; }
+    .ana-row{ display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--border); background:#f8fafc; border-radius:14px; }
+    .ana-rank{ width:32px; height:32px; border-radius:12px; background:linear-gradient(135deg, #2563eb, #1d4ed8); color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; }
+    .ana-row .mid{ flex:1; min-width:0; }
+    .ana-row .mid .t{ font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .ana-row .mid .s{ font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+    .ana-row .right{ text-align:right; }
+    .ana-row .right .n{ font-weight:900; }
+    .ana-row .right .c{ font-size:12px; font-weight:800; }
+    .ana-row .right .c.pos{ color:var(--success); }
+    .ana-row .right .c.neg{ color:var(--danger); }
+
+    .ana-insights{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    @media (max-width:900px){ .ana-insights{ grid-template-columns:1fr; } }
+    .ana-insight{ background:rgba(255,255,255,.7); border:1px solid var(--border); border-radius:16px; padding:14px; }
+    .ana-insight .h{ font-weight:900; display:flex; align-items:center; gap:8px; }
+    .ana-insight p{ margin:8px 0 0; color:#334155; font-size:13px; }
+
   </style>
 </head>
+
 <body>
   <header class="appbar">
     <button id="sidebarToggle" class="hamburger" aria-label="Menü" aria-expanded="false">☰</button>
     <div class="brand">Mesztor Admin</div>
     <div id="envBadge" class="badge"><span class="dot"></span><span class="label">Demo mód</span></div>
+    <div id="userBadge" class="muted" style="font-size:12px;"></div>
+    <button id="logoutBtn" class="btn secondary" style="margin-left:8px;">Kilépés</button>
   </header>
 
   <div class="admin-shell">
@@ -158,6 +257,15 @@
         <button class="side-link tab-btn" data-pane="layout"><span class="emoji">🧩</span>Beállítások – Layout</button>
         <button class="side-link tab-btn" data-pane="email"><span class="emoji">✉️</span>Beállítások – Email</button>
         <button class="side-link tab-btn" data-pane="content"><span class="emoji">📝</span>Beállítások – Tartalom</button>
+        <button class="side-link tab-btn" data-pane="references"><span class="emoji">📸</span>Referencia fotók</button>
+        <button class="side-link tab-btn" data-pane="suppliers">
+          <span class="emoji">🏢</span>Beszállító partnerek
+        </button>
+        <button class="side-link tab-btn" data-pane="products">
+          <span class="emoji">📦</span>
+          <span>Termékek</span>
+        </button>
+        <button class="side-link tab-btn" data-pane="slider"><span class="emoji">🖼️</span>Főoldali slider</button>
       </nav>
     </aside>
 
@@ -165,51 +273,195 @@
     <main class="main">
       <!-- Analitika -->
       <section id="pane-analytics" class="tab-pane active container">
-        <div class="panel">
-          <div class="panel-head">Oldal analitika</div>
-          <div class="panel-body">
-            <div class="muted" id="dateRangeLabel">Időszak</div>
-            <div class="spacer"></div>
-            <div class="grid grid-3">
-              <div class="kpi">
-                <div class="label">Munkamenetek</div>
-                <div class="num" id="kpiSessions">0</div>
-                <div class="delta" id="kpiSessionsChange">+0.0%</div>
-              </div>
-              <div class="kpi">
-                <div class="label">Egyedi látogatók</div>
-                <div class="num" id="kpiUsers">0</div>
-                <div class="delta" id="kpiUsersChange">+0.0%</div>
-              </div>
-              <div class="kpi">
-                <div class="label">Átlagos session idő</div>
-                <div class="num" id="kpiAvgDuration">0p 00s</div>
-                <div class="delta" id="kpiDurChange">+0.0%</div>
-              </div>
-            </div>
+  <div class="ana-wrap">
+    <div class="ana-header">
+      <div>
+        <h1>Analitika Dashboard</h1>
+        <p>MESZ-TOR Kft. weboldal statisztikák</p>
+      </div>
+      <div class="ana-controls">
+        <div class="ana-pill" title="Frissítve a Firebase-ből, ha elérhető">
+          <span class="ana-live-dot"></span>
+          <span>Élő adatok</span>
+          <span id="anaLastUpdated" style="color:var(--muted); font-weight:600;"></span>
+        </div>
 
-            <div class="spacer"></div>
-            <div class="kpi">
-              <div class="label">Oldalak / session</div>
-              <div class="num" id="kpiPagesPerSession">0.00</div>
-              <div class="delta" id="kpiPpsChange">+0.0%</div>
-            </div>
+        <div class="ana-select" title="Válaszd ki az időszakot">
+          <span class="label">Időszak</span>
+          <select id="anaDateRange">
+            <option value="1" >Elmúlt 24 óra</option>
+            <option value="7" selected>Elmúlt 7 nap</option>
+            <option value="14">Elmúlt 14 nap</option>
+            <option value="30" >Elmúlt 30 nap</option>
+            <option value="60">Elmúlt 60 nap</option>
+            <option value="90">Elmúlt 90 nap</option>
+          </select>
+        </div>
+      </div>
+    </div>
 
-            <div class="spacer"></div>
-            <div class="panel" style="padding:16px">
-              <canvas id="sessionsChart" height="220"></canvas>
-            </div>
+    <!-- KPI Cards -->
+    <div class="ana-grid-4">
+      <div class="ana-card ana-kpi">
+        <div class="kpi-top">
+          <div>
+            <div class="kpi-label">Munkamenetek</div>
+            <div class="kpi-value" id="anaKpiSessions">0</div>
+            <div class="kpi-delta" id="anaKpiSessionsDelta"><span class="pos">+0.0%</span><small>vs előző időszak</small></div>
+          </div>
+          <div class="kpi-icon">📈</div>
+        </div>
+      </div>
 
-            <div class="spacer"></div>
-            <div class="panel">
-              <div class="panel-head">Top oldalak</div>
-              <div class="panel-body" id="topPages">
-                <div class="muted">Nincs adat.</div>
-              </div>
-            </div>
+      <div class="ana-card ana-kpi">
+        <div class="kpi-top">
+          <div>
+            <div class="kpi-label">Egyedi látogatók</div>
+            <div class="kpi-value" id="anaKpiUsers">0</div>
+            <div class="kpi-delta" id="anaKpiUsersDelta"><span class="pos">+0.0%</span><small>vs előző időszak</small></div>
+          </div>
+          <div class="kpi-icon" style="background:linear-gradient(135deg, rgba(22,163,74,.9), rgba(22,163,74,.7));">👤</div>
+        </div>
+      </div>
+
+      <div class="ana-card ana-kpi">
+        <div class="kpi-top">
+          <div>
+            <div class="kpi-label">Oldal megtekintések</div>
+            <div class="kpi-value" id="anaKpiPageviews">0</div>
+            <div class="kpi-delta" id="anaKpiPageviewsDelta"><span class="pos">+0.0%</span><small>vs előző időszak</small></div>
+          </div>
+          <div class="kpi-icon" style="background:linear-gradient(135deg, rgba(217,108,6,.95), rgba(217,108,6,.75));">👁</div>
+        </div>
+      </div>
+
+      <div class="ana-card ana-kpi">
+        <div class="kpi-top">
+          <div>
+            <div class="kpi-label">Visszafordulási arány</div>
+            <div class="kpi-value"><span id="anaKpiBounce">0</span>%</div>
+            <div class="kpi-delta" id="anaKpiBounceDelta"><span class="pos">+0.0%</span><small>javulás</small></div>
+          </div>
+          <div class="kpi-icon" style="background:linear-gradient(135deg, rgba(139,92,246,.9), rgba(139,92,246,.7));">🎯</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary KPIs -->
+    <div class="ana-grid-2">
+      <div class="ana-card ana-hero blue">
+        <div class="body">
+          <div class="tiny">Átlagos session idő</div>
+          <div class="big" id="anaAvgDuration">0p 00s</div>
+          <div class="delta" id="anaDurationDelta">+0.0%</div>
+        </div>
+      </div>
+
+      <div class="ana-card ana-hero orange">
+        <div class="body">
+          <div class="tiny">Oldalak / munkamenet</div>
+          <div class="big" id="anaPagesPerSession">0.00</div>
+          <div class="delta" id="anaPpsDelta">+0.0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Chart -->
+    <div class="ana-card">
+      <div class="head">
+        <div>
+          <div class="title">Forgalom trend</div>
+          <div class="sub">Napi bontás a kiválasztott időszakra</div>
+        </div>
+        <div class="ana-select" style="box-shadow:none;">
+          <span class="label">Mutató</span>
+          <select id="anaMetric">
+            <option value="sessions" selected>Munkamenetek</option>
+            <option value="users">Egyedi látogatók</option>
+            <option value="pageviews">Oldal megtekintések</option>
+          </select>
+        </div>
+      </div>
+      <div class="ana-chart-wrap">
+        <canvas id="anaMainChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Heatmap + Device -->
+    <div class="ana-grid-3">
+      <div class="ana-card">
+        <div class="head">
+          <div>
+            <div class="title">Aktivitás hőtérkép</div>
+            <div class="sub">Mikor látogatják legtöbben az oldalt</div>
           </div>
         </div>
-      </section>
+        <div class="body">
+          <div id="anaHeatmap" class="ana-heatmap"></div>
+        </div>
+      </div>
+
+      <div class="ana-card">
+        <div class="head">
+          <div class="title">Eszköz megoszlás</div>
+        </div>
+        <div class="body">
+          <div style="height:210px;">
+            <canvas id="anaDeviceChart"></canvas>
+          </div>
+          <div id="anaDeviceLegend" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Pages + Browser -->
+    <div class="ana-grid-2">
+      <div class="ana-card">
+        <div class="head">
+          <div class="title">Legnépszerűbb oldalak</div>
+        </div>
+        <div class="body">
+          <div id="anaTopPages" class="ana-list"></div>
+        </div>
+      </div>
+
+      <div class="ana-card">
+        <div class="head">
+          <div class="title">Böngésző statisztikák</div>
+        </div>
+        <div class="body">
+          <div style="height:280px;">
+            <canvas id="anaBrowserChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights 
+    <div class="ana-card" style="background:linear-gradient(90deg, rgba(37,99,235,.07), rgba(217,108,6,.07));">
+      <div class="head">
+        <div class="title">Automatikus betekintések</div>
+      </div>
+      <div class="body">
+        <div class="ana-insights">
+          <div class="ana-insight">
+            <div class="h">📈 Pozitív trend</div>
+            <p id="anaInsightTrend">—</p>
+          </div>
+          <div class="ana-insight">
+            <div class="h">⏱ Elkötelezettség</div>
+            <p id="anaInsightEngagement">—</p>
+          </div>
+          <div class="ana-insight">
+            <div class="h">🎯 Optimalizálási tipp</div>
+            <p id="anaInsightTip">—</p>
+          </div>
+        </div>
+      </div>
+    </div>-->
+
+  </div>
+</section>
 
       <!-- Layout -->
       <section id="pane-layout" class="tab-pane container">
@@ -225,7 +477,7 @@
             </div>
             <div id="listsWrap" class="board-wrap"></div>
             <div class="spacer"></div>
-            <button id="addListBtn" class="btn secondary">+ Újabb lista hozzáadása</button>
+            <button id="addListBtn" style="display:none" class="btn secondary">+ Újabb lista hozzáadása</button>
           </div>
         </div>
       </section>
@@ -240,7 +492,33 @@
               <button class="btn primary" type="submit">Mentés</button>
             </form>
             <div id="emailStatus" class="muted" style="margin-top:10px"></div>
+
+            <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb;" />
+
+            <div class="muted" style="margin-bottom:8px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <div>Jelszó csere</div>
+              <div>
+                
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+              <form id="changePwForm" class="grid" style="grid-template-columns:1fr 1fr 1fr 0.5fr; gap:10px; align-items:center; width: 100%;">
+                <input type="password" style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:12px;" id="currentPw" placeholder="Régi jelszó" autocomplete="current-password" required />
+                <input type="password" style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:12px;" id="newPw" placeholder="Új jelszó (min. 8 karakter)" autocomplete="new-password" minlength="8" required />
+                <input type="password" id="newPw2" placeholder="Új jelszó újra" autocomplete="new-password" minlength="8" style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:12px;" />
+                <button class="btn primary" style="display: flex; align-items: center; justify-content: center; font-weight: bold; " type="submit">Jelszó csere</button>
+              </form>
+              
+            </div>
+
+            
+
+            <div id="changePwStatus" class="muted" style="margin-top:10px"></div>
+
           </div>
+          
+
         </div>
       </section>
 
@@ -255,12 +533,245 @@
 
             <iframe
               id="sitePreview"
-              src="../main/index.html?adminPreview=1"
+              src=""
               style="width:100%; min-height:700px; border:1px solid #e5e7eb; border-radius:16px; background:#fff;"
             ></iframe>
+
+            <script>
+              (function () {
+                const iframe = document.getElementById("sitePreview");
+                const isAdminSubdomain = location.hostname.startsWith("admin.");
+
+                const targetUrl = isAdminSubdomain
+                  ? `${location.origin}/site/index.html?adminPreview=1`
+                  : new URL("../index.html?adminPreview=1", location.href).toString();
+
+                iframe.src = targetUrl;
+              })();
+            </script>
+
+
           </div>
         </div>
       </section>
+
+      <!-- Beszállító partnerek -->
+      <section id="pane-suppliers" class="tab-pane container">
+        <div class="panel">
+          <div class="panel-head">Beszállító partnerek logói</div>
+          <div class="panel-body">
+            <p class="muted" style="margin-bottom:10px">
+              Itt tudod beállítani a <b>„Megbízható beszállító partnereink”</b> blokkban megjelenő logókat.
+            </p>
+
+            <form id="supplierForm" class="stack gap" style="max-width:480px;">
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Név</div>
+                <input type="text" id="supplierName" placeholder="pl. Hörmann Hungária Kft." />
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Alcím (opcionális)</div>
+                <input
+                  type="text"
+                  id="supplierSubtitle"
+                  placeholder="pl. Automata bejáratok specialistája"
+                />
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Logó feltöltése</div>
+                <input type="file" id="supplierImage" accept="image/*" />
+              </label>
+
+              <div>
+                <button type="submit" class="btn primary" style="margin-top:10px;">Beszállító mentése</button>
+                <span id="supplierStatus" class="muted" style="margin-left:8px;"></span>
+              </div>
+            </form>
+
+            <div class="spacer"></div>
+
+            <h3 style="font-size:1rem;margin-bottom:.25rem;">Meglévő beszállítók</h3>
+            <p class="muted" style="margin-bottom:.5rem;">
+              Itt tudod <b>átírni a nevet</b>, illetve <b>cserélni a logót</b>, vagy törölni a partnert.
+            </p>
+            <div id="suppliersList" class="stack gap"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Termékek admin -->
+      <section id="pane-products" class="tab-pane container">
+        <h1 class="page-title">Termékválaszték – termékek</h1>
+
+        <div class="panel" style="padding: 20px">
+          <h2 class="panel-title">Új termék felvitele</h2>
+          <p class="muted">
+            Add meg a termék nevét, rövid és hosszabb leírását, valamint egy fotót.
+            Ezek fognak megjelenni a főoldali „Termékválaszték” kártyákon és a
+            részletes termékoldalon.
+          </p>
+
+          <form id="productForm" class="stack gap">
+            <label>
+              <div style="font-size:.8rem;margin-bottom:.15rem;">Termék neve</div>
+              <input
+                type="text"
+                id="productName"
+                placeholder="pl. Szigetelt szekcionált garázskapu"
+              />
+            </label>
+
+            <label>
+              <div style="font-size:.8rem;margin-bottom:.15rem;">Rövid leírás (kártyára)</div>
+              <textarea
+                id="productShort"
+                rows="2"
+                style="width:100%;resize:vertical;"
+                placeholder="pl. 40 mm panel, motoros működtetés, 5 év garancia."
+              ></textarea>
+            </label>
+
+            <label>
+              <div style="font-size:.8rem;margin-bottom:.15rem;">Részletes leírás (részletek oldalra)</div>
+              <textarea
+                id="productLong"
+                rows="6"
+                style="width:100%;resize:vertical;"
+                placeholder="Ide írhatod a részletes műszaki paramétereket, garanciát, kiegészítőket stb."
+              ></textarea>
+            </label>
+
+            <label>
+              <div style="font-size:.8rem;margin-bottom:.15rem;">Termék fotó</div>
+              <input type="file" id="productImage" accept="image/*" />
+            </label>
+
+            <div>
+              <button type="submit" class="btn primary" style="margin-top:10px;">
+                Termék mentése
+              </button>
+              <span id="productStatus" class="muted" style="margin-left:8px;"></span>
+            </div>
+          </form>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="panel" style="padding: 20px">
+          <h2 class="panel-title" style="margin-bottom:.25rem;">Meglévő termékek</h2>
+          <p class="muted" style="margin-bottom:.5rem;">
+            A legújabb termékek jelennek meg elöl. A törlés végleges.
+          </p>
+          <div id="productsList" class="stack gap"></div>
+        </div>
+      </section>
+
+            <!-- Főoldali slider -->
+      <section id="pane-slider" class="tab-pane container">
+        <div class="panel">
+          <div class="panel-head">Főoldali slider – képek</div>
+          <div class="panel-body">
+            <p class="muted" style="margin-bottom:10px">
+              Itt tudod beállítani a főoldalon megjelenő <b>automatikusan lapozódó képslidet</b>.
+              A képek a Firebase Realtime Database <code>heroSlider</code> ágában tárolódnak base64 formában.
+            </p>
+
+            <form id="sliderForm" class="stack gap" style="max-width:480px;">
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Cím (opcionális)</div>
+                <input type="text" id="sliderTitle" placeholder="pl. Ipari szekcionált kapuk" />
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Alcím / rövid leírás (opcionális)</div>
+                <input
+                  type="text"
+                  id="sliderSubtitle"
+                  placeholder="pl. Nagy igénybevételre tervezett ipari megoldások"
+                />
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Kép feltöltése</div>
+                <input type="file" id="sliderImage" accept="image/*" />
+              </label>
+
+              <div>
+                <button type="submit" class="btn primary" style="margin-top:10px;">
+                  Diakép mentése
+                </button>
+                <span id="sliderStatus" class="muted" style="margin-left:8px;"></span>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="panel">
+          <div class="panel-head">Meglévő slider képek</div>
+          <div class="panel-body">
+            <p class="muted" style="margin-bottom:6px;">
+              A képek abban a sorrendben jelennek meg a főoldali sliderben, ahogy itt látszanak.
+              A sorrendet jelenleg a feltöltés ideje határozza meg (legrégebbi elöl).
+            </p>
+            <div id="sliderList" class="stack gap"></div>
+          </div>
+        </div>
+      </section>
+
+
+
+
+      <!-- Referencia fotók -->
+      <section id="pane-references" class="tab-pane container">
+        <div class="panel">
+          <div class="panel-head">Referencia fotók</div>
+          <div class="panel-body">
+            <p class="muted" style="margin-bottom:10px">
+              Itt tudsz referencia kártyákat létrehozni. Ezek a <b>„Referenciáink”</b> blokkban jelennek meg a főoldalon.
+            </p>
+
+            <form id="referencesForm" class="stack gap" style="max-width:480px;">
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Cím (opcionális)</div>
+                <input type="text" id="refTitle" placeholder="pl. Ipari szekcionált kapu" />
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Rövid leírás</div>
+                <textarea
+                  id="refDesc"
+                  rows="3"
+                  style="width:100%;resize:vertical;"
+                  placeholder="pl. Ipari kaputechnika kivitelezés Székesfehérváron."
+                ></textarea>
+              </label>
+
+              <label>
+                <div style="font-size:.8rem;margin-bottom:.15rem;">Kép feltöltése</div>
+                <input type="file" id="refImage" accept="image/*" />
+              </label>
+
+              <div>
+                <button type="submit" class="btn primary" style="margin-top:10px;">Referencia mentése</button>
+                <span id="referencesStatus" class="muted" style="margin-left:8px;"></span>
+              </div>
+            </form>
+
+            <div class="spacer"></div>
+
+            <h3 style="font-size:1rem;margin-bottom:.25rem;">Meglévő referenciák</h3>
+            <p class="muted" style="margin-bottom:.5rem;">
+              A legfrissebbek vannak felül. A törlés nem visszavonható.
+            </p>
+            <div id="referencesList" class="stack gap"></div>
+          </div>
+        </div>
+      </section>
+
 
 
     </main>
@@ -268,10 +779,14 @@
 
   <div id="overlay" class="overlay" aria-hidden="true"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
   <!-- Main module -->
   <script type="module">
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref as dbRef, get, set, update as dbUpdate, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import Sortable from "https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/modular/sortable.esm.js";
 
     /* ---------- Firebase config ---------- */
@@ -286,20 +801,191 @@
       measurementId: "G-4L7YN2X9YL"
     };
 
-    let app, dbRealtime, firebaseEnabled = false;
+    let app, dbRealtime, dbFirestore, fs, firebaseEnabled = false;
     const envBadgeEl = document.getElementById("envBadge");
     try{
       app = getApps().length ? getApp() : initializeApp(firebaseConfig);
       dbRealtime = getDatabase(app);
+      dbFirestore = getFirestore(app);
       firebaseEnabled = true;
       envBadgeEl.classList.add("ok");
-      envBadgeEl.querySelector(".label").textContent = "Firebase aktív";
+      envBadgeEl.querySelector(".label").textContent = "Adatbázis aktív";
     }catch(e){
       console.warn("Firebase init hiba, demó mód:", e);
       firebaseEnabled = false;
       envBadgeEl.classList.remove("ok");
       envBadgeEl.querySelector(".label").textContent = "Demo mód";
     }
+
+    // --- Auto logout 30 perc inaktivitás után + 1 perces figyelmeztetés ---
+// Feltételezi, hogy van `auth` (getAuth(app)) és importálva van a `signOut`.
+// Ha nincs, a lenti importot használd (VAGY egészítsd ki a meglévő importodat).
+
+// import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+// const auth = getAuth(app);
+
+(function idleAutoLogout() {
+
+  const ENABLE_IDLE_LOGOUT = false;
+  if (!ENABLE_IDLE_LOGOUT) return;
+
+  const IDLE_MINUTES = 30;
+  const WARN_BEFORE_SECONDS = 60;
+
+  const IDLE_MS = IDLE_MINUTES * 60 * 1000;
+  const WARN_MS = IDLE_MS - WARN_BEFORE_SECONDS * 1000;
+
+  let warnTimer = null;
+  let logoutTimer = null;
+  let warned = false;
+
+  const resetTimers = () => {
+    if (warnTimer) clearTimeout(warnTimer);
+    if (logoutTimer) clearTimeout(logoutTimer);
+    warned = false;
+
+    // 29. perc körül figyelmeztetés
+    warnTimer = setTimeout(() => {
+      // csak ha még be van jelentkezve
+      if (!auth?.currentUser) return;
+
+      warned = true;
+      alert("1 perc inaktivitás után automatikusan kijelentkeztetünk biztonsági okból.");
+    }, WARN_MS);
+
+    // 30 perc után logout
+    logoutTimer = setTimeout(async () => {
+      try {
+        if (auth?.currentUser) await signOut(auth);
+      } finally {
+        // átirányítás a login oldalra (módosítsd, ha nálad más)
+        const loginUrl = new URL("./login.html", location.href).toString();
+        location.href = loginUrl;
+      }
+    }, IDLE_MS);
+  };
+
+  // Aktivitás események
+  const onActivity = () => {
+    // ha már felugrott a warning, és a user mozog -> ne logoljuk ki
+    if (warned) {
+      // (opcionális) ide tehetsz egy halk status üzenetet
+    }
+    resetTimers();
+  };
+
+  ["mousemove", "mousedown", "keydown", "touchstart", "scroll"].forEach((evt) => {
+    window.addEventListener(evt, onActivity, { passive: true });
+  });
+
+  // ha visszajön a tabra, az is aktivitás
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) onActivity();
+  });
+
+  // induláskor indítjuk a timereket
+  resetTimers();
+})();
+
+
+
+const changePwForm = document.getElementById("changePwForm");
+const currentPwEl  = document.getElementById("currentPw");
+const newPwEl      = document.getElementById("newPw");
+const newPw2El     = document.getElementById("newPw2");
+const changePwStatus = document.getElementById("changePwStatus");
+
+changePwForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const user = auth.currentUser;
+  if (!user?.email) {
+    changePwStatus.textContent = "Nem vagy bejelentkezve.";
+    return;
+  }
+
+  // FONTOS: nincs trim()
+  const currentPw = (currentPwEl?.value ?? "");
+  const newPw  = (newPwEl?.value ?? "");
+  const newPw2 = (newPw2El?.value ?? "");
+
+  if (!currentPw || !newPw || !newPw2) {
+    changePwStatus.textContent = "Tölts ki minden mezőt.";
+    return;
+  }
+  if (newPw.length < 8) {
+    changePwStatus.textContent = "Az új jelszó legyen legalább 8 karakter.";
+    return;
+  }
+  if (newPw !== newPw2) {
+    changePwStatus.textContent = "Az új jelszavak nem egyeznek.";
+    return;
+  }
+  if (currentPw === newPw) {
+    changePwStatus.textContent = "Az új jelszó nem lehet ugyanaz, mint a régi.";
+    return;
+  }
+
+  changePwStatus.textContent = "Régi jelszó ellenőrzése…";
+
+  try {
+    const cred = EmailAuthProvider.credential(user.email, currentPw);
+    await reauthenticateWithCredential(user, cred);
+
+    changePwStatus.textContent = "Jelszó mentése…";
+    await updatePassword(user, newPw);
+
+    changePwStatus.textContent = "Sikeres jelszócsere ✅";
+    currentPwEl.value = "";
+    newPwEl.value = "";
+    newPw2El.value = "";
+  } catch (err) {
+    console.warn("[changePassword] hiba:", err);
+    const code = err?.code || "";
+
+    if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+      changePwStatus.textContent = "Hibás régi jelszó.";
+    } else if (code === "auth/too-many-requests") {
+      changePwStatus.textContent = "Túl sok próbálkozás. Próbáld később.";
+    } else if (code === "auth/requires-recent-login") {
+      changePwStatus.textContent = "Kérlek lépj ki és be újra, majd próbáld meg.";
+    } else {
+      changePwStatus.textContent = "Nem sikerült a jelszót cserélni. (" + code + ")";
+    }
+  }
+});
+
+
+
+/* ---------- Auth guard (admin csak bejelentkezve) ---------- */
+    const auth = getAuth(app);
+    try { await setPersistence(auth, browserLocalPersistence); } catch {}
+
+    const LOGIN_URL = "./login.html";
+    const next = encodeURIComponent(location.pathname + location.search + location.hash);
+
+    const userBadgeEl = document.getElementById("userBadge");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // Várjuk meg az auth állapotot, mielőtt bármit megjelenítünk
+    await new Promise((resolve) => {
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          // nincs bejelentkezés -> login
+          location.replace(`${LOGIN_URL}?next=${next}`);
+          return;
+        }
+        if (userBadgeEl) userBadgeEl.textContent = user.email ? `Bejelentkezve: ${user.email}` : "Bejelentkezve";
+        document.body.classList.add("authed");
+        resolve();
+      });
+    });
+
+    logoutBtn?.addEventListener("click", async () => {
+      try { await signOut(auth); } finally {
+        location.replace(`${LOGIN_URL}?next=${next}`);
+      }
+    });
 
     /* ---------- Sidebar / Tabs / Hamburger ---------- */
     const tabs  = document.querySelectorAll('.tab-btn');
@@ -327,148 +1013,851 @@
     const slug = s => (s||"").toLowerCase().trim().replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"").replace(/\-+/g,"-");
     const toHHMMSS = (sec)=>{ const s=Math.max(0,Math.round(+sec||0)); const m=Math.floor(s/60), r=s%60; return `${m}p ${String(r).padStart(2,"0")}s`; };
 
-    /* ---------- Analitika (Realtime DB -> aggregálás) ---------- */
-    const kpiSessionsEl     = document.getElementById("kpiSessions");
-    const kpiUsersEl        = document.getElementById("kpiUsers");
-    const kpiAvgDurationEl  = document.getElementById("kpiAvgDuration");
-    const kpiPagesPerSessEl = document.getElementById("kpiPagesPerSession");
-    const kpiSessionsChEl   = document.getElementById("kpiSessionsChange");
-    const kpiUsersChEl      = document.getElementById("kpiUsersChange");
-    const kpiDurChEl        = document.getElementById("kpiDurChange");
-    const kpiPpsChEl        = document.getElementById("kpiPpsChange");
-    const dateRangeLabelEl  = document.getElementById("dateRangeLabel");
-    const topPagesEl        = document.getElementById("topPages");
-    let sessionsChart;
+    
+    /* ---------- Firestore + képtömörítés beállítások ---------- */
 
-    const demoAnalytics = {
-      dateRangeLabel: "Utóbbi 7 nap (demo)",
-      byDay: [
-        { day: "2025-11-14", sessions: 31, users: 26, avgSessionSeconds: 140, pageviews: 81 },
-        { day: "2025-11-15", sessions:  2, users:  2, avgSessionSeconds: 120, pageviews:  5 },
-        { day: "2025-11-16", sessions:  3, users:  3, avgSessionSeconds: 160, pageviews:  7 },
-        { day: "2025-11-17", sessions:  3, users:  3, avgSessionSeconds: 170, pageviews:  8 },
-        { day: "2025-11-18", sessions:  3, users:  3, avgSessionSeconds: 170, pageviews:  8 },
-        { day: "2025-11-19", sessions:  1, users:  1, avgSessionSeconds: 100, pageviews:  2 },
-        { day: "2025-11-20", sessions:  2, users:  2, avgSessionSeconds: 160, pageviews:  6 }
-      ],
-      topPages: [
-        { path:"/", sessions: 18, avgSeconds: 180 },
-        { path:"/szolgaltatasok", sessions: 11, avgSeconds: 160 },
-        { path:"/referenciak", sessions:  8, avgSeconds: 200 },
-        { path:"/kapcsolat", sessions:  6, avgSeconds:  95 },
-      ],
-      prevPeriod: { sessions: 60, users: 50, avgSessionSeconds: 145, pageviewsPerSession: 2.9 },
-      deviceStats: { mobile:60, tablet:15, desktop:25 }
-    };
+    // Átmeneti kompatibilitás: ha a publikus oldal még RTDB-ből olvas, akkor ideiglenesen állítsd true-ra.
+    // Ha már a publikus oldal is Firestore-ból olvas, maradjon false (így nem írsz több adatot RTDB-be).
+    const WRITE_RTD_BK = false;
 
-    function fmtShort(iso){ const d=new Date(iso); if(isNaN(d)) return iso; return d.toLocaleDateString("hu-HU",{month:"2-digit",day:"2-digit"}); }
-    function pct(cur, prev){ if(!prev) return 0; return ((cur-prev)/prev)*100; }
-    function deviceType(ua=""){const u=ua.toLowerCase(); if(/mobile|iphone|ipod|android.*mobile/.test(u))return"mobile"; if(/ipad|tablet|android(?!.*mobile)/.test(u))return"tablet"; return"desktop";}
+    const hasFS = () => firebaseEnabled && !!dbFirestore;
+    const hasRTDB = () => firebaseEnabled && !!dbRealtime;
 
-    function buildTopPagesFromSessions(sessions){
-      const map=new Map();
-      sessions.forEach(s=>{
-        const path = s.firstPage || s.lastPage || "/";
-        const dur  = Number(s.durationSec||0);
-        const item = map.get(path)||{path,sessions:0,totalDur:0};
-        item.sessions++; item.totalDur+=dur; map.set(path,item);
-      });
-      return [...map.values()].map(x=>({path:x.path, sessions:x.sessions, avgSeconds:x.totalDur/x.sessions}))
-               .sort((a,b)=>b.sessions-a.sessions).slice(0,5);
+    async function fsGetSingleton(col, id){
+      if(!hasFS()) return null;
+      const s = await getDoc(doc(dbFirestore, col, id));
+      return s.exists() ? (s.data() || null) : null;
     }
 
-    function buildAnalyticsFromSessions(sessions){
-      if(!sessions?.length) return demoAnalytics;
-      const byDate=new Map(), visitors=new Set(); let totalDur=0,totalPv=0;
-      sessions.forEach(s=>{
-        const t = s.startedAt || s.lastUpdatedAt || Date.now();
-        const d = new Date(t); if(isNaN(d)) return;
-        const key = d.toISOString().slice(0,10);
-        const rec = byDate.get(key)||{day:key,sessions:0,sumDur:0,pageviews:0,userSet:new Set()};
-        rec.sessions++; const dur=+s.durationSec||0; rec.sumDur+=dur; totalDur+=dur;
-        const pv=+s.pageViews||0; rec.pageviews+=pv; totalPv+=pv;
-        if(s.visitorId) {rec.userSet.add(s.visitorId); visitors.add(s.visitorId);}
-        rec.device = deviceType(s.userAgent||"");
-        byDate.set(key,rec);
-      });
-      const days=[...byDate.values()].sort((a,b)=>a.day.localeCompare(b.day))
-        .map(r=>({day:r.day, sessions:r.sessions, users:r.userSet.size||r.sessions, avgSessionSeconds:r.sumDur/r.sessions, pageviews:r.pageviews}));
-      const totalSessions=days.reduce((s,d)=>s+d.sessions,0);
-      const uniqueVisitors = visitors.size || totalSessions;
-      const avgDur = totalSessions? days.reduce((s,d)=>s+d.avgSessionSeconds*d.sessions,0)/totalSessions : 0;
-      const pps    = totalSessions? totalPv/totalSessions : 0;
-      return {
-        dateRangeLabel: "Összes összegyűjtött adat",
-        byDay: days,
-        topPages: buildTopPagesFromSessions(sessions),
-        prevPeriod: { sessions: totalSessions, users: uniqueVisitors, avgSessionSeconds: avgDur, pageviewsPerSession: pps },
-        deviceStats: {} // opcionális
-      };
+    async function fsSetSingleton(col, id, data, { merge=true } = {}){
+      if(!hasFS()) return;
+      await setDoc(doc(dbFirestore, col, id), data, { merge });
     }
 
-    function setDelta(el,value){ const txt=(value>=0?"+":"")+value.toFixed(1)+"%"; el.textContent=txt; el.style.color = value>=0? "var(--success)":"var(--danger)"; }
-    function renderTopPages(data){
-      const pages=data.topPages||[];
-      if(!pages.length){ topPagesEl.innerHTML='<div class="muted">Nincs adat.</div>'; return; }
-      topPagesEl.innerHTML="";
-      pages.forEach(p=>{
-        const row=document.createElement("div"); row.className="top-row";
-        const left=document.createElement("div"); left.innerHTML=`<div class="top-path">${p.path}</div><div class="top-meta">${p.sessions} session · ${toHHMMSS(p.avgSeconds)}</div>`;
-        const right=document.createElement("div"); right.className="top-num"; right.textContent=p.sessions.toLocaleString("hu-HU");
-        row.appendChild(left); row.appendChild(right); topPagesEl.appendChild(row);
-      });
+    async function fsListAll(col){
+      if(!hasFS()) return [];
+      const snap = await getDocs(collection(dbFirestore, col));
+      return snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
     }
 
-    async function loadAnalytics(){
-      if(!firebaseEnabled || !dbRealtime){
-        const d=demoAnalytics; updateKpisAndChart(d); return;
-      }
+    async function fsUpsert(col, id, data, { merge=true } = {}){
+      if(!hasFS()) return;
+      await setDoc(doc(dbFirestore, col, id), data, { merge });
+    }
+
+    async function fsDelete(col, id){
+      if(!hasFS()) return;
+      await deleteDoc(doc(dbFirestore, col, id));
+    }
+
+    // Kép tömörítés + átméretezés: drasztikusan csökkenti a letöltött MB-okat.
+    // Firestore limit: egy dokumentum max ~1 MiB. Ha túl nagy, jelezni fogjuk.
+    async function fileToOptimizedDataUrl(file, { maxW=1200, maxH=1200, mime="image/webp", quality=0.78 } = {}){
+      if(!file) return null;
+
+      const blobUrl = URL.createObjectURL(file);
       try{
-        const snap=await get(dbRef(dbRealtime,"analytics/sessions"));
-        if(!snap.exists()){ updateKpisAndChart(demoAnalytics); return; }
-        const sessions = Object.values(snap.val()||{});
-        const d = buildAnalyticsFromSessions(sessions);
-        updateKpisAndChart(d);
-      }catch(e){
-        console.warn("[analytics] hiba:", e);
-        updateKpisAndChart(demoAnalytics);
+        const img = await new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = (e) => reject(e);
+          im.src = blobUrl;
+        });
+
+        const w = img.naturalWidth || img.width;
+        const h = img.naturalHeight || img.height;
+        const scale = Math.min(1, maxW / w, maxH / h);
+
+        const cw = Math.max(1, Math.round(w * scale));
+        const ch = Math.max(1, Math.round(h * scale));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = cw;
+        canvas.height = ch;
+
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, cw, ch);
+
+        const dataUrl = canvas.toDataURL(mime, quality);
+
+        // Durva korlát: ~950k karakter felett már könnyen Firestore 1MiB fölé csúszik (base64 overhead miatt).
+        if (dataUrl && dataUrl.length > 950000) {
+          throw new Error("A kép még tömörítés után is túl nagy. Próbáld kisebb képpel, vagy csökkentsd a felbontást/minőséget.");
+        }
+
+        return dataUrl;
+      } finally {
+        URL.revokeObjectURL(blobUrl);
       }
     }
 
-    function updateKpisAndChart(d){
-      const days=d.byDay||[];
-      const totalSessions = days.reduce((s,x)=>s+x.sessions,0);
-      const totalUsers    = days.reduce((s,x)=>s+x.users,0);
-      const totalPv       = days.reduce((s,x)=>s+x.pageviews,0);
-      const avgDur        = totalSessions? days.reduce((s,x)=>s+x.avgSessionSeconds*x.sessions,0)/totalSessions : 0;
-      const pps           = totalSessions? totalPv/totalSessions : 0;
+    // Egyszeri migráció: RTDB -> Firestore (adatok másolása, törlés nélkül)
+    async function migrateRtdbToFirestore(){
+      if(!hasFS() || !hasRTDB()){
+        alert("Firebase nincs inicializálva (Firestore/RTDB).");
+        return;
+      }
 
-      kpiSessionsEl.textContent = totalSessions.toLocaleString("hu-HU");
-      kpiUsersEl.textContent    = totalUsers.toLocaleString("hu-HU");
-      kpiAvgDurationEl.textContent = toHHMMSS(avgDur);
-      kpiPagesPerSessEl.textContent = pps.toFixed(2);
+      const ok = confirm("RTDB → Firestore migráció indul. (Nem törlünk RTDB-ből.)\n\nOK = indul, Mégse = kilép.");
+      if(!ok) return;
 
-      // (demo jellegű) összevetés előző időszakkal
-      setDelta(kpiSessionsChEl, pct(totalSessions, d.prevPeriod?.sessions||totalSessions));
-      setDelta(kpiUsersChEl,    pct(totalUsers,    d.prevPeriod?.users||totalUsers));
-      setDelta(kpiDurChEl,      pct(avgDur,        d.prevPeriod?.avgSessionSeconds||avgDur));
-      setDelta(kpiPpsChEl,      pct(pps,           d.prevPeriod?.pageviewsPerSession||pps));
+      const status = (msg)=>console.log("[migrate]", msg);
 
-      dateRangeLabelEl.textContent = d.dateRangeLabel||"Időszak";
+      // ---- Firestore méret limitek: 10 MiB / request, 1 MiB / doc ----
+      // https://firebase.google.com/docs/firestore/quotas
+      const SAFE_MAX_REQUEST_BYTES = 7_500_000; // tartsunk bőven 10 MiB alatt
+      const SAFE_MAX_OPS = 200;                 // bőven 500 alatt
 
-      const labels = days.map(x=>fmtShort(x.day));
-      const series = days.map(x=>x.sessions);
-      if(sessionsChart) sessionsChart.destroy();
-      sessionsChart = new Chart(document.getElementById("sessionsChart").getContext("2d"), {
-        type:"line",
-        data:{ labels, datasets:[{ label:"Munkamenetek", data:series, tension:.35, borderWidth:2, pointRadius:3, fill:false }] },
-        options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
-      });
+      const estBytes = (obj) => {
+        try { return new TextEncoder().encode(JSON.stringify(obj)).length; }
+        catch { return (JSON.stringify(obj) || "").length; }
+      };
 
-      renderTopPages(d);
+      const isDataUrl = (v) => typeof v === "string" && v.startsWith("data:image/");
+
+      const compressDataUrl = async (dataUrl, maxW=1200, quality=0.78) => {
+        // Visszaad egy (jó eséllyel) kisebb webp dataURL-t
+        return await new Promise((resolve) => {
+          try{
+            const img = new Image();
+            img.onload = () => {
+              const scale = Math.min(1, maxW / (img.width || maxW));
+              const w = Math.max(1, Math.round((img.width || maxW) * scale));
+              const h = Math.max(1, Math.round((img.height || maxW) * scale));
+              const canvas = document.createElement("canvas");
+              canvas.width = w; canvas.height = h;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, w, h);
+              // webp tömörítés
+              const out = canvas.toDataURL("image/webp", quality);
+              resolve(out || dataUrl);
+            };
+            img.onerror = () => resolve(dataUrl);
+            img.src = dataUrl;
+          }catch(_e){
+            resolve(dataUrl);
+          }
+        });
+      };
+
+      const normalizeImagesDeep = async (obj, maxW=1200, quality=0.78) => {
+        if(Array.isArray(obj)){
+          for(let i=0;i<obj.length;i++) obj[i] = await normalizeImagesDeep(obj[i], maxW, quality);
+          return obj;
+        }
+        if(obj && typeof obj === "object"){
+          for(const k of Object.keys(obj)) obj[k] = await normalizeImagesDeep(obj[k], maxW, quality);
+          return obj;
+        }
+        if(isDataUrl(obj)){
+          // csak a nagyon nagyokat tömörítsük – gyorsabb
+          if(obj.length > 120_000) return await compressDataUrl(obj, maxW, quality);
+          return obj;
+        }
+        return obj;
+      };
+
+      const migrateEntriesToCollection = async (entries, fsCol) => {
+        let batch = writeBatch(dbFirestore);
+        let ops = 0;
+        let bytes = 0;
+        let migrated = 0;
+        let skipped = 0;
+
+        for(const [id, raw] of entries){
+          // clone (nehogy a memóriában felülírjuk az eredetit)
+          let data = raw || {};
+          try { data = JSON.parse(JSON.stringify(data)); } catch {}
+
+          // 1) alaptömörítés (webp + resize)
+          data = await normalizeImagesDeep(data, 1200, 0.78);
+
+          // 2) ha még mindig nagy, agresszívebben
+          let dbytes = estBytes(data);
+          if(dbytes > 950_000){
+            data = await normalizeImagesDeep(data, 800, 0.70);
+            dbytes = estBytes(data);
+          }
+
+          // 3) ha még mindig túl nagy: kihagyjuk (Firestore 1MiB/doc limit)
+          if(dbytes >= 1_048_000){
+            skipped++;
+            status(`⚠️ SKIP ${fsCol}/${id} túl nagy (~${dbytes} byte). Ilyet Firestore nem tud tárolni (1MiB/doc).`);
+            continue;
+          }
+
+          // ha a következő művelet túl nagy request-et csinálna, commit
+          if(ops >= SAFE_MAX_OPS || (bytes + dbytes) >= SAFE_MAX_REQUEST_BYTES){
+            await batch.commit();
+            batch = writeBatch(dbFirestore);
+            ops = 0; bytes = 0;
+          }
+
+          batch.set(doc(dbFirestore, fsCol, id), data, { merge:false });
+          ops++; bytes += dbytes; migrated++;
+        }
+
+        if(ops > 0) await batch.commit();
+        status(`✅ ${fsCol}: migrálva=${migrated}, kihagyva=${skipped}`);
+      };
+
+      try{
+        // Settings: email
+        status("settings/email");
+        const emailSnap = await get(dbRef(dbRealtime, "settings/email"));
+        if(emailSnap.exists()){
+          await fsSetSingleton("settings", "email", emailSnap.val() || {}, { merge:false });
+        }
+
+        // Settings: layoutBoards
+        status("settings/layoutBoards");
+        const boardSnap = await get(dbRef(dbRealtime, "settings/layoutBoards"));
+        if(boardSnap.exists()){
+          await fsSetSingleton("settings", "layoutBoards", boardSnap.val() || {}, { merge:false });
+        }
+
+        // Content sections
+        status("content/sections -> contentSections/*");
+        const contentSnap = await get(dbRef(dbRealtime, "content/sections"));
+        if(contentSnap.exists()){
+          const all = contentSnap.val() || {};
+          await migrateEntriesToCollection(Object.entries(all), "contentSections");
+        }
+
+        // Collections
+        async function migrateCollection(rtdbPath, fsCol){
+          status(`${rtdbPath} -> ${fsCol}/*`);
+          const snap = await get(dbRef(dbRealtime, rtdbPath));
+          if(!snap.exists()) return;
+          const val = snap.val() || {};
+          await migrateEntriesToCollection(Object.entries(val), fsCol);
+        }
+
+        await migrateCollection("suppliers", "suppliers");
+        await migrateCollection("references", "references");
+        await migrateCollection("products", "products");
+        await migrateCollection("heroSlider", "heroSlider");
+
+        status("✅ Migráció kész.");
+        alert("Kész! RTDB → Firestore migráció befejezve.\n\nMost állítsd át az admin mentéseket Firestore-ra (ez a fájl már így van), és a publikus oldalt is érdemes Firestore betöltésre refaktorálni.");
+      }catch(err){
+        console.warn("[migrate] hiba:", err);
+        alert("Migráció közben hiba történt. Nézd meg a console-t.");
+      }
     }
 
-    /* ---------- Layout (Trello board, Realtime DB) ---------- */
+    // Futás DevTools-ból: window.migrateRtdbToFirestore()
+    window.migrateRtdbToFirestore = migrateRtdbToFirestore;
+
+/* ---------- Analitika (Realtime DB -> aggregálás) ---------- */
+let anaRawSessions = [];
+let anaMainChart = null;
+let anaDeviceChart = null;
+let anaBrowserChart = null;
+let anaUiBound = false;
+
+const ANA_DAY_LABELS = ["H","K","Sze","Cs","P","Szo","V"];
+
+function anaLocalDateKey(dateLike){
+  const d = (dateLike instanceof Date) ? dateLike : new Date(dateLike);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const da = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+}
+function anaLabelFromKey(key){
+  const [y,m,d] = key.split("-").map(Number);
+  const dt = new Date(y, m-1, d);
+  return dt.toLocaleDateString("hu-HU", { month:"short", day:"numeric" });
+}
+function anaFormatInt(n){ return (n||0).toLocaleString("hu-HU"); }
+function anaFormatFloat(n, digits=2){
+  const v = Number.isFinite(n) ? n : 0;
+  return v.toFixed(digits);
+}
+function anaFormatDuration(seconds){
+  const s = Math.max(0, Math.floor(seconds||0));
+  const mins = Math.floor(s/60);
+  const secs = s%60;
+  return `${mins}p ${String(secs).padStart(2,"0")}s`;
+}
+function anaPctChange(curr, prev){
+  if(!prev || prev === 0) return 0;
+  return ((curr - prev) / prev) * 100;
+}
+function anaPctChangeSafe(curr, prev){
+  if(prev === 0){
+    if(curr === 0) return 0;
+    return 100; // induló növekedés
+  }
+  return ((curr - prev) / prev) * 100;
+}
+
+function anaParseDevice(ua=""){
+  const s = String(ua).toLowerCase();
+  if(/tablet|ipad/.test(s)) return "Tablet";
+  if(/mobi|iphone|android/.test(s)) return "Mobil";
+  return "Desktop";
+}
+function anaParseBrowser(ua=""){
+  const s = String(ua);
+  // egyszerű, de elég jó a dashboardhoz
+  if(/Edg\//.test(s)) return "Edge";
+  if(/Firefox\//.test(s)) return "Firefox";
+  if(/Safari\//.test(s) && !/Chrome\//.test(s) && !/Chromium\//.test(s)) return "Safari";
+  if(/Chrome\//.test(s) || /Chromium\//.test(s)) return "Chrome";
+  return "Egyéb";
+}
+
+function anaComputeMetrics(sessions){
+  const visitors = new Set();
+  let pageviews = 0;
+  let dur = 0;
+  let bounces = 0;
+
+  sessions.forEach((s, i) => {
+    visitors.add(s.visitorId || s.uid || s.userId || `anon_${i}`);
+    const pv = Number(s.pageViews || s.pageviews || 0) || 0;
+    pageviews += pv;
+    const ds = Number(s.durationSec || s.duration || 0) || 0;
+    dur += ds;
+    if(pv <= 1) bounces++;
+  });
+
+  const totalSessions = sessions.length;
+  const avgDuration = totalSessions ? (dur / totalSessions) : 0;
+  const pagesPerSession = totalSessions ? (pageviews / totalSessions) : 0;
+  const bounceRate = totalSessions ? (bounces / totalSessions) * 100 : 0;
+
+  return { totalSessions, users: visitors.size, pageviews, avgDuration, pagesPerSession, bounceRate };
+}
+
+function anaBuildDaySeries(sessions, days){
+  const now = new Date();
+  // endDate = max startedAt, ha van; különben ma
+  let endDate = now;
+  if(sessions.length){
+    const maxTs = Math.max(...sessions.map(s => new Date(s.startedAt || s.ts || Date.now()).getTime()));
+    if(Number.isFinite(maxTs)) endDate = new Date(maxTs);
+  }
+  endDate.setHours(0,0,0,0);
+
+  const startDate = new Date(endDate);
+  startDate.setDate(startDate.getDate() - (days - 1));
+  startDate.setHours(0,0,0,0);
+
+  const inRange = sessions.filter(s => {
+    const t = new Date(s.startedAt || s.ts || Date.now());
+    return t >= startDate && t <= new Date(endDate.getTime() + 24*3600*1000 - 1);
+  });
+
+  const map = new Map(); // dayKey -> {sessions, pageviews, durSum, bounces, visitors:Set}
+  inRange.forEach((s, i) => {
+    const dt = new Date(s.startedAt || s.ts || Date.now());
+    const key = anaLocalDateKey(dt);
+    if(!map.has(key)){
+      map.set(key, { sessions:0, pageviews:0, durSum:0, bounces:0, visitors:new Set() });
+    }
+    const rec = map.get(key);
+    rec.sessions++;
+    const pv = Number(s.pageViews || s.pageviews || 0) || 0;
+    rec.pageviews += pv;
+    const ds = Number(s.durationSec || s.duration || 0) || 0;
+    rec.durSum += ds;
+    if(pv <= 1) rec.bounces++;
+    rec.visitors.add(s.visitorId || s.uid || s.userId || `anon_${i}`);
+  });
+
+  const series = [];
+  for(let i=0;i<days;i++){
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    const key = anaLocalDateKey(d);
+    const rec = map.get(key);
+    const sessionsN = rec ? rec.sessions : 0;
+    const pageviewsN = rec ? rec.pageviews : 0;
+    const usersN = rec ? rec.visitors.size : 0;
+    const avgDur = sessionsN ? (rec.durSum / sessionsN) : 0;
+    const bounceRate = sessionsN ? (rec.bounces / sessionsN) * 100 : 0;
+
+    series.push({
+      day: key,
+      label: anaLabelFromKey(key),
+      sessions: sessionsN,
+      users: usersN,
+      pageviews: pageviewsN,
+      avgDuration: avgDur,
+      bounceRate
+    });
+  }
+  return { startDate, endDate, inRange, series };
+}
+
+function anaSplitSessionsByMid(startDate, days, sessions){
+  const mid = new Date(startDate);
+  mid.setDate(mid.getDate() + Math.floor(days/2));
+  mid.setHours(0,0,0,0);
+
+  const prev = [];
+  const curr = [];
+  sessions.forEach(s => {
+    const t = new Date(s.startedAt || s.ts || Date.now());
+    if(t < mid) prev.push(s);
+    else curr.push(s);
+  });
+  return { prev, curr };
+}
+
+function anaComputeTopPages(prevSessions, currSessions, limit=5){
+  const sumByPath = (arr) => {
+    const m = new Map();
+    arr.forEach(s=>{
+      const path = (s.lastPage || s.firstPage || s.path || "/") || "/";
+      const pv = Number(s.pageViews || s.pageviews || 1) || 1;
+      m.set(path, (m.get(path)||0) + pv);
+    });
+    return m;
+  };
+  const prevMap = sumByPath(prevSessions);
+  const currMap = sumByPath(currSessions);
+
+  // combine keys
+  const keys = new Set([...prevMap.keys(), ...currMap.keys()]);
+  const combined = Array.from(keys).map(path=>{
+    const prev = prevMap.get(path)||0;
+    const curr = currMap.get(path)||0;
+    const total = prev + curr;
+    return { path, views: total, change: anaPctChangeSafe(curr, prev), currViews: curr };
+  }).sort((a,b)=> b.views - a.views);
+
+  return combined.slice(0, limit);
+}
+
+function anaComputeDeviceShare(sessions){
+  const counts = { Desktop:0, Mobil:0, Tablet:0 };
+  sessions.forEach(s=>{
+    const dev = anaParseDevice(s.userAgent || s.ua || "");
+    counts[dev] = (counts[dev]||0)+1;
+  });
+  const total = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
+  return Object.entries(counts).map(([name, cnt]) => ({
+    name,
+    value: Math.round((cnt/total)*100),
+    count: cnt
+  }));
+}
+
+function anaComputeBrowserShare(sessions){
+  const counts = {};
+  sessions.forEach(s=>{
+    const b = anaParseBrowser(s.userAgent || s.ua || "");
+    counts[b] = (counts[b]||0)+1;
+  });
+  const total = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
+
+  const items = Object.entries(counts).map(([name,cnt])=>({
+    name,
+    value: Math.round((cnt/total)*100),
+    count: cnt
+  })).sort((a,b)=>b.value-a.value);
+
+  // ha sok "Egyéb", összevonás nem kell, elég
+  return items.slice(0,6);
+}
+
+function anaComputeHeatmap(sessions){
+  // dayIndex: H(0) ... V(6)
+  const counts = Array.from({length:7}, ()=> Array.from({length:24}, ()=>0));
+  sessions.forEach(s=>{
+    const d = new Date(s.startedAt || s.ts || Date.now());
+    const jsDay = d.getDay(); // 0=V
+    const dayIndex = (jsDay + 6) % 7; // 0=H
+    const hour = d.getHours();
+    counts[dayIndex][hour] += 1;
+  });
+  let max = 0;
+  counts.forEach(row=> row.forEach(v=>{ if(v>max) max=v; }));
+  max = max || 1;
+  const intensity = counts.map(row=> row.map(v=> v/max));
+  return intensity;
+}
+
+/* ---------- Renderers ---------- */
+function anaSetDelta(el, changePct, positiveIsGood=true){
+  if(!el) return;
+  const good = positiveIsGood ? (changePct >= 0) : (changePct <= 0);
+  const cls = good ? "pos" : "neg";
+  const sign = (changePct >= 0) ? "+" : "";
+  el.innerHTML = `<span class="${cls}">${sign}${changePct.toFixed(1)}%</span> <small>vs előző időszak</small>`;
+}
+
+function anaRenderHeatmap(intensity){
+  const root = document.getElementById("anaHeatmap");
+  if(!root) return;
+  root.innerHTML = "";
+
+  const header = document.createElement("div");
+  header.className = "hm-header";
+  header.innerHTML = `<div></div>
+    <div>0:00</div><div>6:00</div><div>12:00</div><div>18:00</div><div>23:00</div>`;
+  root.appendChild(header);
+
+  ANA_DAY_LABELS.forEach((dayLabel, dayIndex)=>{
+    const row = document.createElement("div");
+    row.className = "hm-row";
+    const day = document.createElement("div");
+    day.className = "hm-day";
+    day.textContent = dayLabel;
+    const cells = document.createElement("div");
+    cells.className = "hm-cells";
+
+    for(let hour=0; hour<24; hour++){
+      const i = intensity?.[dayIndex]?.[hour] ?? 0;
+      const cell = document.createElement("div");
+      cell.className = "hm-cell";
+      cell.style.background = `rgba(37,99,235, ${0.08 + i*0.85})`;
+      cell.title = `${dayLabel} ${hour}:00 • ${Math.round(i*100)}% aktivitás`;
+      cells.appendChild(cell);
+    }
+
+    row.appendChild(day);
+    row.appendChild(cells);
+    root.appendChild(row);
+  });
+
+  const legend = document.createElement("div");
+  legend.className = "hm-legend";
+  legend.innerHTML = `<span>Alacsony</span>
+    <div class="hm-scale">
+      <i style="background:rgba(37,99,235,.15)"></i>
+      <i style="background:rgba(37,99,235,.35)"></i>
+      <i style="background:rgba(37,99,235,.55)"></i>
+      <i style="background:rgba(37,99,235,.75)"></i>
+      <i style="background:rgba(37,99,235,.95)"></i>
+    </div>
+    <span>Magas</span>`;
+  root.appendChild(legend);
+}
+
+function anaDestroyChart(ch){ try{ ch?.destroy?.(); }catch(e){} }
+
+function anaRenderMainChart(series, metric){
+  const canvas = document.getElementById("anaMainChart");
+  if(!canvas || !window.Chart) return;
+
+  anaDestroyChart(anaMainChart);
+  const labels = series.map(d=> d.label);
+  const values = series.map(d=> Number(d[metric] || 0));
+
+  anaMainChart = new Chart(canvas.getContext("2d"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: metric,
+        data: values,
+        fill: true,
+        tension: 0.35,
+        borderWidth: 2,
+        borderColor: "rgba(37,99,235,1)",
+        backgroundColor: "rgba(37,99,235,.15)",
+        pointRadius: 2,
+        pointHoverRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display:false },
+        tooltip: { mode:"index", intersect:false }
+      },
+      scales: {
+        x: { grid: { display:false } },
+        y: { grid: { color:"rgba(148,163,184,.25)" }, ticks: { precision:0 } }
+      }
+    }
+  });
+}
+
+function anaRenderDeviceChart(deviceShare){
+  const canvas = document.getElementById("anaDeviceChart");
+  const legend = document.getElementById("anaDeviceLegend");
+  if(!canvas || !window.Chart) return;
+
+  anaDestroyChart(anaDeviceChart);
+
+  const labels = deviceShare.map(d=> d.name);
+  const values = deviceShare.map(d=> d.value);
+
+  anaDeviceChart = new Chart(canvas.getContext("2d"), {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: [
+          "rgba(37,99,235,1)",
+          "rgba(217,108,6,1)",
+          "rgba(22,163,74,1)"
+        ],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins: { legend:{ display:false }, tooltip:{ callbacks:{
+        label: (ctx)=> `${ctx.label}: ${ctx.parsed}%`
+      }}},
+      cutout: "60%"
+    }
+  });
+
+  if(legend){
+    legend.innerHTML = deviceShare.map((d, idx)=>{
+      const colors = ["rgba(37,99,235,1)","rgba(217,108,6,1)","rgba(22,163,74,1)"];
+      const c = colors[idx] || "rgba(100,116,139,1)";
+      return `<div style="display:flex; align-items:center; gap:8px;">
+        <span style="width:10px; height:10px; border-radius:999px; background:${c}; display:inline-block;"></span>
+        <span style="font-size:13px; color:var(--muted); font-weight:700;">${d.name}</span>
+        <span style="font-size:13px; font-weight:900;">${d.value}%</span>
+      </div>`;
+    }).join("");
+  }
+}
+
+function anaRenderBrowserChart(browserShare){
+  const canvas = document.getElementById("anaBrowserChart");
+  if(!canvas || !window.Chart) return;
+
+  anaDestroyChart(anaBrowserChart);
+
+  anaBrowserChart = new Chart(canvas.getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: browserShare.map(d=> d.name),
+      datasets: [{
+        data: browserShare.map(d=> d.value),
+        backgroundColor: "rgba(37,99,235,1)",
+        borderRadius: 8
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins: { legend:{ display:false } },
+      scales: {
+        x: { grid: { color:"rgba(148,163,184,.25)" }, ticks:{ callback:(v)=> v+"%" } },
+        y: { grid: { display:false } }
+      }
+    }
+  });
+}
+
+function anaRenderTopPages(items){
+  const root = document.getElementById("anaTopPages");
+  if(!root) return;
+  root.innerHTML = "";
+
+  if(!items.length){
+    root.innerHTML = `<div class="small">Nincs megjeleníthető adat.</div>`;
+    return;
+  }
+
+  items.forEach((p, idx)=>{
+    const row = document.createElement("div");
+    row.className = "ana-row";
+    const changeCls = (p.change >= 0) ? "pos" : "neg";
+    const sign = (p.change >= 0) ? "+" : "";
+    row.innerHTML = `
+      <div class="ana-rank">${idx+1}</div>
+      <div class="mid">
+        <div class="t">${p.title || p.path}</div>
+        <div class="s">${p.path}</div>
+      </div>
+      <div class="right">
+        <div class="n">${anaFormatInt(p.views)}</div>
+        <div class="c ${changeCls}">${sign}${p.change.toFixed(1)}%</div>
+      </div>
+    `;
+    root.appendChild(row);
+  });
+}
+
+/* ---------- Main orchestrator ---------- */
+function anaRenderDashboard(){
+  const dateRangeEl = document.getElementById("anaDateRange");
+  const metricEl = document.getElementById("anaMetric");
+
+  const days = parseInt(dateRangeEl?.value || "30", 10) || 30;
+  const metric = metricEl?.value || "sessions";
+
+  const { startDate, endDate, inRange, series } = anaBuildDaySeries(anaRawSessions, days);
+  const { prev, curr } = anaSplitSessionsByMid(startDate, days, inRange);
+
+  const prevM = anaComputeMetrics(prev);
+  const currM = anaComputeMetrics(curr);
+
+  // KPI values (current half)
+  const sessionsEl = document.getElementById("anaKpiSessions");
+  const usersEl = document.getElementById("anaKpiUsers");
+  const pvEl = document.getElementById("anaKpiPageviews");
+  const bounceEl = document.getElementById("anaKpiBounce");
+
+  if(sessionsEl) sessionsEl.textContent = anaFormatInt(currM.totalSessions);
+  if(usersEl) usersEl.textContent = anaFormatInt(currM.users);
+  if(pvEl) pvEl.textContent = anaFormatInt(currM.pageviews);
+  if(bounceEl) bounceEl.textContent = anaFormatFloat(currM.bounceRate, 1);
+
+  // KPI deltas
+  anaSetDelta(document.getElementById("anaKpiSessionsDelta"), anaPctChange(currM.totalSessions, prevM.totalSessions), true);
+  anaSetDelta(document.getElementById("anaKpiUsersDelta"), anaPctChange(currM.users, prevM.users), true);
+  anaSetDelta(document.getElementById("anaKpiPageviewsDelta"), anaPctChange(currM.pageviews, prevM.pageviews), true);
+
+  // Bounce: csökkenés = jó → "javulás"
+  const bounceImprove = prevM.bounceRate ? ((prevM.bounceRate - currM.bounceRate) / prevM.bounceRate) * 100 : 0;
+  const bounceDeltaEl = document.getElementById("anaKpiBounceDelta");
+  if(bounceDeltaEl){
+    const good = bounceImprove >= 0;
+    const cls = good ? "pos" : "neg";
+    const sign = bounceImprove >= 0 ? "+" : "";
+    bounceDeltaEl.innerHTML = `<span class="${cls}">${sign}${bounceImprove.toFixed(1)}%</span> <small>javulás</small>`;
+  }
+
+  // Secondary KPIs
+  const avgDurEl = document.getElementById("anaAvgDuration");
+  const durDeltaEl = document.getElementById("anaDurationDelta");
+  if(avgDurEl) avgDurEl.textContent = anaFormatDuration(currM.avgDuration);
+
+  const durCh = anaPctChange(currM.avgDuration, prevM.avgDuration);
+  if(durDeltaEl) durDeltaEl.textContent = `${durCh>=0?"+":""}${durCh.toFixed(1)}%`;
+
+  const ppsEl = document.getElementById("anaPagesPerSession");
+  const ppsDeltaEl = document.getElementById("anaPpsDelta");
+  if(ppsEl) ppsEl.textContent = anaFormatFloat(currM.pagesPerSession, 2);
+
+  const ppsCh = anaPctChange(currM.pagesPerSession, prevM.pagesPerSession);
+  if(ppsDeltaEl) ppsDeltaEl.textContent = `${ppsCh>=0?"+":""}${ppsCh.toFixed(1)}%`;
+
+  // Charts
+  anaRenderMainChart(series, metric);
+  anaRenderDeviceChart(anaComputeDeviceShare(inRange));
+  anaRenderBrowserChart(anaComputeBrowserShare(inRange));
+  anaRenderHeatmap(anaComputeHeatmap(inRange));
+
+  // Top pages (by pageviews)
+  const top = anaComputeTopPages(prev, curr, 5).map(p => ({
+    ...p,
+    title: (p.path === "/") ? "Főoldal" : p.path
+  }));
+  anaRenderTopPages(top);
+
+  // Insights
+  const usersChange = anaPctChange(currM.users, prevM.users);
+  const trend = document.getElementById("anaInsightTrend");
+  const engagement = document.getElementById("anaInsightEngagement");
+  const tip = document.getElementById("anaInsightTip");
+
+  if(trend){
+    trend.textContent = `A látogatók száma ${usersChange >= 0 ? "növekedett" : "csökkent"} az előző időszakhoz képest (${usersChange>=0?"+":""}${usersChange.toFixed(1)}%).${usersChange >= 5 ? " Kiváló teljesítmény!" : ""}`;
+  }
+  if(engagement){
+    engagement.textContent = `A látogatók átlagosan ${anaFormatDuration(currM.avgDuration)} időt töltenek az oldalon és ${anaFormatFloat(currM.pagesPerSession,2)} oldalt néznek meg egy munkamenetben.`;
+  }
+  if(tip){
+    tip.textContent = `${currM.bounceRate > 50 ? "A visszafordulási arány magas. Érdemes javítani a főoldal első benyomását és a CTA-kat." : "Kiváló visszafordulási arány! A tartalom jól megtartja a látogatókat."}`;
+  }
+}
+
+function anaBindUiOnce(){
+  if(anaUiBound) return;
+  anaUiBound = true;
+
+  const dateRangeEl = document.getElementById("anaDateRange");
+  const metricEl = document.getElementById("anaMetric");
+
+  dateRangeEl?.addEventListener("change", anaRenderDashboard);
+  metricEl?.addEventListener("change", anaRenderDashboard);
+}
+
+function anaGenerateDemoSessions(days=30){
+  const pages = ["/", "/termekek/garazskapuk", "/termekek/ipari-kapuk", "/kapcsolat", "/rolunk"];
+  const uas = [
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
+    "Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36",
+  ];
+
+  const now = new Date();
+  const sessions = [];
+  const total = Math.max(200, days * 20);
+
+  for(let i=0;i<total;i++){
+    const d = new Date(now);
+    d.setDate(now.getDate() - Math.floor(Math.random() * days));
+    d.setHours(Math.floor(Math.random()*24), Math.floor(Math.random()*60), Math.floor(Math.random()*60), 0);
+
+    const pv = 1 + Math.floor(Math.random()*4);
+    const dur = 30 + Math.floor(Math.random()*420);
+
+    sessions.push({
+      startedAt: d.toISOString(),
+      visitorId: "demo_" + (1 + Math.floor(Math.random()*120)),
+      pageViews: pv,
+      durationSec: dur,
+      userAgent: uas[Math.floor(Math.random()*uas.length)],
+      lastPage: pages[Math.floor(Math.random()*pages.length)]
+    });
+  }
+  return sessions;
+}
+
+async function loadAnalytics(){
+  anaBindUiOnce();
+
+  try{
+    if(dbRealtime){
+      const snap = await get(dbRef(dbRealtime, "analytics/sessions"));
+      const val = snap.val();
+      if(val){
+        anaRawSessions = Object.values(val);
+      } else {
+        anaRawSessions = [];
+      }
+    } else {
+      anaRawSessions = [];
+    }
+  }catch(err){
+    console.warn("[analytics] RTDB olvasási hiba:", err);
+    anaRawSessions = [];
+  }
+
+  if(!anaRawSessions.length){
+    // demo fallback
+    const dateRangeEl = document.getElementById("anaDateRange");
+    const days = parseInt(dateRangeEl?.value || "30", 10) || 30;
+    anaRawSessions = anaGenerateDemoSessions(days);
+  }
+
+  const updatedEl = document.getElementById("anaLastUpdated");
+  if(updatedEl){
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,"0");
+    const mm = String(now.getMinutes()).padStart(2,"0");
+    updatedEl.textContent = `· frissítve: ${hh}:${mm}`;
+  }
+
+  anaRenderDashboard();
+}
+
+/* ---------- Layout (Trello board, Firestore) ---------- */
     const listsWrap = document.getElementById("listsWrap");
     const addListBtn = document.getElementById("addListBtn");
     const saveBtnBoards = document.getElementById("layoutSaveBtnBoards");
@@ -490,7 +1879,7 @@
             <input class="list-path" type="text" value="${list.path||"/"}" placeholder="/útvonal (pl. /, /termekek)" />
           </div>
           <div class="cards" id="cards-${list.id}"></div>
-          <div class="list-foot"><button class="btn secondary add-card" type="button">+ Kártya hozzáadása</button></div>
+          <div style="display:none" class="list-foot"><button class="btn secondary add-card" type="button">+ Kártya hozzáadása</button></div>
         </div>`;
     }
     function cardTemplate(card){
@@ -548,11 +1937,26 @@
     }
 
     async function saveBoard(){
-      if(!firebaseEnabled || !dbRealtime){
-        saveStatusEl.textContent="Demo módban lokálisan frissítve."; setTimeout(()=>saveStatusEl.textContent="",1200); return;
+      if(!firebaseEnabled || !dbFirestore){
+        saveStatusEl.textContent="Demo módban lokálisan frissítve."; 
+        setTimeout(()=>saveStatusEl.textContent="",1200); 
+        return;
       }
-      try{ await set(dbRef(dbRealtime,"settings/layoutBoards"), board); saveStatusEl.textContent="Mentve ✅"; setTimeout(()=>saveStatusEl.textContent="",1200); }
-      catch(e){ console.warn("[layoutBoards] mentési hiba:", e); saveStatusEl.textContent="Hiba a mentésnél."; }
+      try{ 
+        const payload = { ...(board||{}), updatedAt: Date.now() };
+        await setDoc(doc(dbFirestore,"settings","layoutBoards"), payload, { merge:false });
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime,"settings/layoutBoards"), payload);
+        }
+
+        saveStatusEl.textContent="Mentve ✅"; 
+        setTimeout(()=>saveStatusEl.textContent="",1200); 
+      }
+      catch(e){ 
+        console.warn("[layoutBoards] mentési hiba:", e); 
+        saveStatusEl.textContent="Hiba a mentésnél."; 
+      }
     }
     async function loadBoard(){
       const seed={
@@ -563,32 +1967,84 @@
           { id:uid(), title:"Referenciák", path:"/referenciak", cards:[ {id:uid(),key:"referenciak",title:"referenciák"}, {id:uid(),key:"top-termekek",title:"top termékek"}, {id:uid(),key:"top-beszallitok",title:"top beszállítók"} ]}
         ]
       };
-      if(!firebaseEnabled || !dbRealtime){ board=seed; renderBoard(); return; }
-      try{
-        const snap=await get(dbRef(dbRealtime,"settings/layoutBoards"));
-        board = snap.exists()? (snap.val()||seed) : seed;
-      }catch(e){ console.warn("[layoutBoards] betöltési hiba, seed indul:", e); board=seed; }
+      let loaded=null;
+
+      // 1) Firestore az elsődleges
+      if(firebaseEnabled && dbFirestore){
+        try{
+          const fsSnap = await getDoc(doc(dbFirestore,"settings","layoutBoards"));
+          if(fsSnap.exists()) loaded = fsSnap.data() || null;
+        }catch(e){
+          console.warn("[layoutBoards] Firestore betöltési hiba:", e);
+        }
+      }
+
+      // 2) Ha Firestore üres, fallback RTDB-re (migráció előtti állapothoz)
+      if(!loaded && firebaseEnabled && dbRealtime){
+        try{
+          const snap = await get(dbRef(dbRealtime,"settings/layoutBoards"));
+          if(snap.exists()) loaded = snap.val() || null;
+        }catch(e){
+          console.warn("[layoutBoards] RTDB betöltési hiba:", e);
+        }
+      }
+
+      board = (loaded && loaded.lists) ? loaded : seed;
       renderBoard();
     }
     document.getElementById("addListBtn").addEventListener("click", ()=>{ board.lists.push({id:uid(),title:"Új lista",path:"/",cards:[]}); renderBoard(); autoSave(); });
     document.getElementById("layoutSaveBtnBoards").addEventListener("click", saveBoard);
 
-    /* ---------- Email beállítás ---------- */
+    /* ---------- Email beállítás (Firestore) ---------- */
     const emailForm = document.getElementById("emailForm");
     const emailRecipient = document.getElementById("emailRecipient");
     const emailStatus = document.getElementById("emailStatus");
+
     async function loadEmail(){
-      if(!firebaseEnabled || !dbRealtime) return;
-      try{ const snap=await get(dbRef(dbRealtime,"settings/email")); if(snap.exists()) emailRecipient.value=(snap.val()?.recipient)||""; }catch{}
+      if(!emailRecipient) return;
+
+      let data = null;
+
+      // Firestore az elsődleges
+      if (firebaseEnabled && dbFirestore) {
+        try {
+          const s = await getDoc(doc(dbFirestore, "settings", "email"));
+          if (s.exists()) data = s.data() || null;
+        } catch (e) {
+          console.warn("[email] Firestore betöltési hiba:", e);
+        }
+      }
+
+      // fallback RTDB (migráció előtt)
+      if (!data && firebaseEnabled && dbRealtime) {
+        try {
+          const snap = await get(dbRef(dbRealtime,"settings/email"));
+          if (snap.exists()) data = snap.val() || null;
+        } catch (e) {}
+      }
+
+      emailRecipient.value = (data?.recipient) ? String(data.recipient) : "";
     }
-    emailForm.addEventListener("submit", async (e)=>{
+
+    emailForm?.addEventListener("submit", async (e)=>{
       e.preventDefault();
-      const recipient=emailRecipient.value.trim();
-      if(firebaseEnabled && dbRealtime){ await set(dbRef(dbRealtime,"settings/email"), { recipient, updatedAt: Date.now() }); }
-      emailStatus.textContent="Mentve ✅"; setTimeout(()=>emailStatus.textContent="",1500);
+      const recipient = (emailRecipient?.value || "").trim();
+
+      if(firebaseEnabled && dbFirestore){
+        await setDoc(doc(dbFirestore,"settings","email"), { recipient, updatedAt: Date.now() }, { merge:true });
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime,"settings/email"), { recipient, updatedAt: Date.now() });
+        }
+      }
+
+      if(emailStatus){
+        emailStatus.textContent="Mentve ✅";
+        setTimeout(()=>emailStatus.textContent="",1500);
+      }
     });
 
-    /* ---------- Tartalom szerkesztők ---------- */
+/* ---------- Tartalom szerkesztők ---------- */
     const contentFormsWrap = document.getElementById("contentForms");
 
     // Itt adjuk meg, hogy szekciónként milyen mezőket tud beállítani az admin.
@@ -843,9 +2299,24 @@
       const order = getSectionKeys();
       let all = {};
 
-      if (firebaseEnabled && dbRealtime) {
-        const snap = await get(dbRef(dbRealtime,"content/sections"));
-        all = snap.exists() ? (snap.val() || {}) : {};
+      // 1) Firestore az elsődleges
+      if (firebaseEnabled && dbFirestore) {
+        try{
+          const snap = await getDocs(collection(dbFirestore, "contentSections"));
+          if (!snap.empty) {
+            snap.forEach(d => { all[d.id] = d.data() || {}; });
+          }
+        }catch(e){
+          console.warn("[content] Firestore betöltési hiba:", e);
+        }
+      }
+
+      // 2) fallback RTDB (migráció előtt)
+      if (Object.keys(all).length === 0 && firebaseEnabled && dbRealtime) {
+        try{
+          const snap = await get(dbRef(dbRealtime,"content/sections"));
+          all = snap.exists() ? (snap.val() || {}) : {};
+        }catch(e){}
       }
 
       contentFormsWrap.innerHTML = order
@@ -858,15 +2329,18 @@
 
         const imgInput = card.querySelector('input[type=file][data-img]');
         if (imgInput) {
-          imgInput.addEventListener("change", ()=>{
-            const f = imgInput.files?.[0]; if (!f) return;
-            const r = new FileReader();
-            r.onload = ()=>{
-              imageDataUrl = r.result;
+          imgInput.addEventListener("change", async ()=>{
+            const f = imgInput.files?.[0]; 
+            if (!f) return;
+
+            try{
+              imageDataUrl = await fileToOptimizedDataUrl(f, { maxW: 1400, maxH: 1400, quality: 0.78 });
               const prev = card.querySelector(".preview");
               if (prev) prev.textContent = "Kép kiválasztva (mentés után elérhető).";
-            };
-            r.readAsDataURL(f);
+            }catch(err){
+              console.warn("[content] kép hiba:", err);
+              alert(err?.message || "Nem sikerült a képet feldolgozni.");
+            }
           });
         }
 
@@ -881,8 +2355,12 @@
           const payload = { ...fields, updatedAt: Date.now() };
           if (imageDataUrl) payload.imageDataUrl = imageDataUrl;
 
-          if (firebaseEnabled && dbRealtime) {
-            await set(dbRef(dbRealtime, `content/sections/${key}`), payload);
+          if (firebaseEnabled && dbFirestore) {
+            await setDoc(doc(dbFirestore, "contentSections", key), payload, { merge:true });
+
+            if (WRITE_RTD_BK && dbRealtime) {
+              await set(dbRef(dbRealtime, `content/sections/${key}`), payload);
+            }
           }
 
           const st = card.querySelector("[data-status]");
@@ -894,13 +2372,704 @@
       });
     }
 
+        /* ---------- Beszállító partnerek admin (Firestore) ---------- */
+    const supplierForm = document.getElementById("supplierForm");
+    const supplierNameInput = document.getElementById("supplierName");
+    const supplierSubtitleInput = document.getElementById("supplierSubtitle");
+    const supplierImageInput = document.getElementById("supplierImage");
+    const supplierStatusEl = document.getElementById("supplierStatus");
+    const suppliersListEl = document.getElementById("suppliersList");
+
+    async function loadSuppliersAdmin() {
+      if (!suppliersListEl) return;
+
+      if (!firebaseEnabled || !dbFirestore) {
+        suppliersListEl.innerHTML =
+          '<div class="muted">Demo mód – a beszállítók nem kerülnek mentésre.</div>';
+        return;
+      }
+
+      suppliersListEl.innerHTML = '<div class="muted">Betöltés...</div>';
+
+      try {
+        const items = await fsListAll("suppliers");
+
+        if (!items.length) {
+          suppliersListEl.innerHTML =
+            '<div class="muted">Még nincs rögzített beszállító partner.</div>';
+          return;
+        }
+
+        // Rendezés: orderIndex (növekvő), majd createdAt (csökkenő)
+        items.sort((a, b) => {
+          const ai = (a.orderIndex ?? 999999999999);
+          const bi = (b.orderIndex ?? 999999999999);
+          if (ai !== bi) return ai - bi;
+          return (b.createdAt || 0) - (a.createdAt || 0);
+        });
+
+        const pendingImages = new Map();
+
+        suppliersListEl.innerHTML = items
+          .map((item) => {
+            const imgSrc = item.imageUrl || item.imageDataUrl || "";
+            const name = (item.name || "").replace(/"/g, "&quot;");
+            const subtitle = (item.subtitle || "").replace(/"/g, "&quot;");
+
+            return `
+              <div class="kpi panel"
+                   style="padding:10px; display:flex; gap:10px; align-items:center; margin-top:10px;"
+                   data-supplier-id="${item.id}">
+                <div style="width:80px; flex-shrink:0;">
+                  ${
+                    imgSrc
+                      ? `<img src="${imgSrc}" alt="Beszállító logó"
+                               style="width:100%;height:60px;object-fit:cover;border-radius:10px;border:1px solid rgba(15,23,42,.08);" />`
+                      : `<div class="muted" style="font-size:.8rem;">Nincs kép</div>`
+                  }
+                  <div style="margin-top:25px;">
+                    <input type="file" accept="image/*" data-supplier-image
+                           style="display:inline-block;margin-left:0;" />
+                  </div>
+                </div>
+
+                <div style="flex:1 1 auto;min-width:0;">
+                  <input type="text"
+                         data-supplier-name
+                         value="${name}"
+                         style="width:100%;padding:.4rem .5rem;border-radius:8px;border:1px solid #e5e7eb;margin-bottom:4px;" />
+                  <input type="text"
+                         data-supplier-subtitle
+                         value="${subtitle}"
+                         placeholder="Alcím (opcionális)"
+                         style="width:100%;padding:.35rem .5rem;border-radius:8px;border:1px solid #e5e7eb;font-size:.8rem;" />
+                  <div class="muted" style="font-size:.75rem;margin-top:4px;">
+                  </div>
+                </div>
+
+                <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+                  <button class="btn primary" style="" data-supplier-save>Mentés</button>
+                  <button class="btn primary" style="background: #CC4223; color: white;border: none;" data-supplier-delete>Törlés</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        // Kép csere -> pendingImages (tömörítve)
+        suppliersListEl.querySelectorAll("[data-supplier-image]").forEach((input) => {
+          input.addEventListener("change", async () => {
+            const wrap = input.closest("[data-supplier-id]");
+            const id = wrap?.dataset?.supplierId;
+            const f = input.files?.[0];
+            if (!id || !f) return;
+
+            try{
+              const dataUrl = await fileToOptimizedDataUrl(f, { maxW: 700, maxH: 700, quality: 0.78 });
+              pendingImages.set(id, dataUrl);
+              supplierStatusEl.textContent = "Kép kiválasztva (mentés után frissül).";
+              setTimeout(()=> supplierStatusEl.textContent="", 1500);
+            }catch(err){
+              console.warn("[suppliersAdmin] kép hiba:", err);
+              alert(err?.message || "Nem sikerült a képet feldolgozni.");
+            }
+          });
+        });
+
+        // Mentés gomb (név/alcím/kép)
+        suppliersListEl.querySelectorAll("[data-supplier-save]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const wrap = btn.closest("[data-supplier-id]");
+            if (!wrap) return;
+
+            const id = wrap.dataset.supplierId;
+            const nameInput = wrap.querySelector("[data-supplier-name]");
+            const subtitleInput = wrap.querySelector("[data-supplier-subtitle]");
+
+            const name = nameInput?.value?.trim() || "";
+            const subtitle = subtitleInput?.value?.trim() || "";
+
+            try{
+              const base = await getDoc(doc(dbFirestore, "suppliers", id));
+              if(!base.exists()) return;
+
+              const current = base.data() || {};
+              const payload = {
+                ...current,
+                name,
+                subtitle,
+                updatedAt: Date.now()
+              };
+
+              if (pendingImages.has(id)) {
+                payload.imageDataUrl = pendingImages.get(id); 
+                delete payload.imageUrl;
+              }
+
+              await setDoc(doc(dbFirestore, "suppliers", id), payload, { merge:false });
+
+              if (WRITE_RTD_BK && dbRealtime) {
+                await set(dbRef(dbRealtime, "suppliers/" + id), payload);
+              }
+
+              await loadSuppliersAdmin();
+              supplierStatusEl.textContent = "Mentve ✅";
+            }catch(err){
+              console.warn("[suppliersAdmin] mentés hiba:", err);
+              supplierStatusEl.textContent = "Hiba mentés közben.";
+            }finally{
+              setTimeout(() => { if (supplierStatusEl) supplierStatusEl.textContent = ""; }, 2000);
+            }
+          });
+        });
+
+        // Törlés
+        suppliersListEl.querySelectorAll("[data-supplier-delete]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const wrap = btn.closest("[data-supplier-id]");
+            const id = wrap?.dataset?.supplierId;
+            if (!id) return;
+            if (!confirm("Biztosan törlöd ezt a beszállítót?")) return;
+
+            try{
+              await deleteDoc(doc(dbFirestore, "suppliers", id));
+              if (WRITE_RTD_BK && dbRealtime) {
+                await remove(dbRef(dbRealtime, "suppliers/" + id));
+              }
+              await loadSuppliersAdmin();
+              supplierStatusEl.textContent = "Törölve ✅";
+            }catch(err){
+              console.warn("[suppliersAdmin] törlés hiba:", err);
+              supplierStatusEl.textContent = "Hiba törlés közben.";
+            }finally{
+              setTimeout(() => { if (supplierStatusEl) supplierStatusEl.textContent = ""; }, 2000);
+            }
+          });
+        });
+
+      } catch (err) {
+        console.warn("[suppliersAdmin] betöltés hiba:", err);
+        suppliersListEl.innerHTML =
+          '<div class="muted">Hiba a beszállítók betöltésekor.</div>';
+      }
+    }
+
+    supplierForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!firebaseEnabled || !dbFirestore) return;
+
+      const name = supplierNameInput?.value?.trim() || "";
+      const subtitle = supplierSubtitleInput?.value?.trim() || "";
+      const file = supplierImageInput?.files?.[0];
+
+      if (!name) {
+        alert("Add meg a beszállító nevét.");
+        return;
+      }
+
+      if (!file) {
+        alert("Válassz egy logót.");
+        return;
+      }
+
+      supplierStatusEl.textContent = "Feldolgozás...";
+
+      try {
+        const dataUrl = await fileToOptimizedDataUrl(file, { maxW: 700, maxH: 700, quality: 0.78 });
+
+        const id = doc(collection(dbFirestore, "suppliers")).id;
+
+        const payload = {
+          name,
+          subtitle,
+          imageDataUrl: dataUrl,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          orderIndex: Date.now()
+        };
+
+        await setDoc(doc(dbFirestore, "suppliers", id), payload);
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime, "suppliers/" + id), payload);
+        }
+
+        supplierForm.reset();
+        supplierStatusEl.textContent = "Mentve ✅";
+        await loadSuppliersAdmin();
+      } catch (err) {
+        console.warn("[suppliersAdmin] mentés hiba:", err);
+        supplierStatusEl.textContent = "Hiba mentés közben.";
+      } finally {
+        setTimeout(() => {
+          if (supplierStatusEl) supplierStatusEl.textContent = "";
+        }, 2000);
+      }
+    });
 
 
-    /* ---------- Start ---------- */
+/* ---------- Referencia fotók admin (Firestore) ---------- */
+    const referencesForm = document.getElementById("referencesForm");
+    const referencesStatusEl = document.getElementById("referencesStatus");
+    const referencesListEl = document.getElementById("referencesList");
+    const refTitleInput = document.getElementById("refTitle");
+    const refDescInput = document.getElementById("refDesc");
+    const refImageInput = document.getElementById("refImage");
+
+    async function loadReferencesAdmin(){
+      if (!referencesListEl) return;
+
+      if (!firebaseEnabled || !dbFirestore) {
+        referencesListEl.innerHTML = '<div class="muted">Demo mód – a referenciák nem kerülnek mentésre.</div>';
+        return;
+      }
+
+      referencesListEl.innerHTML = '<div class="muted">Betöltés...</div>';
+
+      try{
+        const items = await fsListAll("references");
+
+        if (!items.length) {
+          referencesListEl.innerHTML = '<div class="muted">Még nincs feltöltött referencia.</div>';
+          return;
+        }
+
+        items.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        referencesListEl.innerHTML = items.map(item => {
+          const imgSrc = item.imageUrl || item.imageDataUrl || "";
+          const title = (item.title || "").replace(/</g,"&lt;");
+          const desc  = (item.desc  || "").replace(/</g,"&lt;");
+
+          return `
+            <div class="kpi panel" style="padding:10px; display:flex; gap:10px; align-items:center; margin-top:10px;"
+                 data-ref-id="${item.id}">
+              <div style="width:80px; flex-shrink:0;">
+                ${imgSrc ? `<img src="${imgSrc}" alt="Referencia" style="width:100%;height:60px;object-fit:cover;border-radius:10px;border:1px solid rgba(15,23,42,.08);" />`
+                        : `<div class="muted" style="font-size:.8rem;">Nincs kép</div>`}
+              </div>
+
+              <div style="flex:1 1 auto;min-width:0;">
+                <div style="font-weight:700;">${title || "(cím nélkül)"}</div>
+                <div class="muted" style="font-size:.85rem;">${desc || ""}</div>
+                <div class="muted" style="font-size:.75rem;margin-top:4px;">ID: ${item.id}</div>
+              </div>
+
+              <div style="flex-shrink:0; display:flex; gap:8px; align-items:center;">
+                <button class="btn ghost" data-ref-delete>Törlés</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        referencesListEl.querySelectorAll("[data-ref-delete]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const wrap = btn.closest("[data-ref-id]");
+            const id = wrap?.dataset?.refId;
+            if (!id) return;
+            if (!confirm("Biztosan törlöd ezt a referenciát?")) return;
+
+            try{
+              await deleteDoc(doc(dbFirestore, "references", id));
+              if (WRITE_RTD_BK && dbRealtime) {
+                await remove(dbRef(dbRealtime, "references/" + id));
+              }
+              await loadReferencesAdmin();
+            }catch(err){
+              console.warn("[referencesAdmin] törlés hiba:", err);
+              alert("Nem sikerült törölni.");
+            }
+          });
+        });
+
+      }catch(err){
+        console.warn("[referencesAdmin] betöltés hiba:", err);
+        referencesListEl.innerHTML = '<div class="muted">Hiba a referenciák betöltésekor.</div>';
+      }
+    }
+
+    referencesForm?.addEventListener("submit", async (e)=>{
+      e.preventDefault();
+
+      if (!firebaseEnabled || !dbFirestore) return;
+
+      const title = refTitleInput?.value?.trim() || "";
+      const desc  = refDescInput?.value?.trim() || "";
+      const file  = refImageInput?.files?.[0];
+
+      if (!file) { alert("Válassz egy képet."); return; }
+
+      referencesStatusEl.textContent = "Feldolgozás...";
+
+      try{
+        const dataUrl = await fileToOptimizedDataUrl(file, { maxW: 1600, maxH: 1600, quality: 0.78 });
+
+        const id = doc(collection(dbFirestore, "references")).id;
+        const payload = {
+          title,
+          desc,
+          imageDataUrl: dataUrl,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+
+        await setDoc(doc(dbFirestore, "references", id), payload);
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime, "references/" + id), payload);
+        }
+
+        referencesForm.reset();
+        referencesStatusEl.textContent = "Mentve ✅";
+        await loadReferencesAdmin();
+      }catch(err){
+        console.warn("[referencesAdmin] mentés hiba:", err);
+        referencesStatusEl.textContent = "Hiba mentés közben.";
+      }finally{
+        setTimeout(()=>{ if(referencesStatusEl) referencesStatusEl.textContent=""; }, 2000);
+      }
+    });
+
+
+/* ---------- Termékek admin (Firestore) ---------- */
+
+    const productForm       = document.getElementById("productForm");
+    const productNameInput  = document.getElementById("productName");
+    const productShortInput = document.getElementById("productShort");
+    const productLongInput  = document.getElementById("productLong");
+    const productImageInput = document.getElementById("productImage");
+    const productStatusEl   = document.getElementById("productStatus");
+    const productsListEl    = document.getElementById("productsList");
+
+    async function loadProductsAdmin() {
+      if (!productsListEl) return;
+
+      if (!firebaseEnabled || !dbFirestore) {
+        productsListEl.innerHTML =
+          '<div class="muted">Demo mód – a termékek nem kerülnek mentésre.</div>';
+        return;
+      }
+
+      productsListEl.innerHTML = '<div class="muted">Betöltés...</div>';
+
+      try {
+        const items = await fsListAll("products");
+
+        if (!items.length) {
+          productsListEl.innerHTML =
+            '<div class="muted">Még nincs feltöltött termék.</div>';
+          return;
+        }
+
+        items.sort((a,b)=> (b.createdAt || 0) - (a.createdAt || 0));
+
+        productsListEl.innerHTML = items.map(item => {
+          const imgSrc = item.imageUrl || item.imageDataUrl || "";
+          const name = (item.name || "").replace(/</g,"&lt;");
+          const short = (item.short || "").replace(/</g,"&lt;");
+
+          return `
+            <div class="kpi panel" style="padding:10px; display:flex; gap:10px; align-items:center; margin-top:10px;"
+                 data-product-id="${item.id}">
+              <div style="width:80px; flex-shrink:0;">
+                ${imgSrc ? `<img src="${imgSrc}" alt="Termék" style="width:100%;height:60px;object-fit:cover;border-radius:10px;border:1px solid rgba(15,23,42,.08);" />`
+                        : `<div class="muted" style="font-size:.8rem;">Nincs kép</div>`}
+              </div>
+
+              <div style="flex:1 1 auto;min-width:0;">
+                <div style="font-weight:700;">${name || "(név nélkül)"}</div>
+                <div class="muted" style="font-size:.85rem;">${short || ""}</div>
+                <div class="muted" style="font-size:.75rem;margin-top:4px;">ID: ${item.id}</div>
+              </div>
+
+              <div style="flex-shrink:0; display:flex; gap:8px; align-items:center;">
+                <button class="btn ghost" data-product-delete>Törlés</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        productsListEl.querySelectorAll("[data-product-delete]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const wrap = btn.closest("[data-product-id]");
+            const id = wrap?.dataset?.productId;
+            if (!id) return;
+            if (!confirm("Biztosan törlöd ezt a terméket?")) return;
+
+            try{
+              await deleteDoc(doc(dbFirestore, "products", id));
+              if (WRITE_RTD_BK && dbRealtime) {
+                await remove(dbRef(dbRealtime, "products/" + id));
+              }
+              await loadProductsAdmin();
+            }catch(err){
+              console.warn("[productsAdmin] törlés hiba:", err);
+              alert("Nem sikerült törölni.");
+            }
+          });
+        });
+
+      } catch (err) {
+        console.warn("[productsAdmin] betöltés hiba:", err);
+        productsListEl.innerHTML =
+          '<div class="muted">Hiba a termékek betöltésekor.</div>';
+      }
+    }
+
+    productForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!firebaseEnabled || !dbFirestore) return;
+
+      const name  = productNameInput?.value?.trim() || "";
+      const shortDescription = productShortInput?.value?.trim() || "";
+      const longDescription  = productLongInput?.value?.trim() || "";
+      const file  = productImageInput?.files?.[0];
+
+      if (!name) { alert("Add meg a termék nevét."); return; }
+      if (!file) { alert("Válassz egy képet."); return; }
+
+      productStatusEl.textContent = "Feldolgozás...";
+
+      try {
+        const dataUrl = await fileToOptimizedDataUrl(file, { maxW: 1600, maxH: 1600, quality: 0.78 });
+
+        const id = doc(collection(dbFirestore, "products")).id;
+
+        const payload = {
+          name,
+          shortDescription,
+          longDescription,
+          imageDataUrl: dataUrl,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+
+        await setDoc(doc(dbFirestore, "products", id), payload);
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime, "products/" + id), payload);
+        }
+
+        productForm.reset();
+        productStatusEl.textContent = "Mentve ✅";
+        await loadProductsAdmin();
+      } catch (err) {
+        console.warn("[productsAdmin] mentés hiba:", err);
+        productStatusEl.textContent = "Hiba mentés közben.";
+      } finally {
+        setTimeout(() => { if (productStatusEl) productStatusEl.textContent = ""; }, 2000);
+      }
+    });
+
+
+/* ---------- Főoldali slider admin (Firestore) ---------- */
+    const sliderForm = document.getElementById("sliderForm");
+    const sliderTitleInput = document.getElementById("sliderTitle");
+    const sliderSubtitleInput = document.getElementById("sliderSubtitle");
+    const sliderImageInput = document.getElementById("sliderImage");
+    const sliderStatusEl = document.getElementById("sliderStatus");
+    const sliderListEl = document.getElementById("sliderList");
+    const sliderSaveOrderBtn = document.getElementById("sliderSaveOrderBtn");
+    let sliderMaxOrder = 0;
+
+    async function loadSliderAdmin() {
+      if (!sliderListEl) return;
+
+      if (!firebaseEnabled || !dbFirestore) {
+        sliderListEl.innerHTML =
+          '<div class="muted">Demo mód – a slider képek nem kerülnek mentésre.</div>';
+        return;
+      }
+
+      sliderListEl.innerHTML = '<div class="muted">Betöltés...</div>';
+
+      try {
+        let items = await fsListAll("heroSlider");
+
+        // fallback RTDB, ha Firestore még üres
+        if (!items.length && firebaseEnabled && dbRealtime) {
+          try{
+            const snap = await get(dbRef(dbRealtime, "heroSlider"));
+            if (snap.exists()) {
+              const val = snap.val() || {};
+              items = Object.entries(val).map(([id,d]) => ({ id, ...(d || {}) }));
+            }
+          }catch(e){}
+        }
+
+        if (!items.length) {
+          sliderListEl.innerHTML =
+            '<div class="muted">Még nincs feltöltött slider kép.</div>';
+          return;
+        }
+
+        items.sort((a,b) => (a.order ?? 999999) - (b.order ?? 999999));
+
+        sliderMaxOrder = items.reduce((m,it)=>Math.max(m, (typeof it.order==="number"? it.order : -1)), -1);
+        if (sliderMaxOrder < 0) sliderMaxOrder = items.length - 1;
+
+        sliderListEl.innerHTML = items
+          .map((item) => {
+            const imgSrc = item.imageUrl || item.imageDataUrl || "";
+            const title = (item.title || "").replace(/</g,"&lt;");
+            const subtitle = (item.subtitle || "").replace(/</g,"&lt;");
+
+            return `
+              <div class="kpi panel"
+                   style="padding:10px; display:flex; gap:10px; align-items:center; margin-top:10px;"
+                   data-slide-id="${item.id}">
+                <div class="drag-handle" title="Húzd a sorrendhez"
+                     style="cursor:grab; user-select:none; font-size:18px; padding:0 6px; opacity:.7;">⠿</div>
+
+                <div style="width:80px; flex-shrink:0;">
+                  ${imgSrc ? `<img src="${imgSrc}" alt="Slider"
+                               style="width:100%;height:60px;object-fit:cover;border-radius:10px;border:1px solid rgba(15,23,42,.08);" />`
+                          : `<div class="muted" style="font-size:.8rem;">Nincs kép</div>`}
+                </div>
+
+                <div style="flex:1 1 auto;min-width:0;">
+                  <div style="font-weight:700;">${title || "(cím nélkül)"}</div>
+                  <div class="muted" style="font-size:.85rem;">${subtitle || ""}</div>
+                  <div class="muted" style="font-size:.75rem;margin-top:4px;">ID: ${item.id}</div>
+                </div>
+
+                <div style="flex-shrink:0; display:flex; gap:8px; align-items:center;">
+                  <button class="btn ghost" data-slide-delete>Törlés</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        // Delete
+        sliderListEl.querySelectorAll("[data-slide-delete]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const wrap = btn.closest("[data-slide-id]");
+            const id = wrap?.dataset?.slideId;
+            if (!id) return;
+            if (!confirm("Biztosan törlöd ezt a slider képet?")) return;
+
+            try{
+              await deleteDoc(doc(dbFirestore, "heroSlider", id));
+              if (WRITE_RTD_BK && dbRealtime) {
+                await remove(dbRef(dbRealtime, "heroSlider/" + id));
+              }
+              await loadSliderAdmin();
+            }catch(err){
+              console.warn("[sliderAdmin] törlés hiba:", err);
+              alert("Nem sikerült törölni.");
+            }
+          });
+        });
+
+        // Sortable
+        if (window.Sortable) {
+          new Sortable(sliderListEl, {
+            animation: 150,
+            handle: ".drag-handle",
+            ghostClass: "sortable-ghost",
+            onEnd: persistSliderOrder
+          });
+        }
+
+      } catch (err) {
+        console.warn("[sliderAdmin] betöltés hiba:", err);
+        sliderListEl.innerHTML =
+          '<div class="muted">Hiba a slider képek betöltésekor.</div>';
+      }
+    }
+
+    async function persistSliderOrder(){
+      if (!firebaseEnabled || !dbFirestore) return;
+
+      const ids = Array.from(sliderListEl.querySelectorAll("[data-slide-id]"))
+        .map(el => el.getAttribute("data-slide-id"))
+        .filter(Boolean);
+
+      try{
+        const batch = writeBatch(dbFirestore);
+        ids.forEach((id, idx) => {
+          batch.set(doc(dbFirestore, "heroSlider", id), { order: idx, updatedAt: Date.now() }, { merge:true });
+        });
+        await batch.commit();
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          const updatesObj = {};
+          ids.forEach((id, idx) => { updatesObj[`heroSlider/${id}/order`] = idx; });
+          await dbUpdate(dbRef(dbRealtime, "/"), updatesObj);
+        }
+
+        if (sliderStatusEl) {
+          sliderStatusEl.textContent = "Sorrend mentve ✅";
+          setTimeout(() => (sliderStatusEl.textContent = ""), 1500);
+        }
+      }catch(err){
+        console.warn("[sliderAdmin] order mentés hiba:", err);
+        if (sliderStatusEl) sliderStatusEl.textContent = "Hiba a sorrend mentésnél.";
+        setTimeout(() => (sliderStatusEl.textContent = ""), 2000);
+      }
+    }
+
+    sliderSaveOrderBtn?.addEventListener("click", persistSliderOrder);
+
+    sliderForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!firebaseEnabled || !dbFirestore) return;
+
+      const title = sliderTitleInput?.value?.trim() || "";
+      const subtitle = sliderSubtitleInput?.value?.trim() || "";
+      const file = sliderImageInput?.files?.[0];
+
+      if (!file) { alert("Válassz egy képet."); return; }
+
+      sliderStatusEl.textContent = "Feldolgozás...";
+
+      try{
+        const dataUrl = await fileToOptimizedDataUrl(file, { maxW: 2000, maxH: 2000, quality: 0.78 });
+
+        const id = doc(collection(dbFirestore, "heroSlider")).id;
+
+        const payload = {
+          title,
+          subtitle,
+          imageDataUrl: dataUrl,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          order: ++sliderMaxOrder
+        };
+
+        await setDoc(doc(dbFirestore, "heroSlider", id), payload);
+
+        if (WRITE_RTD_BK && dbRealtime) {
+          await set(dbRef(dbRealtime, "heroSlider/" + id), payload);
+        }
+
+        sliderForm.reset();
+        sliderStatusEl.textContent = "Mentve ✅";
+        await loadSliderAdmin();
+      }catch(err){
+        console.warn("[sliderAdmin] mentés hiba:", err);
+        sliderStatusEl.textContent = "Hiba mentés közben.";
+      }finally{
+        setTimeout(()=>{ if(sliderStatusEl) sliderStatusEl.textContent=""; }, 2000);
+      }
+    });
+
+
+/* ---------- Start ---------- */
     await loadBoard();
     await loadEmail();
     await loadContent();
     await loadAnalytics();
+    await loadSuppliersAdmin();
+    await loadReferencesAdmin();
+    await loadProductsAdmin();
+    await loadSliderAdmin();
   </script>
+  
+
 </body>
 </html>
