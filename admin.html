@@ -648,6 +648,15 @@
               <input type="file" id="productImage" accept="image/*" />
             </label>
 
+            <!-- ÚJ: webshop mezők, a korábbi termékmezők változatlanok -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+              <label><div style="font-size:.8rem;margin-bottom:.15rem;">Értékesítés típusa</div><select id="shopMode" class="btn" style="width:100%"><option value="quote">Ajánlatkérés</option><option value="purchase">Kosárba tehető</option></select></label>
+              <label><div style="font-size:.8rem;margin-bottom:.15rem;">Ár (Ft; kosaras terméknél kötelező)</div><input id="shopPrice" type="number" min="0" step="1" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px"></label>
+              <label><div style="font-size:.8rem;margin-bottom:.15rem;">Készlet (db; üres = nem kezelt)</div><input id="shopStock" type="number" min="0" step="1" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px"></label>
+              <label><div style="font-size:.8rem;margin-bottom:.15rem;">Kategória</div><input id="shopCategory" type="text" maxlength="100" placeholder="pl. Távirányítók"></label>
+            </div>
+            <label style="font-size:.85rem;"><input id="shopVisible" type="checkbox" checked> Megjelenítés a webshopban</label>
+            <div id="productEditHint" class="muted" style="display:none">Termék szerkesztése: az új fotó megadása opcionális. <button class="btn" type="button" id="productEditCancel">Szerkesztés megszakítása</button></div>
             <div>
               <button type="submit" class="btn primary" style="margin-top:10px;">
                 Termék mentése
@@ -2732,139 +2741,124 @@ async function loadAnalytics(){
     });
 
 
-/* ---------- Termékek admin (Firestore) ---------- */
-
-    const productForm       = document.getElementById("productForm");
-    const productNameInput  = document.getElementById("productName");
+/* ---------- Termékek admin (Firestore) | webshop mezőkkel bővítve ---------- */
+    const productForm = document.getElementById("productForm");
+    const productNameInput = document.getElementById("productName");
     const productShortInput = document.getElementById("productShort");
-    const productLongInput  = document.getElementById("productLong");
+    const productLongInput = document.getElementById("productLong");
     const productImageInput = document.getElementById("productImage");
-    const productStatusEl   = document.getElementById("productStatus");
-    const productsListEl    = document.getElementById("productsList");
+    const productStatusEl = document.getElementById("productStatus");
+    const productsListEl = document.getElementById("productsList");
+    const shopModeInput = document.getElementById("shopMode");
+    const shopPriceInput = document.getElementById("shopPrice");
+    const shopStockInput = document.getElementById("shopStock");
+    const shopCategoryInput = document.getElementById("shopCategory");
+    const shopVisibleInput = document.getElementById("shopVisible");
+    const productEditHint = document.getElementById("productEditHint");
+    let editingProductId = null, currentProducts = [];
+    const productEscape = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+
+    function cancelProductEditing() {
+      editingProductId = null;
+      productForm?.reset();
+      if (productEditHint) productEditHint.style.display="none";
+      if (productStatusEl) productStatusEl.textContent="";
+    }
+    document.getElementById("productEditCancel")?.addEventListener("click",cancelProductEditing);
 
     async function loadProductsAdmin() {
       if (!productsListEl) return;
-
       if (!firebaseEnabled || !dbFirestore) {
-        productsListEl.innerHTML =
-          '<div class="muted">Demo mód – a termékek nem kerülnek mentésre.</div>';
+        productsListEl.innerHTML = '<div class="muted">Az adatbázis nem elérhető.</div>';
         return;
       }
-
       productsListEl.innerHTML = '<div class="muted">Betöltés...</div>';
-
       try {
         const items = await fsListAll("products");
-
+        currentProducts = items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
         if (!items.length) {
-          productsListEl.innerHTML =
-            '<div class="muted">Még nincs feltöltött termék.</div>';
+          productsListEl.innerHTML = '<div class="muted">Még nincs feltöltött termék.</div>';
           return;
         }
-
-        items.sort((a,b)=> (b.createdAt || 0) - (a.createdAt || 0));
-
         productsListEl.innerHTML = items.map(item => {
-          const imgSrc = item.imageUrl || item.imageDataUrl || "";
-          const name = (item.name || "").replace(/</g,"&lt;");
-          const short = (item.short || "").replace(/</g,"&lt;");
-
-          return `
-            <div class="kpi panel" style="padding:10px; display:flex; gap:10px; align-items:center; margin-top:10px;"
-                 data-product-id="${item.id}">
-              <div style="width:80px; flex-shrink:0;">
-                ${imgSrc ? `<img src="${imgSrc}" alt="Termék" style="width:100%;height:60px;object-fit:cover;border-radius:10px;border:1px solid rgba(15,23,42,.08);" />`
-                        : `<div class="muted" style="font-size:.8rem;">Nincs kép</div>`}
-              </div>
-
-              <div style="flex:1 1 auto;min-width:0;">
-                <div style="font-weight:700;">${name || "(név nélkül)"}</div>
-                <div class="muted" style="font-size:.85rem;">${short || ""}</div>
-                <div class="muted" style="font-size:.75rem;margin-top:4px;">ID: ${item.id}</div>
-              </div>
-
-              <div style="flex-shrink:0; display:flex; gap:8px; align-items:center;">
-                <button class="btn ghost" data-product-delete>Törlés</button>
-              </div>
-            </div>
-          `;
+          const img = item.imageUrl || item.imageDataUrl || "";
+          const shopping = item.shopMode==="purchase" ? "Kosaras" : "Ajánlatkéréses";
+          return '<div class="kpi panel" style="padding:10px;display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap" data-product-id="'+productEscape(item.id)+'">'+
+            '<div style="width:80px;flex-shrink:0">'+(img?'<img src="'+productEscape(img)+'" alt="" style="width:100%;height:60px;object-fit:cover;border-radius:10px">':'Nincs kép')+'</div>'+
+            '<div style="flex:1 1 180px;min-width:0"><div style="font-weight:700">'+productEscape(item.name||"(név nélkül)")+'</div>'+
+            '<div class="muted" style="font-size:.82rem">'+productEscape(item.shortDescription||item.short||"")+'</div>'+
+            '<div class="muted" style="font-size:.75rem">'+shopping+(item.shopMode==="purchase"?" · "+Number(item.price||0).toLocaleString("hu-HU")+" Ft":"")+'</div></div>'+
+            '<div style="display:flex;gap:8px"><button class="btn secondary" data-product-edit>Szerkesztés</button><button class="btn ghost" data-product-delete>Törlés</button></div></div>';
         }).join("");
-
-        productsListEl.querySelectorAll("[data-product-delete]").forEach(btn => {
-          btn.addEventListener("click", async () => {
-            const wrap = btn.closest("[data-product-id]");
-            const id = wrap?.dataset?.productId;
-            if (!id) return;
-            if (!confirm("Biztosan törlöd ezt a terméket?")) return;
-
-            try{
-              await deleteDoc(doc(dbFirestore, "products", id));
-              if (WRITE_RTD_BK && dbRealtime) {
-                await remove(dbRef(dbRealtime, "products/" + id));
-              }
-              await loadProductsAdmin();
-            }catch(err){
-              console.warn("[productsAdmin] törlés hiba:", err);
-              alert("Nem sikerült törölni.");
-            }
-          });
-        });
-
       } catch (err) {
-        console.warn("[productsAdmin] betöltés hiba:", err);
-        productsListEl.innerHTML =
-          '<div class="muted">Hiba a termékek betöltésekor.</div>';
+        console.warn("[productsAdmin] hiba:",err);
+        productsListEl.innerHTML = '<div class="muted">Terméklista betöltési hiba.</div>';
       }
     }
-
-    productForm?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      if (!firebaseEnabled || !dbFirestore) return;
-
-      const name  = productNameInput?.value?.trim() || "";
-      const shortDescription = productShortInput?.value?.trim() || "";
-      const longDescription  = productLongInput?.value?.trim() || "";
-      const file  = productImageInput?.files?.[0];
-
-      if (!name) { alert("Add meg a termék nevét."); return; }
-      if (!file) { alert("Válassz egy képet."); return; }
-
-      productStatusEl.textContent = "Feldolgozás...";
-
-      try {
-        const dataUrl = await fileToOptimizedDataUrl(file, { maxW: 1600, maxH: 1600, quality: 0.78 });
-
-        const id = doc(collection(dbFirestore, "products")).id;
-
-        const payload = {
-          name,
-          shortDescription,
-          longDescription,
-          imageDataUrl: dataUrl,
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        };
-
-        await setDoc(doc(dbFirestore, "products", id), payload);
-
-        if (WRITE_RTD_BK && dbRealtime) {
-          await set(dbRef(dbRealtime, "products/" + id), payload);
-        }
-
-        productForm.reset();
-        productStatusEl.textContent = "Mentve ✅";
-        await loadProductsAdmin();
-      } catch (err) {
-        console.warn("[productsAdmin] mentés hiba:", err);
-        productStatusEl.textContent = "Hiba mentés közben.";
-      } finally {
-        setTimeout(() => { if (productStatusEl) productStatusEl.textContent = ""; }, 2000);
+    productsListEl?.addEventListener("click", async e => {
+      const editBtn=e.target.closest("[data-product-edit]");
+      const delBtn=e.target.closest("[data-product-delete]");
+      if (!editBtn&&!delBtn) return;
+      const id=e.target.closest("[data-product-id]")?.dataset.productId;
+      const item=currentProducts.find(x=>x.id===id);
+      if (!item) return;
+      if (editBtn) {
+        editingProductId=id;
+        productNameInput.value=item.name||"";
+        productShortInput.value=item.shortDescription||item.short||"";
+        productLongInput.value=item.longDescription||item.description||"";
+        productImageInput.value="";
+        shopModeInput.value=item.shopMode||"quote";
+        shopPriceInput.value=item.price??"";
+        shopStockInput.value=item.stock??"";
+        shopCategoryInput.value=item.category||"";
+        shopVisibleInput.checked=item.shopVisible!==false;
+        productEditHint.style.display="block";
+        productForm.scrollIntoView({behavior:"smooth",block:"center"});
+        return;
       }
+      if (!confirm("Biztosan törlöd ezt a terméket?")) return;
+      try {
+        await deleteDoc(doc(dbFirestore,"products",id));
+        if (WRITE_RTD_BK && dbRealtime) await remove(dbRef(dbRealtime,"products/"+id));
+        if(editingProductId===id)cancelProductEditing();
+        await loadProductsAdmin();
+      } catch(err){console.warn("[productsAdmin] törlés hiba:",err);alert("Nem sikerült törölni.");}
     });
 
+    productForm?.addEventListener("submit",async e=>{
+      e.preventDefault();
+      if (!firebaseEnabled || !dbFirestore) return;
+      const name=productNameInput.value.trim();
+      const file=productImageInput.files?.[0];
+      const shopping=shopModeInput.value;
+      if (!name) return alert("Add meg a termék nevét.");
+      if (shopping==="purchase" && (shopPriceInput.value==="" || !Number.isFinite(Number(shopPriceInput.value)) || Number(shopPriceInput.value)<0)) return alert("Add meg a rendelhető termék árát.");
+      if (!editingProductId&&!file) return alert("Új termékhez válassz képet.");
+      const old=currentProducts.find(p=>p.id===editingProductId)||{};
+      productStatusEl.textContent="Mentés...";
+      try {
+        const id=editingProductId||doc(collection(dbFirestore,"products")).id;
+        const payload={
+          name,shortDescription:productShortInput.value.trim(),longDescription:productLongInput.value.trim(),
+          shopMode:shopping,price:shopping==="purchase"?Number(shopPriceInput.value):null,
+          stock:shopStockInput.value===""?null:Number(shopStockInput.value),
+          category:shopCategoryInput.value.trim(),shopVisible:shopVisibleInput.checked,
+          createdAt:old.createdAt||Date.now(),updatedAt:Date.now()
+        };
+        if(file) {
+          if(!file.type.startsWith("image/")||file.size>7*1024*1024) return alert("Legfeljebb 7 MB méretű képfájl tölthető fel.");
+          payload.imageDataUrl=await fileToOptimizedDataUrl(file,{maxW:1600,maxH:1600,quality:.78});
+        }
+        await setDoc(doc(dbFirestore,"products",id),payload,{merge:true});
+        if(WRITE_RTD_BK&&dbRealtime) await dbUpdate(dbRef(dbRealtime,"products/"+id),payload);
+        cancelProductEditing();
+        productStatusEl.textContent="Mentve ✅";
+        await loadProductsAdmin();
+      }catch(err){console.warn("[productsAdmin] mentési hiba:",err);productStatusEl.textContent="Mentési hiba.";}
+    });
 
-/* ---------- Főoldali slider admin (Firestore) ---------- */
+    /* ---------- Főoldali slider admin (Firestore) ---------- */
     const sliderForm = document.getElementById("sliderForm");
     const sliderTitleInput = document.getElementById("sliderTitle");
     const sliderSubtitleInput = document.getElementById("sliderSubtitle");
