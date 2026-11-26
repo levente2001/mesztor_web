@@ -9,13 +9,14 @@
   <!-- Google Font (nem kötelező, csak szebb) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="shortcut icon" href="mesztor-favicon.png" type="image/x-icon">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
       --color-bg: #f5f7fb;
       --color-surface: #ffffff;
-      --color-primary: #c86904;
+      --color-primary: #D96C06;
       --color-primary-soft: #e0efff;
       --color-accent: #d8a600;
       --color-text: #33291f;
@@ -23,7 +24,7 @@
       --radius-lg: 18px;
       --radius-md: 12px;
       --shadow-soft: 0 18px 40px rgba(42, 25, 15, 0.08);
-      --container-width: 1180px;
+      --container-width: 1280px;
     }
 
     * {
@@ -37,7 +38,7 @@
     body {
       margin: 0;
       font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, #f0f4ff 0, #f5f7fb 32%, #f8fafc 100%);
+      background: #EEEEEE;
       color: var(--color-text);
       line-height: 1.6;
     }
@@ -56,13 +57,13 @@
       width: 100%;
       max-width: var(--container-width);
       margin: 0 auto;
-      padding: 0 1.5rem;
+      padding: 0 2rem;
     }
 
     /* Topbar */
 
     .topbar {
-      background: #2a1c0f;
+      background: #222222;
       color: #e5e7eb;
       font-size: 0.85rem;
     }
@@ -121,6 +122,7 @@
       justify-content: space-between;
       gap: 1.5rem;
       padding: 0.8rem 1.5rem;
+      position: relative; 
     }
 
     .brand {
@@ -130,17 +132,20 @@
     }
 
     .brand-logo {
-      width: 40px;
-      height: 40px;
+      width: 80px;
+      height: 56px;
       border-radius: 12px;
-      background: radial-gradient(circle at 20% 20%, #efbb90, #c86c04);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
       font-weight: 800;
       font-size: 1.1rem;
-      box-shadow: 0 10px 25px rgba(200, 154, 4, 0.35);
+    }
+
+    .brand-img {
+      height: 56px;
+      width: 80px;
     }
 
     .brand-text-main {
@@ -210,12 +215,12 @@
       border-radius: 999px;
       padding: 0.45rem 1.2rem;
       border: none;
-      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      background: #D96C06;
       color: #ffffff;
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
-      box-shadow: 0 10px 25px rgba(200, 138, 4, 0.35);
+      box-shadow: 0 5px 15px rgba(200, 138, 4, 0.35);
     }
 
     .nav-cta:hover {
@@ -240,11 +245,22 @@
     }
 
     /* --- Felső menü: layout-board alapú dropdown-ok --- */
+    .main-nav {
+      position: static; /* már NEM ehhez igazítjuk a dropdown-t */
+    }
+
     .nav-item {
-      position: relative;
+      position: static;         /* így a legközelebbi pozicionált ős a header-inner lesz */
       display: flex;
       align-items: center;
     }
+
+    /* maradhat, de így már csak megerősítés */
+    .nav-item.has-dropdown {
+      position: static;
+    }
+
+
 
     .nav-item + .nav-item {
       margin-left: 0.75rem;
@@ -256,42 +272,90 @@
       gap: 0.25rem;
     }
 
-    .nav-dropdown {
-      position: absolute;
-      top: 120%;
-      left: 0;
-      min-width: 180px;
-      padding: 0.45rem 0.5rem;
-      border-radius: 12px;
-      background: #ffffff;
-      box-shadow: 0 12px 30px rgba(15,23,42,0.14);
-      display: none;
-      flex-direction: column;
-      gap: 0.25rem;
-      z-index: 60;
-    }
+        /* --- Mega dropdown a felső menühöz --- */
+    /* --- Mega dropdown a felső menühöz --- */
+.nav-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(980px, calc(100vw - 3rem)); /* szép, középre húzott doboz, mindkét oldalt kb. 1.5rem margó */
+  padding: 1.6rem 2rem;
+  border-radius: 0px 0px 10px 10px;
+  background: #fff;
+  display: none;
+  z-index: 60;
+}
 
-    .nav-item.has-dropdown:hover .nav-dropdown {
-      display: flex;
-    }
+/* Rácsos elrendezés */
+.nav-item.has-dropdown.dropdown-open .nav-dropdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.8rem;
+}
 
-    .nav-dropdown a {
-      font-size: 0.85rem;
-      padding: 0.25rem 0.15rem;
-      color: #0f172a;
-      white-space: nowrap;
-    }
 
-    /* ne rajzolja rá a fő menüpont aláhúzását a dropdown linkekre */
-    .nav-dropdown a::after {
-      display: none;
-    }
+/* ne rajzolja rá a fő menüpont aláhúzását a dropdown linkekre */
+.nav-dropdown a::after {
+  display: none;
+}
+
+/* Kártyás dropdown elemek */
+.nav-dropdown .nav-dd-item {
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.65rem 0.75rem;
+  color: #0f172a;
+  white-space: normal;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  border-radius: 0.9rem;
+  text-decoration: none;
+  background: transparent;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nav-dropdown .nav-dd-item:hover {
+  background: #f8fafc;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+  color: #0f172a;
+}
+
+.nav-dd-icon {
+  flex: 0 0 2.4rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.nav-dd-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.nav-dd-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.nav-dd-sub {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
 
 
     /* Hero */
 
     .hero {
-      padding: 3.5rem 0 3.75rem;
+      padding: 1.5rem 0 3.75rem;
     }
 
     .hero-inner {
@@ -349,15 +413,14 @@
     }
 
     .btn-primary {
-      border-radius: 999px;
+      border-radius: 10px;
       border: none;
       cursor: pointer;
       padding: 0.85rem 1.6rem;
       font-weight: 600;
       font-size: 0.95rem;
-      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      background: #222222;
       color: #ffffff;
-      box-shadow: 0 14px 30px rgba(200, 118, 4, 0.4);
     }
 
     .btn-primary:hover {
@@ -365,14 +428,15 @@
     }
 
     .btn-ghost {
-      border-radius: 999px;
-      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 10px;
+      border: none;
       padding: 0.8rem 1.5rem;
       background: rgba(255, 255, 255, 0.7);
       font-weight: 500;
       font-size: 0.9rem;
       display: inline-flex;
       align-items: center;
+      box-shadow: 0 4px 10px rgba(98, 98, 98, 0.2);
       gap: 0.5rem;
       cursor: pointer;
     }
@@ -400,14 +464,28 @@
     }
 
     .hero-card {
-      background: var(--color-surface);
       border-radius: 26px;
-      padding: 1.4rem;
-      box-shadow: var(--shadow-soft);
+      padding: 1rem;
       position: relative;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 1;
       overflow: hidden;
     }
+
+  /* a kép visszaforgatva, hogy egyenesen álljon */
+  .hero-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+    display: block;
+    transform-origin: center center;
+  }
+
+
 
     .hero-card-badge {
       font-size: 0.75rem;
@@ -514,7 +592,6 @@
       background: var(--color-surface);
       border-radius: var(--radius-lg);
       padding: 1.25rem 1.3rem;
-      box-shadow: 0 14px 35px rgba(15, 23, 42, 0.06);
       display: flex;
       flex-direction: column;
       gap: 0.45rem;
@@ -565,10 +642,8 @@
     /* Partners strip */
 
     .partners-strip {
-      background: radial-gradient(circle at 0 0, #e0f2fe 0, #f5f7fb 40%, #ffffff 100%);
-      border-radius: 26px;
+      border-radius: 10px;
       padding: 1.25rem 1.5rem;
-      box-shadow: var(--shadow-soft);
       display: flex;
       flex-direction: column;
       gap: 0.9rem;
@@ -602,8 +677,50 @@
       background: var(--color-surface);
       border-radius: var(--radius-lg);
       padding: 1.1rem 1.2rem;
-      box-shadow: 0 10px 30px rgba(42, 31, 15, 0.05);
     }
+
+    /* Services admin UI */
+    .icon-card { position: relative; }
+
+    .svc-admin-actions{
+      position:absolute;
+      top:12px;
+      right:12px;
+      display:flex;
+      gap:6px;
+    }
+
+    .svc-admin-btn{
+      width:32px;
+      height:32px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.92);
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    .svc-admin-btn:hover{
+      background:#fff;
+      box-shadow: 0 10px 24px rgba(15,23,42,.10);
+    }
+
+    .icon-card-add{
+      border:2px dashed rgba(148,163,184,.85);
+      background: rgba(248,250,252,.75);
+      cursor:pointer;
+    }
+
+    .icon-badge-add{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: transparent;
+      border:2px dashed rgba(148,163,184,.85);
+      font-size:28px;
+      line-height:1;
+    }
+
 
     .icon-badge {
       width: 32px;
@@ -632,7 +749,7 @@
     /* Motto & references */
 
     .motto-block {
-      background: #0f172a;
+      background: #2a1c0f;
       color: #e5e7eb;
       border-radius: 26px;
       padding: 2.1rem 2rem;
@@ -737,17 +854,118 @@
       color: var(--color-muted);
     }
 
+    /* From Uiverse.io by Smit-Prajapati */ 
+.orange {
+  color: #ff7a01;
+}
+
+.form-container {
+  max-width: 100%;
+  background-color: #001925;
+  padding: 30px;
+  border-radius: 24px 0px 0px 24px;
+  border-right: 5px solid #ff7a01;
+}
+
+.heading {
+  display: block;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.form-container .form .input {
+  color: #87a4b6;
+  width: 100%;
+  background-color: #002733;
+  border: none;
+  outline: none;
+  padding: 10px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+  border-left: 1px solid transparent;
+}
+
+.form-container .form .input:focus {
+  border-left: 5px solid #ff7a01;
+}
+
+.form-container .form .textarea {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  outline: none;
+  background-color: #002733;
+  color: #ff7a01;
+  font-weight: bold;
+  resize: none;
+  max-height: 150px;
+  margin-bottom: 20px;
+  border-left: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-container .form .textarea:focus {
+  border-left: 5px solid #ff7a01;
+}
+
+.form-container .form .button-container {
+  display: flex;
+  gap: 10px;
+}
+
+.form-container .form .button-container .send-button {
+  flex-basis: 100%;
+  background: #ff7a01;
+  padding: 10px;
+  color: #001925;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid transparent;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  transition: all 0.2s ease-in-out;
+}
+
+.form-container .form .button-container .send-button:hover {
+  background: transparent;
+  border: 1px solid #ff7a01;
+  color: #ff7a01;
+}
+
+.form-container .form .button-container .reset-button-container {
+  filter: drop-shadow(1px 1px 0px #ff7a01);
+  flex-basis: 30%;
+}
+
+.form-container .form .button-container .reset-button-container .reset-button {
+  position: relative;
+  text-align: center;
+  padding: 10px;
+  color: #ff7a01;
+  font-weight: bold;
+  background: #001925;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  transition: all 0.2s ease-in-out;
+}
+
+.form-container .form .button-container .reset-button-container .reset-button:hover {
+  background: #ff7a01;
+  color: #001925;
+}
+
     /* Contact */
 
     .contact-grid {
       display: grid;
       grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-      gap: 2rem;
+      gap: 0rem;
     }
 
     .contact-card {
       background: var(--color-surface);
-      border-radius: 24px;
+      border-radius: 0px 24px 24px 0px;
       padding: 1.7rem 1.7rem;
     }
 
@@ -781,7 +999,7 @@
       align-items: center;
       justify-content: center;
       font-size: 1rem;
-      color: var(--color-primary);
+      color: #0d6efd;
       flex-shrink: 0;
       margin-top: 0.1rem;
     }
@@ -811,6 +1029,349 @@
       align-items: center;
     }
 
+    /* --------- Termékválaszték – termék kártyák --------- */
+
+.product-grid-card {
+  background: #fff;
+  border-radius: 1.1rem;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  cursor: pointer;
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+}
+
+.product-grid-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 12px 30px rgba(95, 95, 97, 0.75);
+}
+
+.product-grid-card-image {
+  position: relative;
+  padding-top: 62%;
+  border-radius: 0.9rem;
+  overflow: hidden;
+  background: #020617;
+  border: 1px solid rgba(15, 23, 42, 0.9);
+}
+
+.product-grid-card-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-grid-card-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.product-grid-card-desc {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.product-grid-card .btn-primary {
+  margin-top: 0.25rem;
+  align-self: flex-start;
+  font-size: 0.85rem;
+  padding-inline: 0.9rem;
+}
+
+
+        /* Referencia kép nagy nézet (modal) – csak desktopon használjuk */
+    .reference-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.75);
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+
+    .reference-modal-backdrop.open {
+      display: flex;
+    }
+
+    .reference-modal {
+      position: relative;
+      max-width: min(900px, 90vw);
+      max-height: min(80vh, 600px);
+      border-radius: 1rem;
+      overflow: hidden;
+      background: #020617;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.6);
+    }
+
+    .reference-modal img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .reference-modal-close {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      border: none;
+      border-radius: 999px;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.7);
+      color: #e5e7eb;
+      font-size: 1rem;
+    }
+
+    .reference-modal-close:hover {
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .reference-modal-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      user-select: none;
+    }
+
+    .reference-modal-nav:hover {
+      background: rgba(30, 64, 175, 0.9);
+    }
+
+    .reference-modal-prev {
+      left: 12px;
+    }
+
+    .reference-modal-next {
+      right: 12px;
+    }
+
+    .reference-modal-meta {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0.55rem 0.7rem;
+      border-radius: 0.85rem;
+      background: linear-gradient(to top, rgba(2, 6, 23, 0.78), rgba(2, 6, 23, 0.22));
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      pointer-events: none; /* csak információ, ne fogja meg a kattintást */
+    }
+
+    .reference-modal-title {
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .reference-modal-counter {
+      opacity: 0.85;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    /* ------------ Főoldali hero slider ------------ */
+
+.hero-slider {
+  padding: 0rem 0 0rem;
+}
+
+.hero-slider-inner {
+  max-width: 100%;
+  padding: 0rem 0 2.8rem;
+  margin-inline: auto;
+}
+
+.hero-slider-viewport {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #0f172a 0, #020617 55%);
+}
+
+.hero-slider-track {
+  display: flex;
+  transition: transform 0.55s ease;
+}
+
+.hero-slide {
+  position: relative;
+  min-width: 100%;
+  height: min(420px, 65vh);
+  background: #020617;
+}
+
+.hero-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.05);
+}
+
+.hero-slide-overlay {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 1.4rem 1.6rem 1.5rem;
+  background: linear-gradient(to top, #222, rgba(15, 23, 42, 0.4), transparent);
+  color: #e5e7eb;
+}
+
+.hero-slide-title {
+  font-size: clamp(1.2rem, 2vw + .4rem, 1.7rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-bottom: .2rem;
+}
+
+.hero-slide-subtitle {
+  font-size: .9rem;
+  color: #cbd5f5;
+}
+
+.hero-slider-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  color: #e5e7eb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.hero-slider-nav:hover {
+  background: rgba(30, 64, 175, 0.9);
+}
+
+.hero-slider-nav-prev {
+  left: 14px;
+}
+
+.hero-slider-nav-next {
+  right: 14px;
+}
+
+.hero-slider-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-bottom: 2px;
+}
+
+.hero-slider-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(15, 23, 42, 0.7);
+  cursor: pointer;
+  padding: 0;
+}
+
+.hero-slider-dot.is-active {
+  background: #f97316;
+  border-color: #fed7aa;
+}
+
+@media (max-width: 700px) {
+
+  .form-container {
+    max-width: 100%;
+    background-color: #001925;
+    padding: 30px;
+    border-radius: 24px 24px 0px 0px;
+    border-bottom: 5px solid #ff7a01;
+    border-right: none;
+  }
+
+  .contact-card {
+      background: var(--color-surface);
+      border-radius: 0px 0px 24px 24px;
+      padding: 1.7rem 1.7rem;
+  }
+
+  .contact-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 0rem;
+    }
+
+  .hero-slider {
+    padding-top: 1.8rem;
+  }
+
+  .hero-slider-viewport {
+    border-radius: 1.1rem;
+  }
+
+  .hero-slide {
+    height: min(320px, 60vh);
+  }
+
+  .hero-slide-overlay {
+    padding-inline: 1.1rem;
+    padding-bottom: 1.1rem;
+  }
+}
+
+
+    /* Mobilon akkor se látszódjon, ha véletlenül megnyitnánk */
+    @media (max-width: 800px) {
+      .reference-modal-backdrop {
+        display: none !important;
+      }
+    }
+
+    /* Desktopon legyen "zoom-in" kurzor a referencia képeken */
+    @media (min-width: 801px) {
+      .reference-image-wrap img {
+        cursor: zoom-in;
+      }
+    }
+
+
     .footer-links {
       display: flex;
       flex-wrap: wrap;
@@ -835,72 +1396,145 @@
       }
     }
 
-    @media (max-width: 800px) {
-      .topbar-inner {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0.5rem 1.2rem;
-      }
+@media (max-width: 800px) {
+  /* ne lehessen oldalra scrollozni */
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
 
-      .header-inner {
-        padding: 0.7rem 1.2rem;
-      }
+  .topbar-inner {
+    display: none;
+  }
+
+  .header-inner {
+    padding: 0.7rem 1.2rem;
+  }
 
       .nav-links {
         position: fixed;
-        inset: 60px 0 auto 0;
+        top: 60px;          /* a header alól induljon */
+        left: 0;
+        right: 0;
+        bottom: 0;          /* a képernyő aljáig tartson */
         background: rgba(248, 250, 252, 0.98);
         border-bottom: 1px solid rgba(15, 23, 42, 0.06);
-        padding: 0.75rem 1.5rem 1rem;
+        padding: 0.75rem 1.25rem 1.25rem;
+
+        display: flex;
         flex-direction: column;
         align-items: flex-start;
-        transform: translateY(-120%);
+
+        transform: translateY(-100%);  /* alapból „felhúzva” */
         opacity: 0;
         pointer-events: none;
         transition: transform 0.2s ease, opacity 0.2s ease;
+
+        overflow-y: auto;              /* BELÜL görgethető */
+        -webkit-overflow-scrolling: touch;
+        z-index: 999;                  /* mindent takarjon */
       }
 
-      .nav-links.open {
-        transform: translateY(0);
-        opacity: 1;
-        pointer-events: auto;
-      }
 
-      .nav-toggle {
-        display: block;
-      }
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+    height: 50vh;
+    pointer-events: auto;
+  }
 
-      .nav-cta {
-        width: 100%;
-        justify-content: center;
-        text-align: center;
-      }
+  .nav-toggle {
+    display: block;
+  }
 
-      .nav-links {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+  .nav-cta {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
 
-      .nav-item {
-        width: 100%;
-        flex-direction: column;
-        align-items: flex-start;
-        margin-left: 0;
-      }
+  /* a fő menüpontok egymás alatt, teljes szélességen */
+  .nav-item {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 0;
+  }
 
-      .nav-item.has-dropdown > a::after {
-        content: "";
-      }
+  .nav-links a {
+    font-size: 0.9rem;   /* kicsit kisebb betű */
+  }
 
-      .nav-dropdown {
-        position: static;
-        box-shadow: none;
-        background: transparent;
-        padding: 0.1rem 0 0.2rem 0.75rem;
-        display: flex;
-      }
+  .nav-item > a {
+    padding: 0.4rem 0;
+  }
 
-    }
+  /* ne legyen külön nyíl utána mobilon */
+  .nav-item.has-dropdown > a::after {
+    content: "";
+  }
+
+  .contactemail {
+    font-size: 0.85rem;
+  }
+
+  /* mega-menü helyett sima, függőleges lista mobilon */
+  .nav-dropdown {
+    position: static;
+    top: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    margin-top: 0.15rem;
+    box-shadow: none;
+    background: transparent;
+    padding: 0.1rem 0 0.6rem 0.5rem;  /* kis behúzás balra */
+    display: block;
+  }
+
+  /* felülírjuk a desktop-grid display-t */
+  .nav-item.has-dropdown.dropdown-open .nav-dropdown {
+    display: block;
+  }
+
+  /* kártyás, de egymás alatti, NEM szélesebb a képernyőnél */
+  .nav-dropdown .nav-dd-item {
+    width: 100%;
+    margin: 0;
+    padding: 0.45rem 0.25rem 0.45rem 0;
+    border-radius: 0.7rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    text-decoration: none;
+    background: transparent;
+  }
+
+  .nav-dropdown .nav-dd-item:hover {
+    background: rgba(15, 23, 42, 0.04);
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* ikon + szöveg mobilra optimalizálva */
+  .nav-dd-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    font-size: 1rem;
+  }
+
+  .nav-dd-title {
+    font-size: 0.85rem;
+  }
+
+  .nav-dd-sub {
+    font-size: 0.76rem;
+  }
+}
+
+
 
     @media (max-width: 600px) {
       section {
@@ -922,6 +1556,114 @@
         justify-content: center;
       }
     }
+
+      /* Top beszállító partnerek */
+
+    .top-partners-section {
+      margin-top: 2.25rem;
+    }
+
+    .partners-strip {
+      background: #fcf5ed;
+      border-radius: 20px;
+      border-radius: var(--radius-lg);
+      padding: 1.8rem 1.9rem;
+    }
+
+    .partners-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .partners-heading-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .partners-heading-lead {
+      margin-top: 0.25rem;
+      font-size: 0.9rem;
+      color: var(--color-muted);
+      max-width: 40rem;
+    }
+
+    .partners-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.3rem;
+      align-items: stretch;
+    }
+
+    .partner-card {
+      border-radius: 1rem;
+      padding: 1rem 1rem 1.1rem;
+      background: #fcf5ed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.55rem;
+    }
+
+    .partner-logo {
+      width: 130px;
+      height:110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .partner-logo img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .partner-logo-placeholder {
+      width: 64px;
+      height: 64px;
+      border-radius: 999px;
+      border: 1px dashed #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #64748b;
+      background: #f8fafc;
+    }
+
+    .partner-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .partner-subtitle {
+      font-size: 0.8rem;
+      color: var(--color-muted);
+    }
+
+    .partners-empty {
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--color-muted);
+      text-align: center;
+    }
+
+    @media (max-width: 640px) {
+      .partners-strip {
+        padding: 1.3rem 1.2rem;
+      }
+
+      .partners-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -932,30 +1674,44 @@
       <div class="topbar-left">
         <div class="topbar-item">
           <span class="icon">📞</span>
-          <span data-section="site" data-field="topbarPhones">
+          <span data-section="site" class="mobileinvisible" data-field="topbarPhones">
             06-22-331-332 · 06-20-977-09-07
           </span>
         </div>
         <div class="topbar-item">
           <span class="icon">✉️</span>
-          <span data-section="site" data-field="topbarEmail">
+          <span data-section="site" class="mobileinvisible" data-field="topbarEmail">
             mesztorkaputechnika1@gmail.com
           </span>
+        </div>
+        <div class="topbar-item">
+          <a
+            href="https://www.facebook.com/mesztorkaputechnika" 
+            target="_blank"
+            rel="noopener"
+            aria-label="Mesz-Tor Facebook oldal"
+            style="display:flex;align-items:center;justify-content: center;text-decoration:none;color:inherit;"
+          >
+            <span class="icon" aria-hidden="true" style="display:flex;align-items:center;justify-content: center;">
+              <!-- egyszerű FB logó SVG -->
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M22 12.07C22 6.51 17.52 2 12 2S2 6.51 2 12.07C2 17.1 5.66 21.29 10.44 22v-7.03H8.08v-2.9h2.36V9.41c0-2.33 1.38-3.62 3.5-3.62.99 0 2.03.18 2.03.18v2.26h-1.14c-1.12 0-1.47.7-1.47 1.42v1.7h2.5l-.4 2.9h-2.1V22C18.34 21.29 22 17.1 22 12.07Z"
+                />
+              </svg>
+            </span>
+            <span class="mobileinvisible" data-section="site" data-field="topbarFacebook" style="margin-left: 5px">/mesztorkaputechnika</span>
+          </a>
         </div>
       </div>
       <div class="topbar-right">
         <div class="topbar-item">
           <span class="icon">📍</span>
-          <span data-section="site" data-field="topbarAddress">
+          <span class="mobileinvisible" data-section="site" data-field="topbarAddress">
             Székesfehérvár, Berényi út 81.
           </span>
         </div>
-        <a href="#contact"
-          class="topbar-cta"
-          data-section="site"
-          data-field="topbarCtaText">
-          Vegye fel velünk a kapcsolatot
-        </a>
       </div>
     </div>
   </div>
@@ -965,7 +1721,11 @@
   <header class="site-header">
     <div class="header-inner container">
       <div class="brand">
-        <div class="brand-logo">M</div>
+        <div class="brand-logo">
+          <a href="#">
+            <img src="mesztor-effect.png" class="brand-img" alt="">
+          </a>
+        </div>
         <div>
           <div class="brand-text-main"
               data-section="site" data-field="brandMain">
@@ -984,35 +1744,157 @@
 
       <nav class="main-nav">
         <div class="nav-links">
-          <a href="#hero"      data-section="site" data-field="navHome">Kezdőlap</a>
-          <a href="#products"  data-section="site" data-field="navProducts">Termékválaszték</a>
-          <a href="#services"  data-section="site" data-field="navServices">Szolgáltatások</a>
-          <a href="#why-us"    data-section="site" data-field="navWhyUs">Miért  mi?</a>
-          <a href="#references" data-section="site" data-field="navReferences">Referenciák</a>
-          <a href="#contact"   data-section="site" data-field="navContact">Kapcsolat</a>
-          <button class="nav-cta"
-                  onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'});"
-                  data-section="site" data-field="navCtaText">
+
+          <!-- Termékválaszték – dropdown -->
+          <div class="nav-item has-dropdown">
+            <a
+              href="#hero"
+            >
+              Kezdőlap
+            </a>
+
+            <div class="nav-dropdown">
+              <a
+                href="#why-us"
+                class="nav-dd-item"
+              >
+                <span class="nav-dd-icon">👨🏻‍🔧</span>
+                <span class="nav-dd-main">
+                  <span class="nav-dd-title">Miért mi?</span>
+                  <span class="nav-dd-sub">Minőség, szakértelem, hosszú távú biztonság</span>
+                </span>
+              </a>
+              <a
+                href="#services"
+                class="nav-dd-item"
+              >
+                <span class="nav-dd-icon">🧰</span>
+                <span class="nav-dd-main">
+                  <span class="nav-dd-title">Szolgáltatásaink</span>
+                  <span class="nav-dd-sub">Felmérés, tanácsadás, szerviz</span>
+                </span>
+              </a>
+              <a
+                href="#products"
+                class="nav-dd-item"
+              >
+                <span class="nav-dd-icon">🚪</span>
+                <span class="nav-dd-main">
+                  <span class="nav-dd-title">Termékválaszték</span>
+                  <span class="nav-dd-sub">Garázs-, ipari kapuk, sorompók, automatika</span>
+                </span>
+              </a>
+
+              
+              
+            </div>
+          </div>
+
+
+
+          <!-- Kapcsolat -->
+          <div class="nav-item">
+            <a
+              href="#contact"
+              data-section="site"
+              data-field="navContact"
+              data-section-key="contact"
+            >
+              Kapcsolat
+            </a>
+          </div>
+
+          <!-- Szolgáltatások – dropdown -->
+          <div class="nav-item has-dropdown">
+            <a
+              href="#services"
+            >
+              Referenciák
+            </a>
+
+            <div class="nav-dropdown">
+              <a
+                href="#references"
+                class="nav-dd-item"
+              >
+                <span class="nav-dd-icon">📸</span>
+                <span class="nav-dd-main">
+                  <span class="nav-dd-title">Referenciák</span>
+                  <span class="nav-dd-sub">Elkészült garázs- és ipari kapuink, fotókkal.</span>
+                </span>
+              </a>
+              <a
+                href="#top-partners"
+                class="nav-dd-item"
+              >
+                <span class="nav-dd-icon">🏢</span>
+                <span class="nav-dd-main">
+                  <span class="nav-dd-title">Top beszállítók</span>
+                  <span class="nav-dd-sub">Márkák, akikkel együtt dolgozunk</span>
+                </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- CTA – ugyanúgy a Kapcsolat szekcióra mutat, de már a közös nav-logikával -->
+          <button
+            class="nav-cta"
+            type="button"
+            onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'});"
+            data-section="site"
+            data-field="navCtaText"
+            data-section-key="contact"
+          >
             Ajánlatkérés
           </button>
         </div>
       </nav>
+
+
 
     </div>
   </header>
 
   <main>
 
+    <!-- Főoldali automatikus slider -->
+    <section id="hero-slider" class="hero-slider">
+      
+    </section>
+
     <!-- Hero -->
     <section id="hero" class="hero">
+      <div class="container">
+        <div class="hero-slider-inner">
+          <div class="hero-kicker">
+              <span class="hero-kicker-dot"></span>
+              <span data-section="hero" data-field="kicker">
+                Csalódásmentes kaputechnika
+              </span>
+            </div>
+          <div class="hero-slider-viewport">
+            <div id="heroSliderTrack" class="hero-slider-track">
+              <!-- Diaképek JS-ből -->
+            </div>
+
+            <button id="heroSliderPrev" class="hero-slider-nav hero-slider-nav-prev" type="button" aria-label="Előző kép">
+              ‹
+            </button>
+            <button id="heroSliderNext" class="hero-slider-nav hero-slider-nav-next" type="button" aria-label="Következő kép">
+              ›
+            </button>
+
+            <div id="heroSliderDots" class="hero-slider-dots"></div>
+          </div>
+        </div>
+        
+      </div>
+      
+
       <div class="container hero-inner">
         <div>
-          <div class="hero-kicker">
-            <span class="hero-kicker-dot"></span>
-            <span data-section="hero" data-field="kicker">
-              Csalódásmentes kaputechnika
-            </span>
-          </div>
+          
           <h1 class="hero-title"
               data-section="hero" data-field="title">
             Üdvözöljük a <span class="highlight">kaputechnikai termékek</span> világában.
@@ -1035,156 +1917,182 @@
               Termékválaszték megtekintése
             </button>
           </div>
-          <div class="hero-meta">
-            <span data-section="hero" data-field="meta1">
-              <strong>Székesfehérvár</strong> bemutatóterem · Berényi út 81.
-            </span>
-            <span data-section="hero" data-field="meta2">
-              <strong>Sokéves tapasztalat</strong> lakossági és ipari kaputechnikában
-            </span>
-          </div>
 
         </div>
 
         <div class="hero-visual">
           <div class="hero-glow"></div>
+          
           <div class="hero-card">
-            <div class="hero-card-badge" data-section="hero" data-field="herobadge">Kaputechnikai megoldások</div>
-            <div class="hero-card-main">
-              <span data-section="hero" data-field="herosoanleft">Lakossági &amp; ipari kapuk</span>
-              <span style="font-size:0.85rem;color:var(--color-muted);" data-section="hero" data-field="herospanright">tanácsadás · kivitelezés · szerviz</span>
-            </div>
-            <div class="hero-pill-row">
-              <span class="pill" data-section="hero" data-field="herocard1">Garázskapuk</span>
-              <span class="pill" data-section="hero" data-field="herocard2">Ipari kapuk</span>
-              <span class="pill" data-section="hero" data-field="herocard3">Kapumozgató motorok</span>
-              <span class="pill" data-section="hero" data-field="herocard4">Sorompók</span>
-            </div>
-            <div class="hero-stats">
-              <div>
-                <div class="hero-stat-label" data-section="hero" data-field="heroctexttitleleft">Szolgáltatásaink</div>
-                <div class="hero-stat-value" data-section="hero" data-field="heroctexttitleright">Ajánlatkészítéstől a szervizig</div>
-              </div>
-              <div>
-                <div class="hero-stat-label" data-section="hero" data-field="heroctextleft">Megbízható beszállítók</div>
-                <div class="hero-stat-value" data-section="hero" data-field="heroctextright">Hörmann és további kiemelt partnerek</div>
-              </div>
-            </div>
+
+            <img id="hero-image" src="IMG-9242.jpg" alt="Mesztor-image">
+            
           </div>
         </div>
-      </div>
+
+      
     </section>
 
     <!-- Products -->
     <section id="products">
       <div class="container">
         <div class="section-header">
-          <div class="section-kicker" data-section="products" data-field="sectionKicker">Termékválaszték</div>
-          <h2 class="section-title" data-section="products" data-field="sectionTitle">Kaputechnikai megoldások egy helyen</h2>
-          <p class="section-lead" data-section="products" data-field="sectionLead">
+          <div class="section-kicker" data-section="products" data-field="products_kicker">Termékválaszték</div>
+          <h2 class="section-title" data-section="products" data-field="products_title">Kaputechnikai megoldások egy helyen</h2>
+          <p class="section-lead" data-section="products" data-field="products_lead">
             Lakossági garázskapuktól az ipari gyorskapukig, kapumozgató motoroktól az automata üvegajtókig –
             segítünk megtalálni az adott helyre legideálisabb megoldást.
           </p>
         </div>
 
-        <div class="card-grid">
+        <!--<div class="card-grid">
           <article class="card">
-            <div class="card-tag" data-section="products" data-field="productcardtop">Lakossági megoldások</div>
-            <div class="card-title" data-section="products" data-field="productcardtitle">Garázskapuk</div>
-            <p class="icon-card-body" data-section="products" data-field="productcardtext">
+            <div class="card-tag" data-section="products" data-field="lakossagi_top">Lakossági megoldások</div>
+            <div class="card-title" data-section="products" data-field="lakossagi_title">Garázskapuk</div>
+            <p class="icon-card-body" data-section="products" data-field="lakossagi_text">
               Esztétikus és biztonságos garázskapuk a mindennapi használathoz.
             </p>
             <div class="card-links">
-              <span class="chip-link" data-section="products" data-field="productcard1">Lakossági redőnykapuk</span>
-              <span class="chip-link" data-section="products" data-field="productcard2">Szekcionált garázskapuk</span>
-              <span class="chip-link" data-section="products" data-field="productcard3">Billenőkapuk</span>
+              <span class="chip-link" data-section="products" data-field="lakossagi1">Lakossági redőnykapuk</span>
+              <span class="chip-link" data-section="products" data-field="lakossagi2">Szekcionált garázskapuk</span>
+              <span class="chip-link" data-section="products" data-field="lakossagi3">Billenőkapuk</span>
             </div>
-            <a href="#contact" class="card-footer-link" data-section="products" data-field="productcardcontact1">Ajánlat garázskapura →</a>
+            <a href="#contact" class="card-footer-link" data-section="products" data-field="lakossagicontact">Ajánlat garázskapura →</a>
           </article>
 
           <article class="card">
-            <div class="card-tag">Ipari megoldások</div>
-            <div class="card-title">Ipari kapuk</div>
-            <p class="icon-card-body">
+            <div class="card-tag" data-section="products" data-field="ipari_top">Ipari megoldások</div>
+            <div class="card-title" data-section="products" data-field="iprai_title">Ipari kapuk</div>
+            <p class="icon-card-body" data-section="products" data-field="ipari_text">
               Megbízható ipari kapuk raktárakhoz, csarnokokhoz és logisztikai központokhoz.
             </p>
             <div class="card-links">
-              <span class="chip-link">Ipari redőnykapuk</span>
-              <span class="chip-link">Ipari szekcionált kapuk</span>
-              <span class="chip-link">Gyorskapuk</span>
+              <span class="chip-link" data-section="products" data-field="ipari1">Ipari redőnykapuk</span>
+              <span class="chip-link" data-section="products" data-field="ipari2">Ipari szekcionált kapuk</span>
+              <span class="chip-link" data-section="products" data-field="ipari3">Gyorskapuk</span>
             </div>
-            <a href="#contact" class="card-footer-link">Ipari kapu ajánlat →</a>
+            <a href="#contact" class="card-footer-link" data-section="products" data-field="iparicontact">Ipari kapu ajánlat →</a>
           </article>
 
           <article class="card">
-            <div class="card-tag">Mozgatástechnika</div>
-            <div class="card-title">Kapumozgató meghajtások</div>
-            <p class="icon-card-body">
+            <div class="card-tag" data-section="products" data-field="mozgas_top">Mozgatástechnika</div>
+            <div class="card-title" data-section="products" data-field="mozgas_title">Kapumozgató meghajtások</div>
+            <p class="icon-card-body" data-section="products" data-field="mozgas_text">
               Kapumozgató motorok lakossági és ipari felhasználásra.
             </p>
             <div class="card-links">
-              <span class="chip-link">Szárnyas kapu motorok</span>
-              <span class="chip-link">Tolókapu motorok</span>
-              <span class="chip-link">Garázskapu motorok</span>
+              <span class="chip-link" data-section="products" data-field="mozgas1">Szárnyas kapu motorok</span>
+              <span class="chip-link" data-section="products" data-field="mozgas2">Tolókapu motorok</span>
+              <span class="chip-link" data-section="products" data-field="mozgas3">Garázskapu motorok</span>
             </div>
-            <a href="#contact" class="card-footer-link">Kapumozgató megoldások →</a>
+            <a href="#contact" class="card-footer-link" data-section="products" data-field="mozgascontact">Kapumozgató megoldások →</a>
           </article>
 
           <article class="card">
-            <div class="card-tag">Beléptetés</div>
-            <div class="card-title">Automata üvegajtók &amp; sorompók</div>
-            <p class="icon-card-body">
+            <div class="card-tag" data-section="products" data-field="belep_top">Beléptetés</div>
+            <div class="card-title" data-section="products" data-field="belep_title">Automata üvegajtók &amp; sorompók</div>
+            <p class="icon-card-body" data-section="products" data-field="belep_text">
               Modern, megbízható beléptetési rendszerek üzletekhez, irodákhoz, parkolókhoz.
             </p>
             <div class="card-links">
-              <span class="chip-link">Automata üvegajtók</span>
-              <span class="chip-link">Sorompók</span>
+              <span class="chip-link" data-section="products" data-field="belep1">Automata üvegajtók</span>
+              <span class="chip-link" data-section="products" data-field="belep2">Sorompók</span>
             </div>
-            <a href="#contact" class="card-footer-link">Beléptetőrendszer ajánlat →</a>
+            <a href="#contact" class="card-footer-link" data-section="products" data-field="belepcontact">Beléptetőrendszer ajánlat →</a>
           </article>
 
           <article class="card">
-            <div class="card-tag">Kiegészítők</div>
-            <div class="card-title">Távirányítók, fotocellák, klaviatúrák</div>
-            <p class="icon-card-body">
+            <div class="card-tag" data-section="products" data-field="kiegesz_top">Kiegészítők</div>
+            <div class="card-title" data-section="products" data-field="kiegesz_title">Távirányítók, fotocellák, klaviatúrák</div>
+            <p class="icon-card-body" data-section="products" data-field="kiegesz_text">
               Biztonságot és kényelmet növelő kiegészítők széles választéka.
             </p>
             <div class="card-links">
-              <span class="chip-link">Távirányítók</span>
-              <span class="chip-link">Fotocellák</span>
-              <span class="chip-link">Klaviatúrák</span>
+              <span class="chip-link" data-section="products" data-field="kiegesz1">Távirányítók</span>
+              <span class="chip-link" data-section="products" data-field="kiegesz2">Fotocellák</span>
+              <span class="chip-link" data-section="products" data-field="kiegesz3">Klaviatúrák</span>
             </div>
-            <a href="#contact" class="card-footer-link">Kiegészítők iránt érdeklődöm →</a>
+            <a href="#contact" class="card-footer-link" data-section="products" data-field="kiegeszcontact">Kiegészítők iránt érdeklődöm →</a>
           </article>
 
           <article class="card">
-            <div class="card-tag">Kerítésmegoldások</div>
-            <div class="card-title">Alu kerítések &amp; egyedi utcai kapuk</div>
-            <p class="icon-card-body">
+            <div class="card-tag" data-section="products" data-field="kerit_top">Kerítésmegoldások</div>
+            <div class="card-title" data-section="products" data-field="kerit_title">Alu kerítések &amp; egyedi utcai kapuk</div>
+            <p class="icon-card-body" data-section="products" data-field="kerit_text">
               Tartós és elegáns alu kerítések, személyre szabott utcai kapukkal.
             </p>
             <div class="card-links">
-              <span class="chip-link">Alu kerítések</span>
-              <span class="chip-link">Egyedi utcai kapuk</span>
+              <span class="chip-link" data-section="products" data-field="kerit1">Alu kerítések</span>
+              <span class="chip-link" data-section="products" data-field="kerit2">Egyedi utcai kapuk</span>
             </div>
-            <a href="#contact" class="card-footer-link">Kerítés és utcai kapu ajánlat →</a>
+            <a href="#contact" class="card-footer-link" data-section="products" data-field="keritcontact">Kerítés és utcai kapu ajánlat →</a>
           </article>
-        </div>
 
-        <div style="margin-top:2.2rem;">
-          <div class="partners-strip">
-            <div style="font-size:0.9rem;color:var(--color-muted);">Megbízható beszállító partnereink:</div>
-            <div class="partners-list">
-              <span class="partner-pill">Hörmann Hungária Kft.</span>
-              <span class="partner-pill">Automata Bejáratok Specialistája Kft.</span>
-              <span class="partner-pill">Roll-N Kft.</span>
-              <span class="partner-pill">Overgate Kft.</span>
-              <span class="partner-pill">Motors For Gate Kft.</span>
-              <span class="partner-pill">Kapuker Kft.</span>
-              <span class="partner-pill">Gal-La Bt.</span>
+          
+        </div>-->
+
+      <!-- Dinamikus termékválaszték (Firebase /products) 
+      <div class="section-header" style="margin-top: 2.5rem;">
+        <div class="section-kicker">Termékválaszték</div>
+        <h3 class="section-title" style="font-size: 1.4rem;">
+          Konkrét termékeink
+        </h3>
+        <p class="section-lead">
+          Az alábbi listában a jelenleg elérhető termékeket találja. A részletes adatokért
+          kattintson a kártyára.
+        </p>
+      </div>-->
+
+      <div style="margin:0 0 1.5rem"><a href="./shop.html" class="btn-primary" style="display:inline-flex;align-items:center;text-decoration:none;">Webshop megnyitása →</a></div>
+
+      <div id="termekvalasztek-grid" class="card-grid">
+        <!-- JS tölti be a termékeket -->
+      </div>
+
+      <p id="termekvalasztek-empty" class="references-empty" style="display:none;">
+        Jelenleg nincs felvitt termék. Amint hozzáadsz egyet az admin felületen,
+        itt automatikusan meg fog jelenni.
+      </p>
+
+      </div>
+
+      </div>
+
+    </section>
+
+    
+
+    <!-- Top partners -->
+    <section class="top-partners-section" id="top-partners" data-section="top-beszallitok">
+      <div class="container">
+        <div class="partners-strip">
+              <div class="partners-inner">
+                <div class="partners-heading">
+                  <div
+                    class="partners-heading-title"
+                    data-section="top-beszallitok"
+                    data-field="sectionTitle"
+                  >
+                    Megbízható beszállító partnereink
+                  </div>
+                  <p
+                    class="partners-heading-lead"
+                    data-section="top-beszallitok"
+                    data-field="sectionLead"
+                  >
+                    A minőségi kaputechnika mögött megbízható, hosszú távú gyártói partnerek állnak.
+                  </p>
+                </div>
+
+                <!-- Dinamikus rács Firebase-ből -->
+                <div id="suppliers-grid" class="partners-grid" aria-live="polite"></div>
+
+                <!-- Üres állapot -->
+                <div id="suppliers-empty" class="partners-empty">
+                  Jelenleg nincs rögzített beszállító partner.
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -1192,63 +2100,15 @@
     <section id="services">
       <div class="container">
         <div class="section-header">
-          <div class="section-kicker">Szolgáltatásaink</div>
-          <h2 class="section-title">Teljes körű támogatás a tervezéstől a szervizig</h2>
-          <p class="section-lead">
+          <div class="section-kicker" data-section="services" data-field="servic_kicker">Szolgáltatásaink</div>
+          <h2 class="section-title" data-section="services" data-field="servic_title">Teljes körű támogatás a tervezéstől a szervizig</h2>
+          <p class="section-lead" data-section="services" data-field="servic_lead">
             Nem csak termékeket kínálunk, hanem komplett megoldást: felmérés, tanácsadás, szállítás,
             beüzemelés és márkafüggetlen szerviz egy kézben.
           </p>
         </div>
 
-        <div class="icon-grid">
-          <article class="icon-card">
-            <div class="icon-badge">📝</div>
-            <h3 class="icon-card-title">Ajánlat készítés</h3>
-            <p class="icon-card-body">
-              Gyors, személyre szabott, díjmentes árajánlat készítése az Ön igényeire szabva.
-            </p>
-          </article>
-
-          <article class="icon-card">
-            <div class="icon-badge">📐</div>
-            <h3 class="icon-card-title">Felmérés</h3>
-            <p class="icon-card-body">
-              Precíz helyszíni felmérés szakképzett munkatársunk által, a legjobb műszaki megoldás érdekében.
-            </p>
-          </article>
-
-          <article class="icon-card">
-            <div class="icon-badge">💬</div>
-            <h3 class="icon-card-title">Szaktanácsadás</h3>
-            <p class="icon-card-body">
-              Hozzáértő kollégáink segítenek eligazodni a termékek, méretek és műszaki lehetőségek között.
-            </p>
-          </article>
-
-          <article class="icon-card">
-            <div class="icon-badge">🚚</div>
-            <h3 class="icon-card-title">Szállítás</h3>
-            <p class="icon-card-body">
-              Szakszerű, sérülésmentes szállítás a kaputechnikai termékek sajátosságainak figyelembevételével.
-            </p>
-          </article>
-
-          <article class="icon-card">
-            <div class="icon-badge">🛠️</div>
-            <h3 class="icon-card-title">Beüzemelés</h3>
-            <p class="icon-card-body">
-              Magas színvonalú beszerelés és beüzemelés, hogy az új kapu hosszú távon megbízhatóan működjön.
-            </p>
-          </article>
-
-          <article class="icon-card">
-            <div class="icon-badge">🔧</div>
-            <h3 class="icon-card-title">Szervizelés, javítás</h3>
-            <p class="icon-card-body">
-              Márkafüggetlen kaputechnikai termékek javítása, karbantartása, gyors reakcióval.
-            </p>
-          </article>
-        </div>
+        <div id="services-grid" class="icon-grid"></div>
       </div>
     </section>
 
@@ -1256,63 +2116,66 @@
     <section id="why-us">
       <div class="container">
         <div class="section-header">
-          <div class="section-kicker">Miért válasszon minket?</div>
-          <h2 class="section-title">Minőség, szakértelem, hosszú távú biztonság</h2>
-          <p class="section-lead">
+          <div class="section-kicker" data-section="why-us" data-field="whyus_kicker">Miért válasszon minket?</div>
+          <h2 class="section-title" data-section="why-us" data-field="whyus_title">Minőség, szakértelem, hosszú távú biztonság</h2>
+          <p class="section-lead" data-section="why-us" data-field="whyus_lead">
             A megbízható minőségű, csalódásmentes termékek mellett köteleztük el magunkat,
             mert számunkra az Ön hosszú távú elégedettsége a legfontosabb.
           </p>
         </div>
 
-        <div class="icon-grid">
+        <!--<div class="icon-grid">
           <article class="icon-card">
-            <div class="icon-badge">⭐</div>
-            <h3 class="icon-card-title">Magas minőségű termékek</h3>
-            <p class="icon-card-body">
+            <div class="icon-badge" data-section="why-us" data-field="minoseg_badge">⭐</div>
+            <h3 class="icon-card-title" data-section="why-us" data-field="minoseg_title">Magas minőségű termékek</h3>
+            <p class="icon-card-body" data-section="why-us" data-field="minoseg_text">
               Az árat nem az olcsóbb termék, hanem a minőség határozza meg – ennek megfelelően válogattuk össze kínálatunkat.
             </p>
           </article>
 
           <article class="icon-card">
-            <div class="icon-badge">📦</div>
-            <h3 class="icon-card-title">Széles termékválaszték</h3>
-            <p class="icon-card-body">
+            <div class="icon-badge" data-section="why-us" data-field="valasztek_badge">📦</div>
+            <h3 class="icon-card-title" data-section="why-us" data-field="valasztek_title">Széles termékválaszték</h3>
+            <p class="icon-card-body" data-section="why-us" data-field="valasztek_text">
               Az összes meghatározó gyártó termékei elérhetőek, így mindig a legjobb megoldást ajánljuk.
             </p>
           </article>
 
           <article class="icon-card">
-            <div class="icon-badge">🛡️</div>
-            <h3 class="icon-card-title">Kiemelt garanciák</h3>
-            <p class="icon-card-body">
+            <div class="icon-badge" data-section="why-us" data-field="garancia_badge">🛡️</div>
+            <h3 class="icon-card-title" data-section="why-us" data-field="garancia_title">Kiemelt garanciák</h3>
+            <p class="icon-card-body" data-section="why-us" data-field="garancia_text">
               Beszállítóink kiemelt garanciával hálálják meg a minőségi termékekbe vetett bizalmat.
             </p>
           </article>
 
           <article class="icon-card">
-            <div class="icon-badge">🤝</div>
-            <h3 class="icon-card-title">Vevőbarát ügyfélszolgálat</h3>
-            <p class="icon-card-body">
+            <div class="icon-badge" data-section="why-us" data-field="ugyfelszolg_badge">🤝</div>
+            <h3 class="icon-card-title" data-section="why-us" data-field="ugyfelszolg_title">Vevőbarát ügyfélszolgálat</h3>
+            <p class="icon-card-body" data-section="why-us" data-field="ugyfelszolg_text">
               Barátságos, felkészült ügyfélszolgálat segít a megfelelő termék és megoldás kiválasztásában.
             </p>
           </article>
 
           <article class="icon-card">
-            <div class="icon-badge">👷</div>
-            <h3 class="icon-card-title">Precíz munkatársak</h3>
-            <p class="icon-card-body">
+            <div class="icon-badge" data-section="why-us" data-field="munkatars_badge">👷</div>
+            <h3 class="icon-card-title" data-section="why-us" data-field="munkatars_title">Precíz munkatársak</h3>
+            <p class="icon-card-body" data-section="why-us" data-field="munkatars_text">
               Hozzáértő szakemberekből álló csapatunk magas szintű szakmai előképzettséggel dolgozik.
             </p>
           </article>
 
           <article class="icon-card">
-            <div class="icon-badge">🏭</div>
-            <h3 class="icon-card-title">Bőséges raktárkészlet</h3>
-            <p class="icon-card-body">
+            <div class="icon-badge" data-section="why-us" data-field="keszlet_badge">🏭</div>
+            <h3 class="icon-card-title" data-section="why-us" data-field="keszlet_title">Bőséges raktárkészlet</h3>
+            <p class="icon-card-body" data-section="why-us" data-field="keszlet_text">
               A leggyakrabban használt termékekből mindig tartunk raktáron a gyors kiszolgálás érdekében.
             </p>
           </article>
-        </div>
+        </div>-->
+
+        <div id="whyus-grid" class="icon-grid"></div>
+
       </div>
     </section>
 
@@ -1320,17 +2183,17 @@
     <section id="motto">
       <div class="container">
         <div class="motto-block">
-          <div class="motto-title">Mottónk</div>
-          <div class="motto-text">
+          <div class="motto-title" data-section="motto" data-field="motto_title">Mottónk</div>
+          <div class="motto-text" data-section="motto" data-field="motto_text">
             Tudjuk, hogy egy nem megfelelő minőségű termék miatti rossz szájíz tovább tart, mint az alacsony ár okozta
             pillanatnyi öröm. Hiszünk abban, hogy az árat nem egy olcsóbb termék, hanem a minőség határozza meg.
             Ezért mi a megbízható minőségű, csalódásmentes termékek mellett köteleztük el magunkat.
           </div>
           <div class="refs-cta">
-            <div class="refs-cta-text">
+            <div class="refs-cta-text" data-section="motto" data-field="refs_text">
               Nézze meg korábbi munkáinkról készült referencia fotóinkat, és inspirálódjon a megvalósult projektekből.
             </div>
-            <a id="references-link" href="#references" class="btn-ghost">
+            <a id="references-link" href="#references" class="btn-ghost" style="color: #222222" data-section="motto" data-field="refs_link">
               Referencia fotók iránt érdeklődöm
             </a>
           </div>
@@ -1342,9 +2205,9 @@
     <section id="references">
       <div class="container">
         <div class="section-header">
-          <div class="section-kicker">Referenciák</div>
-          <h2 class="section-title">Korábbi munkáink</h2>
-          <p class="section-lead">
+          <div class="section-kicker" data-section="references" data-field="refs_kicker">Referenciák</div>
+          <h2 class="section-title" data-section="references" data-field="refs_title">Korábbi munkáink</h2>
+          <p class="section-lead" data-section="references" data-field="refs_lead">
             Néhány kiemelt projektünk az elmúlt időszakból. A fotók az admin felületen keresztül tölthetők fel,
             és automatikusan megjelennek itt.
           </p>
@@ -1354,7 +2217,7 @@
           <!-- A kártyákat JavaScript tölti be -->
         </div>
 
-        <p id="references-empty" class="references-empty" style="display:none;">
+        <p id="references-empty" class="references-empty" style="display:none;" data-section="references" data-field="refs_empty_text">
           Jelenleg még nincs feltöltött referencia fotó. Amint hozzáadsz képeket az admin felületen,
           itt automatikusan megjelennek.
         </p>
@@ -1365,73 +2228,112 @@
     <section id="contact">
       <div class="container">
         <div class="section-header">
-          <div class="section-kicker">Kapcsolat</div>
-          <h2 class="section-title">Vegye fel velünk a kapcsolatot</h2>
-          <p class="section-lead">
+          <div class="section-kicker" data-section="contact" data-field="contact_kicker">Kapcsolat</div>
+          <h2 class="section-title" data-section="contact" data-field="contact_title">Vegye fel velünk a kapcsolatot</h2>
+          <p class="section-lead" data-section="contact" data-field="contact_text_main">
             Ha termékeinkkel vagy szolgáltatásainkkal kapcsolatban kérdése van, vagy szaktanácsra lenne szüksége,
             forduljon hozzánk bizalommal – szívesen segítünk.
           </p>
         </div>
 
         <div class="contact-grid">
-          <div class="contact-card">
-            <p class="icon-card-body" style="margin-bottom:1.2rem;">
-              Küldje el elképzelését, és kollégáink rövid időn belül felveszik Önnel a kapcsolatot
-              egy személyre szabott ajánlattal. Az alábbi elérhetőségeken is rendelkezésére állunk.
-            </p>
-            <button class="btn-primary" style="width:100%;justify-content:center;box-shadow: none;">
-              Ajánlatkérés e-mailben
-            </button>
-            <p class="contact-highlight">
-              Tipp: csatoljon fotót, méreteket és rövid leírást, így gyorsabban tudunk pontos ajánlatot adni.
-            </p>
+          <!--<div class="contact-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <p class="icon-card-body" style="margin-bottom:1.2rem;" data-section="contact" data-field="contact_text">
+                  Küldje el elképzelését, és kollégáink rövid időn belül felveszik Önnel a kapcsolatot
+                  egy személyre szabott ajánlattal. Az alábbi elérhetőségeken is rendelkezésére állunk.
+                </p>
+              </div>
+              <div>
+                <button
+                  class="btn-primary"
+                  style="width:100%;justify-content:center;box-shadow:none;"
+                  data-section="contact"
+                  data-field="contact_mail"
+                  onclick="window.location.href='mailto:mesztorkaputechnika1@gmail.com';"
+                >
+                  Ajánlatkérés e-mailben
+                </button>
+
+                <p class="contact-highlight" data-section="contact" data-field="contact_highlight">
+                  Tipp: csatoljon fotót, méreteket és rövid leírást, így gyorsabban tudunk pontos ajánlatot adni.
+                </p>
+              </div>
+          </div>-->
+
+          <div class="form-container">
+              <div class="form">
+                  <span class="heading" data-section="contact" data-field="contact_heading">Lépjen velünk kapcsolatba!</span>
+                  <p class="icon-card-body" style="margin-bottom:1.2rem;" data-section="contact" data-field="contact_text">
+                    Küldje el elképzelését, és kollégáink rövid időn belül felveszik Önnel a kapcsolatot
+                    egy személyre szabott ajánlattal. Az alábbi elérhetőségeken is rendelkezésére állunk.
+                  </p>
+                  <input placeholder="Név" type="text" class="input">
+                  <input placeholder="Email" id="mail" type="email" class="input">
+                  <textarea placeholder="Üzenet" rows="10" cols="30" id="message" name="message" class="textarea"></textarea>
+                  <p class="contact-highlight" data-section="contact" data-field="contact_highlight">
+                    Tipp: csatoljon fotót, méreteket és rövid leírást, így gyorsabban tudunk pontos ajánlatot adni.
+                  </p>
+                  <div class="button-container">
+                  <div class="send-button" style="cursor: pointer;">Küldés</div>
+              </div>
+          </div>
           </div>
 
           <div class="contact-card">
             <div class="contact-item">
-              <div class="contact-icon">📞</div>
+              <div class="contact-icon" data-section="contact" data-field="contact_t_icon">📞</div>
               <div>
-                <div class="contact-label">Telefon</div>
-                <div>06-22-331-332</div>
-                <div>Mobil: 06-20-977-09-07</div>
+                <div class="contact-label" data-section="contact" data-field="contact_t_label">Telefon</div>
+                <div data-section="contact" data-field="contact_telo">06-22-331-332</div>
+                <div data-section="contact" data-field="contact_mobil">Mobil: 06-20-977-09-07</div>
               </div>
             </div>
 
             <div class="contact-item">
-              <div class="contact-icon">✉️</div>
+              <div class="contact-icon" data-section="contact" data-field="contact_m_icon">✉️</div>
               <div>
-                <div class="contact-label">E-mail</div>
-                <div>mesztorkaputechnika1@gmail.com</div>
+                <div class="contact-label" data-section="contact" data-field="contact_m_label">E-mail</div>
+                <div data-section="contact" class="contactemail" data-field="contact_m_address">mesztorkaputechnika1@gmail.com</div>
               </div>
             </div>
 
             <div class="contact-item">
-              <div class="contact-icon">📍</div>
+              <div class="contact-icon" data-section="contact" data-field="contact_l_icon">📍</div>
               <div>
-                <div class="contact-label">Bemutatóterem</div>
-                <div>Székesfehérvár, Berényi út 81.</div>
-                <div class="contact-highlight">
+                <div class="contact-label" data-section="contact" data-field="contact_l_label">Bemutatóterem</div>
+                <div data-section="contact" data-field="contact_l_address">Székesfehérvár, Berényi út 81.</div>
+                <div class="contact-highlight" data-section="contact" data-field="contact_openhour">
                   Ügyfélfogadás: Hétfő–Péntek 8:00–12:00 és 13:00–17:00
                 </div>
               </div>
             </div>
 
             <div class="contact-item">
-              <div class="contact-icon">👍</div>
+              <div class="contact-icon" data-section="contact" data-field="contact_f_icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
+                  <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
+                </svg>
+              </div>
               <div>
-                <div class="contact-label">Facebook</div>
-                <div>/mesztorkaputechnika</div>
+                <div class="contact-label">
+                  <a href="https://facebook.com/mesztorkaputechnika" target="_blank" rel="noopener">
+                    <span data-section="contact" data-field="contact_f_label">Facebook</span>
+                  </a>
+                </div>
+                <div>
+                  <a href="https://facebook.com/mesztorkaputechnika" target="_blank" rel="noopener">
+                    <span data-section="contact" data-field="contact_f_address">/mesztorkaputechnika</span>
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-
-          <div class="contact-card-map">
+            <div class="contact-card-map">
             <div class="contact-map">
               <div class="contact-map-frame">
                 <iframe
                   loading="lazy"
-                  style="width:100%; margin:0px; border:none; border-radius: 24px;height: 250px;"
+                  style="width:100%; margin:0px; border:thin solid lightgrey; border-radius: 24px;height: 250px;"
                   allowfullscreen
                   referrerpolicy="no-referrer-when-downgrade"
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2711.5744152118177!2d18.427701676388274!3d47.20340921573286!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4769f7c6a3f97fab%3A0x18808bf47ea10725!2sMesz-Tor%20Kft.%20-%20Kaputechnika!5e0!3m2!1shu!2shu!4v1762281591018!5m2!1shu!2shu">
@@ -1439,6 +2341,10 @@
               </div>
             </div>
           </div>
+          </div>
+        </div>
+
+          
 
       </div>
     </section>
@@ -1448,7 +2354,7 @@
   <!-- Footer -->
   <footer>
     <div class="container footer-inner">
-      <div>© MESZ-TOR Kft. – Kaputechnikai szaküzlet, Székesfehérvár</div>
+      <div data-section="footer" data-field="footer_copyright">© MESZ-TOR Kft. – Kaputechnikai szaküzlet, Székesfehérvár</div>
       <div class="footer-links">
         <a href="#hero">Kezdőlap</a>
         <a href="#">Általános szerződési feltételek</a>
@@ -1461,6 +2367,9 @@
     <script type="module">
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, update, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZUGCJkn9L4xH_M8L0fZYTUresZ9qYPqo",
@@ -1476,44 +2385,258 @@
     const gridEl  = document.getElementById("references-grid");
     const emptyEl = document.getElementById("references-empty");
 
+    const suppliersGrid  = document.getElementById("suppliers-grid");
+    const suppliersEmpty = document.getElementById("suppliers-empty");
+
+
     let app;
     let db;
+    let fs;
     let firebaseEnabled = false;
 
     try {
       if (firebaseConfig.apiKey) {
         app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-        db  = getDatabase(app);
+        db  = getDatabase(app);      // RTDB: csak ha használod (pl. analitika)
+        fs  = getFirestore(app);     // Firestore: tartalom innen jön
         firebaseEnabled = true;
       }
-    } catch (e) {
-      console.warn("[firebase] init hiba – demo mód:", e);
+    } catch (err) {
+      console.warn("[firebase] init hiba – demo mód:", err);
       firebaseEnabled = false;
     }
 
-        /* ------------ LAYOUT → NAV (layoutBoards alapján) ------------ */
+    let auth;
+    let currentUser = null;
+
+    auth = getAuth(app);
+    onAuthStateChanged(auth, (u)=> currentUser = u);
+
+    const sliderSection = document.getElementById("hero-slider");
+    const trackEl       = document.getElementById("heroSliderTrack");
+    const dotsEl        = document.getElementById("heroSliderDots");
+    const prevBtn       = document.getElementById("heroSliderPrev");
+    const nextBtn       = document.getElementById("heroSliderNext");
+
+    let slides = [];
+    let currentIndex = 0;
+    let autoplayTimer = null;
+    const AUTOPLAY_MS = 6000;
+
+    function updateSliderPosition() {
+      if (!trackEl || !slides.length) return;
+      const offset = currentIndex * -100;
+      trackEl.style.transform = `translateX(${offset}%)`;
+
+      if (dotsEl) {
+        const dots = dotsEl.querySelectorAll(".hero-slider-dot");
+        dots.forEach((dot, idx) => {
+          if (idx === currentIndex) {
+            dot.classList.add("is-active");
+          } else {
+            dot.classList.remove("is-active");
+          }
+        });
+      }
+    }
+
+    function goToSlide(index) {
+      if (!slides.length) return;
+      const max = slides.length;
+      currentIndex = (index + max) % max;
+      updateSliderPosition();
+    }
+
+    function nextSlide() {
+      goToSlide(currentIndex + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentIndex - 1);
+    }
+
+    function startAutoplay() {
+      if (autoplayTimer || slides.length <= 1) return;
+      autoplayTimer = setInterval(nextSlide, AUTOPLAY_MS);
+    }
+
+    function stopAutoplay() {
+      if (!autoplayTimer) return;
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+
+    function renderHeroSlider(items) {
+      if (!sliderSection || !trackEl || !dotsEl) return;
+
+      if (!items || !items.length) {
+        sliderSection.style.display = "none";
+        return;
+      }
+
+      sliderSection.style.display = "";
+      trackEl.innerHTML = "";
+      dotsEl.innerHTML = "";
+
+      slides = items.slice();
+
+      items.forEach((item, idx) => {
+        const slideEl = document.createElement("article");
+        slideEl.className = "hero-slide";
+
+        if (item.imageUrl) {
+          const img = document.createElement("img");
+          img.src = item.imageUrl;
+          img.alt = item.title || "Slider kép";
+          img.loading = "lazy";
+          slideEl.appendChild(img);
+        }
+
+        if (item.title || item.subtitle) {
+          const overlay = document.createElement("div");
+          overlay.className = "hero-slide-overlay";
+
+          if (item.title) {
+            const h = document.createElement("div");
+            h.className = "hero-slide-title";
+            h.textContent = item.title;
+            overlay.appendChild(h);
+          }
+
+          if (item.subtitle) {
+            const p = document.createElement("div");
+            p.className = "hero-slide-subtitle";
+            p.textContent = item.subtitle;
+            overlay.appendChild(p);
+          }
+
+          slideEl.appendChild(overlay);
+        }
+
+        trackEl.appendChild(slideEl);
+
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "hero-slider-dot";
+        dot.setAttribute("aria-label", `Ugrás a(z) ${idx + 1}. slider képre`);
+        dot.addEventListener("click", () => {
+          stopAutoplay();
+          goToSlide(idx);
+          startAutoplay();
+        });
+        dotsEl.appendChild(dot);
+      });
+
+      currentIndex = 0;
+      updateSliderPosition();
+      startAutoplay();
+    }
+
+    async function loadHeroSlider() {
+      if (!sliderSection || !trackEl) return;
+
+      if (!firebaseEnabled || !fs) {
+        sliderSection.style.display = "none";
+        return;
+      }
+
+      try {
+        const snap = await getDocs(collection(fs, "heroSlider"));
+        if (snap.empty) {
+          sliderSection.style.display = "none";
+          return;
+        }
+
+        const items = snap.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...(docSnap.data() || {})
+          }))
+          .map((d) => ({
+            id: d.id,
+            title: d.title || "",
+            subtitle: d.subtitle || "",
+            imageUrl: d.imageUrl || d.imageDataUrl || "",
+            createdAt: d.createdAt || 0,
+            order: d.order ?? null,
+          }))
+          .sort((a, b) => {
+            const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : null;
+            const bo = Number.isFinite(Number(b.order)) ? Number(b.order) : null;
+            if (ao != null && bo != null) return ao - bo;
+            if (ao != null) return -1;
+            if (bo != null) return 1;
+            return (a.createdAt || 0) - (b.createdAt || 0);
+          });
+
+
+        renderHeroSlider(items);
+      } catch (err) {
+        console.warn("[heroSlider] betöltés hiba:", err);
+        sliderSection.style.display = "none";
+      }
+    }
+
+    if (prevBtn) prevBtn.addEventListener("click", () => {
+      stopAutoplay();
+      prevSlide();
+      startAutoplay();
+    });
+
+    if (nextBtn) nextBtn.addEventListener("click", () => {
+      stopAutoplay();
+      nextSlide();
+      startAutoplay();
+    });
+
+    if (sliderSection) {
+      sliderSection.addEventListener("mouseenter", stopAutoplay);
+      sliderSection.addEventListener("mouseleave", startAutoplay);
+      sliderSection.addEventListener("focusin", stopAutoplay);
+      sliderSection.addEventListener("focusout", startAutoplay);
+    }
+
+    /* ------------ LAYOUT → NAV (layoutBoards alapján) ------------ */
+
 
     const navLinksEl = document.querySelector(".main-nav .nav-links");
     let navClickHandlerAttached = false;
 
-    // Tartalom betöltés + adminPreview esetén inline szerkesztés + nav
+    // Tartalom betöltés + adminPreview esetén inline szerkesztés
     if (firebaseEnabled) {
       initContentInline().catch(err => console.warn("Tartalom betöltés hiba:", err));
-      initLayoutNav().catch(err => console.warn("Layout/nav betöltés hiba:", err));
     }
+
+    // Statikus nav: kattintáskezelő + csak desktopon "legördülős" dropdown
+    if (navLinksEl) {
+      attachNavClickHandler();
+      attachDropdownHoverFix();
+    }
+
 
     // layout-kulcs → fallback section ID
     const KEY_FALLBACK_IDS = {
-      "miert-mi": "why-us",
-      "szolgaltatasok": "services",
-      "projects": "motto",
-      "footer": "footer",
+      hero: "hero",
+      "termekek-attekintes": "products",
+      "garazskapuk": "products",
+      "ipari-kapuk": "products",
+      "kapumozgatok": "products",
+      "automata-bejaratok": "products",
+      "miert-mesztor": "why-us",
+      "top-beszallitok": "top-partners",   
+      "kiemelt-szolgaltatasok": "services",
+      "helyszini-felmeres": "services",
+      "tanacsadas": "services",
+      "gyors-szerviz": "services",
+      "munkafolyamat": "services",
+      "referencia-garazskapuk": "references",
+      "referencia-ipari-kapuk": "references",
+      "referencia-fotok": "references",
       "kapcsolat-form": "contact",
-      "kapcsolat-map": "contact",
-      "referenciak": "references",
-      "top-termekek": "products",
-      "top-beszallitok": "products"
+      "kapcsolat-map": "contact"
     };
+
+    
+
 
     function findSectionByKey(key) {
       if (!key) return null;
@@ -1544,83 +2667,807 @@
       return null;
     }
 
-    function attachNavClickHandler() {
-      if (!navLinksEl || navClickHandlerAttached) return;
-      navClickHandlerAttached = true;
+    
+    // ----- Szekciók mutatása / elrejtése (Kapcsolat full-screen mód) -----
+    const mainEl = document.querySelector("main");
+    const PAGE_SECTIONS = mainEl ? Array.from(mainEl.querySelectorAll("section")) : [];
 
-      // Delegált kattintás: bármelyik A / BUTTON, amin van data-section-key
-      navLinksEl.addEventListener("click", (e) => {
-        const t = e.target;
-        if (!(t instanceof HTMLElement)) return;
+    function isContactKey(key) {
+      return key === "kapcsolat-form" || key === "kapcsolat-map" || key === "contact";
+    }
 
-        const withKey = t.closest("[data-section-key]");
-        const key = withKey?.dataset.sectionKey;
+    function showOnlyContactSection() {
+      if (!PAGE_SECTIONS.length) return;
+      PAGE_SECTIONS.forEach((sec) => {
+        // a contact rész lehet egyetlen section (id="contact"), de ha később több contact rész lesz,
+        // akkor azokat is megtartjuk (pl. kapcsolat-form / kapcsolat-map)
+        if (sec.id === "contact" || isContactKey(sec.id)) {
+          sec.style.display = "";
+        } else {
+          sec.style.display = "none";
+        }
+      });
+    }
+
+function showAllSections() {
+      if (!PAGE_SECTIONS.length) return;
+      PAGE_SECTIONS.forEach((sec) => {
+        sec.style.display = "";
+      });
+    }
+
+    
+      function attachNavClickHandler() {
+        if (!navLinksEl || navClickHandlerAttached) return;
+        navClickHandlerAttached = true;
+
+        navLinksEl.addEventListener("click", (e) => {
+          const t = e.target;
+          if (!(t instanceof HTMLElement)) return;
+
+          // minden nav linket kezelünk, ami az oldalon belüli hash-re mutat (#...)
+          const a = t.closest("a[href]");
+          if (!a || !navLinksEl.contains(a)) return;
+
+          const href = (a.getAttribute("href") || "").trim();
+          const hashKey = href.startsWith("#") ? href.slice(1) : "";
+
+          // elsődlegesen data-section-key, de ha nincs, akkor a href hash legyen a kulcs
+          const key = (a.dataset.sectionKey || hashKey).trim();
+          if (!key) return;
+
+          e.preventDefault();
+
+          // Kapcsolat: csak a contact szekció maradjon látható
+          if (isContactKey(key)) {
+            showOnlyContactSection();
+          } else {
+            // bármely más menü visszaállítja az egész oldalt
+            showAllSections();
+          }
+
+          const secEl = findSectionByKey(key);
+          if (secEl) {
+            secEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          } else {
+            // ha nincs konkrét szekció, menjünk fel a tetejére
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+
+          // URL hash frissítés (ugrás nélkül)
+          try {
+            history.pushState(null, "", "#" + key);
+          } catch (_) {}
+
+          // mobil menü zárása kattintás után
+          if (navLinksEl.classList.contains("open")) {
+            navLinksEl.classList.remove("open");
+            const btn = document.querySelector(".nav-toggle");
+            if (btn?.classList.contains("open")) btn.classList.remove("open");
+          }
+        });
+      }
+
+// --- Dropdown hover javítás: kis késleltetéssel zárjuk csak be ---
+    function attachDropdownHoverFix() {
+      if (!navLinksEl) return;
+
+      const items = navLinksEl.querySelectorAll(".nav-item.has-dropdown");
+
+      items.forEach((item) => {
+        // ha már rá van kötve, ne duplázzuk az eventeket
+        if (item.dataset.dropdownHoverWired === "1") return;
+        item.dataset.dropdownHoverWired = "1";
+
+        const dropdown = item.querySelector(".nav-dropdown");
+        if (!dropdown) return;
+
+        let hideTimer = null;
+
+        const open = () => {
+          if (hideTimer) {
+            clearTimeout(hideTimer);
+            hideTimer = null;
+          }
+          item.classList.add("dropdown-open");
+        };
+
+        const scheduleClose = () => {
+          hideTimer = window.setTimeout(() => {
+            item.classList.remove("dropdown-open");
+          }, 120); // 0.12 mp elég, hogy átérj a gap-en
+        };
+
+        // ha a felső menüre visszamész
+        item.addEventListener("mouseenter", open);
+        item.addEventListener("mouseleave", scheduleClose);
+
+        // ha a lenyílóra mész rá / onnan jössz le
+        dropdown.addEventListener("mouseenter", open);
+        dropdown.addEventListener("mouseleave", scheduleClose);
+      });
+    }
+
+    // --- Dropdown meta adatok: ikon + szöveg ---
+const NAV_DROPDOWN_HIDDEN_KEYS = new Set(["hero", "footer"]);
+
+const NAV_CARD_META = {
+  "mirt-mi": {
+    icon: "⭐",
+    label: "Miért mi?",
+    sub: "Legfontosabb előnyeink, miért érdemes velünk dolgozni.",
+    path: "#why-us"
+  },
+  "szolgltatsok": {
+    icon: "🛠️",
+    label: "Szolgáltatásaink",
+    sub: "Tanácsadás, kivitelezés, szerviz – a teljes folyamat egy kézben."
+  },
+  "projects": {
+    icon: "📐",
+    label: "Termékválaszték",
+    sub: "Rövid mottó + ajánlatkérés blokk a lap alján."
+  },
+  "referencik": {
+    icon: "📸",
+    label: "Referenciák",
+    sub: "Elkészült garázs- és ipari kapuink, fotókkal."
+  },
+  "top-termekek": {
+    icon: "📦",
+    label: "Top termékek",
+    sub: "Legnépszerűbb kaputechnikai megoldásaink."
+  },
+  "beszllt-partnereink": {
+    icon: "🏢",
+    label: "Top beszállítók",
+    sub: "Megbízható gyártók, akikkel együtt dolgozunk."
+  }
+};
+
+/* ------------ WHY-US – kártyák Firestore-ból ------------ */
+
+const whyUsGrid = document.getElementById("whyus-grid");
+let whyUsCache = [];
+
+const demoWhyUs = [
+  { id:"whyus1", badge:"⭐", title:"Magas minőségű termékek", body:"Minőségi kaputechnikai megoldások, hosszú élettartammal." },
+  { id:"whyus2", badge:"🧱", title:"Széles választék", body:"Garázskapu, ipari kapu, sorompó, kiegészítők — több gyártótól." },
+  { id:"whyus3", badge:"🛡️", title:"Kiemelt garanciák", body:"Megbízható beszállítói háttér és garanciális támogatás." },
+  { id:"whyus4", badge:"🤝", title:"Vevőbarát ügyfélszolgálat", body:"Segítünk választani, tervezni, és végigkísérjük a folyamatot." },
+  { id:"whyus5", badge:"👷", title:"Tapasztalt csapat", body:"Szakértelem felméréstől a kivitelezésig és szervizig." },
+  { id:"whyus6", badge:"📦", title:"Raktár / gyors beszerzés", body:"Népszerű termékek elérhetők, egyediekre gyors beszerzést adunk." }
+];
+
+// FONTOS: ezt nálatok már használja a services is – ne definiáld duplán!
+/* const isAdminPreview = new URLSearchParams(location.search).has("adminPreview"); */
+
+function normalizeWhyUs(d){
+  return {
+    id: d?.id ?? null,
+    badge: d?.badge || "⭐",
+    title: d?.title || "",
+    body: d?.body || "",
+    orderIndex: (typeof d?.orderIndex === "number") ? d.orderIndex : 0,
+    createdAt: d?.createdAt || 0,
+    updatedAt: d?.updatedAt || 0
+  };
+}
+
+function renderWhyUs(items, { admin=false } = {}){
+  if(!whyUsGrid) return;
+
+  const arr = (items || [])
+    .map(normalizeWhyUs)
+    .sort((a,b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0) || (a.createdAt ?? 0) - (b.createdAt ?? 0));
+
+  whyUsCache = arr;
+  whyUsGrid.innerHTML = "";
+
+  arr.forEach(item => whyUsGrid.appendChild(createWhyUsCard(item, { admin })));
+  if(admin) whyUsGrid.appendChild(createAddWhyUsCard());
+}
+
+function createWhyUsCard(item, { admin=false } = {}){
+  const card = document.createElement("article");
+  card.className = "icon-card";
+
+  const badge = document.createElement("div");
+  badge.className = "icon-badge";
+  badge.textContent = item.badge || "⭐";
+
+  const title = document.createElement("div");
+  title.className = "icon-card-title";
+  title.textContent = item.title || "";
+
+  const body = document.createElement("div");
+  body.className = "icon-card-text";
+  body.textContent = item.body || "";
+
+  card.append(badge, title, body);
+
+  // ugyanaz a CSS/UX, mint a services-nél (új CSS nem kell)
+  if(admin && firebaseEnabled && fs && item.id){
+    const actions = document.createElement("div");
+    actions.className = "svc-admin-actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "svc-admin-btn";
+    editBtn.textContent = "✏️";
+    editBtn.title = "Szerkesztés";
+    editBtn.onclick = () => editWhyUs(item);
+
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "svc-admin-btn danger";
+    delBtn.textContent = "🗑️";
+    delBtn.title = "Törlés";
+    delBtn.onclick = () => deleteWhyUs(item);
+
+    actions.append(editBtn, delBtn);
+    card.append(actions);
+  }
+
+  return card;
+}
+
+function createAddWhyUsCard(){
+  const card = document.createElement("article");
+  card.className = "icon-card icon-card-add";
+
+  const badge = document.createElement("div");
+  badge.className = "icon-badge icon-badge-add";
+  badge.textContent = "+";
+
+  const title = document.createElement("div");
+  title.className = "icon-card-title";
+  title.textContent = "Új kártya";
+
+  const text = document.createElement("div");
+  text.className = "icon-card-text";
+  text.textContent = "Kattints ide a hozzáadáshoz.";
+
+  card.append(badge, title, text);
+  card.onclick = () => addWhyUs();
+
+  return card;
+}
+
+async function addWhyUs(){
+  if(!firebaseEnabled || !fs) return alert("A Firebase nincs inicializálva / nincs bejelentkezés.");
+
+  const badge = prompt("Ikon (emoji):", "✨");
+  if(badge === null) return;
+
+  const title = prompt("Cím:", "");
+  if(title === null) return;
+
+  const body = prompt("Leírás:", "");
+  if(body === null) return;
+
+  const maxOrder = whyUsCache.reduce((m,it)=>Math.max(m, (typeof it.orderIndex==="number" ? it.orderIndex : 0)), -1);
+  const id = doc(collection(fs, "whyUs")).id;
+
+  const payload = { badge, title, body, orderIndex: maxOrder + 1, createdAt: Date.now(), updatedAt: Date.now() };
+
+  try{
+    await setDoc(doc(fs, "whyUs", id), payload);
+    await loadWhyUs();
+  }catch(err){
+    console.warn("[whyUs] mentés hiba:", err);
+    alert("Nem sikerült menteni.");
+  }
+}
+
+async function editWhyUs(item){
+  if(!firebaseEnabled || !fs || !item?.id) return;
+
+  const badge = prompt("Ikon (emoji):", item.badge || "✨");
+  if(badge === null) return;
+
+  const title = prompt("Cím:", item.title || "");
+  if(title === null) return;
+
+  const body = prompt("Leírás:", item.body || "");
+  if(body === null) return;
+
+  try{
+    await setDoc(doc(fs, "whyUs", item.id), { badge, title, body, updatedAt: Date.now() }, { merge:true });
+    await loadWhyUs();
+  }catch(err){
+    console.warn("[whyUs] szerkesztés hiba:", err);
+    alert("Nem sikerült menteni.");
+  }
+}
+
+async function deleteWhyUs(item){
+  if(!firebaseEnabled || !fs || !item?.id) return;
+  if(!confirm("Biztosan törlöd ezt a kártyát?")) return;
+
+  try{
+    await deleteDoc(doc(fs, "whyUs", item.id));
+    await loadWhyUs();
+  }catch(err){
+    console.warn("[whyUs] törlés hiba:", err);
+    alert("Nem sikerült törölni.");
+  }
+}
+
+async function loadWhyUs(){
+  if(!whyUsGrid) return;
+
+  if(!firebaseEnabled || !fs){
+    renderWhyUs(demoWhyUs, { admin: isAdminPreview });
+    return;
+  }
+
+  try{
+    const snap = await getDocs(collection(fs, "whyUs"));
+    const items = snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
+
+    // ha üres a collection, legyen demo (adminban így “seedelhető” szerkesztéssel)
+    renderWhyUs(items.length ? items : demoWhyUs, { admin: isAdminPreview });
+  }catch(err){
+    console.warn("[whyUs] betöltés hiba:", err);
+    renderWhyUs(demoWhyUs, { admin: isAdminPreview });
+  }
+}
+
+function applyHeroImageFromContent() {
+  const img = document.getElementById("hero-image");
+  if (!img) return;
+
+  // contentSections/hero -> heroImageSrc
+  const src = sectionsCache?.hero?.heroImageSrc || sectionsCache?.hero?.heroImage || "";
+  if (src) img.src = src;
+}
+
+function pickImageFile() {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = () => resolve(input.files?.[0] || null);
+    input.click();
+  });
+}
+
+function estimateBase64Bytes(dataUrl) {
+  const i = dataUrl.indexOf("base64,");
+  if (i < 0) return dataUrl.length;
+  const b64 = dataUrl.slice(i + 7);
+  return Math.floor((b64.length * 3) / 4); // közelítés
+}
+
+async function fileToResizedJpegDataUrl(file, maxW, quality) {
+  const dataUrl = await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+
+  const img = await new Promise((resolve, reject) => {
+    const im = new Image();
+    im.onload = () => resolve(im);
+    im.onerror = reject;
+    im.src = dataUrl;
+  });
+
+  const w0 = img.width || 1;
+  const h0 = img.height || 1;
+  const ratio = Math.min(maxW / w0, 1);
+  const w = Math.round(w0 * ratio);
+  const h = Math.round(h0 * ratio);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, w, h);
+
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
+async function compressForFirestore(file) {
+  // Firestore doc limit ~1MiB, hagyjunk tartalékot
+  const LIMIT = 900_000;
+
+  const widths = [1400, 1200, 1000, 900, 800];
+  const qualities = [0.85, 0.75, 0.65, 0.55];
+
+  for (const maxW of widths) {
+    for (const q of qualities) {
+      const out = await fileToResizedJpegDataUrl(file, maxW, q);
+      if (estimateBase64Bytes(out) <= LIMIT) return out;
+    }
+  }
+  return null;
+}
+
+function setupHeroImageAdminEdit() {
+  const img = document.getElementById("hero-image");
+  if (!img) return;
+  if (!inlineEditMode || !firebaseEnabled || !fs) return;
+
+  img.style.cursor = "pointer";
+  img.title = "Kattints a kép cseréjéhez (admin)";
+
+  img.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!currentUser) {
+      alert("A kép cseréjéhez be kell jelentkezned (admin).");
+      return;
+    }
+
+    const file = await pickImageFile();
+    if (!file) return;
+
+    try {
+      const dataUrl = await compressForFirestore(file);
+      if (!dataUrl) {
+        alert("A kép túl nagy. Válassz kisebb fájlt, vagy vágd/mentésd le kisebbre.");
+        return;
+      }
+
+      await setDoc(
+        doc(fs, "contentSections", "hero"),
+        { heroImageSrc: dataUrl, updatedAt: Date.now() },
+        { merge: true }
+      );
+
+      img.src = dataUrl;
+    } catch (err) {
+      console.warn("[hero-image] mentés hiba:", err);
+      alert("Nem sikerült menteni a képet (lehet adblock / jogosultság / hálózat).");
+    }
+  });
+}
+
+
+/* ------------ SZOLGÁLTATÁSAINK – kártyák Firestore-ból ------------ */
+
+const servicesGrid = document.getElementById("services-grid");
+let servicesCache = [];
+
+const demoServices = [
+  { badge:"📝", title:"Ajánlat készítés", body:"Gyors, személyre szabott, díjmentes árajánlat készítése az Ön igényeire szabva." },
+  { badge:"📐", title:"Felmérés", body:"Precíz helyszíni felmérés szakképzett munkatársunk által, a legjobb műszaki megoldás érdekében." },
+  { badge:"💬", title:"Szaktanácsadás", body:"Hozzáértő kollégáink segítenek eligazodni a termékek, méretek és műszaki lehetőségek között." },
+  { badge:"🚚", title:"Szállítás", body:"Szakszerű, sérülésmentes szállítás a kaputechnikai termékek sajátosságainak figyelembevételével." },
+  { badge:"🛠", title:"Beüzemelés", body:"Magas színvonalú beszerelés és beüzemelés, hogy az új kapu hosszú távon megbízhatóan működjön." },
+  { badge:"🔧", title:"Szervizelés, javítás", body:"Márkafüggetlen kaputechnikai termékek javítása, karbantartása, gyors reakcióval." }
+];
+
+const isAdminPreview = new URLSearchParams(location.search).has("adminPreview");
+
+function normalizeService(d){
+  return {
+    id: d.id || null,
+    badge: d.badge || d.icon || "🔧",
+    title: d.title || "",
+    body: d.body || d.text || "",
+    orderIndex: typeof d.orderIndex === "number" ? d.orderIndex : 0,
+    createdAt: d.createdAt || 0
+  };
+}
+
+async function addService(){
+  if(!firebaseEnabled || !fs) return;
+
+  const badge = (prompt("Ikon (emoji):", "🔧") || "").trim();
+  if(!badge) return;
+
+  const title = (prompt("Cím:", "") || "").trim();
+  if(!title) return;
+
+  const body = (prompt("Leírás:", "") || "").trim();
+  if(!body) return;
+
+  const maxOrder = servicesCache.reduce(
+    (m,it)=>Math.max(m, (typeof it.orderIndex==="number"? it.orderIndex : 0)),
+    -1
+  );
+
+  const id = doc(collection(fs, "services")).id;
+  const payload = {
+    badge, title, body,
+    orderIndex: maxOrder + 1,
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+
+  try{
+    await setDoc(doc(fs, "services", id), payload);
+    await loadServices();
+  }catch(err){
+    console.warn("[services] mentés hiba:", err);
+    alert("Nem sikerült menteni.");
+  }
+}
+
+async function editService(item){
+  if(!firebaseEnabled || !fs || !item?.id) return;
+
+  const badge = prompt("Ikon (emoji):", item.badge || "🔧");
+  if(badge === null) return;
+
+  const title = prompt("Cím:", item.title || "");
+  if(title === null) return;
+
+  const body = prompt("Leírás:", item.body || "");
+  if(body === null) return;
+
+  try{
+    await setDoc(
+      doc(fs, "services", item.id),
+      { badge: badge.trim(), title: title.trim(), body: body.trim(), updatedAt: Date.now() },
+      { merge:true }
+    );
+    await loadServices();
+  }catch(err){
+    console.warn("[services] szerkesztés hiba:", err);
+    alert("Nem sikerült menteni.");
+  }
+}
+
+function createServiceCard(item, {admin=false}={}){
+  const card = document.createElement("article");
+  card.className = "icon-card";
+
+  const badge = document.createElement("div");
+  badge.className = "icon-badge";
+  badge.textContent = item.badge || "🔧";
+
+  const title = document.createElement("div");
+  title.className = "icon-card-title";
+  title.textContent = item.title || "";
+
+  const body = document.createElement("div");
+  body.className = "icon-card-text";
+  body.textContent = item.body || "";
+
+  card.appendChild(badge);
+  card.appendChild(title);
+  card.appendChild(body);
+
+  if (admin && item.id && firebaseEnabled && fs){
+    const actions = document.createElement("div");
+    actions.className = "svc-admin-actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.type="button";
+    editBtn.className="svc-admin-btn";
+    editBtn.textContent="✏️";
+    editBtn.title="Szerkesztés";
+    editBtn.addEventListener("click", async (ev)=>{
+      ev.stopPropagation();
+      await editService(item);
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.type="button";
+    delBtn.className="svc-admin-btn";
+    delBtn.textContent="🗑️";
+    delBtn.title="Törlés";
+    delBtn.addEventListener("click", async (ev)=>{
+      ev.stopPropagation();
+      if (!confirm("Biztosan törlöd ezt a szolgáltatás kártyát?")) return;
+
+      try{
+        await deleteDoc(doc(fs, "services", item.id));
+        await loadServices();
+      }catch(err){
+        console.warn("[services] törlés hiba:", err);
+        alert("Nem sikerült törölni.");
+      }
+    });
+
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+    card.appendChild(actions);
+  }
+
+  return card;
+}
+
+function createAddServiceCard(){
+  const add = document.createElement("article");
+  add.className="icon-card icon-card-add";
+  add.innerHTML = `
+    <div class="icon-badge icon-badge-add">+</div>
+    <div class="icon-card-title">Új kártya</div>
+    <div class="icon-card-text">Kattints a hozzáadáshoz</div>
+  `;
+  add.addEventListener("click", addService);
+  return add;
+}
+
+function renderServices(items, {admin=false}={}){
+  if(!servicesGrid) return;
+
+  servicesGrid.innerHTML = "";
+  servicesCache = (items || []).map(normalizeService);
+
+  servicesCache.sort((a,b)=>{
+    if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
+    return (a.createdAt || 0) - (b.createdAt || 0);
+  });
+
+  servicesCache.forEach(it => servicesGrid.appendChild(createServiceCard(it, {admin})));
+
+  if (admin) servicesGrid.appendChild(createAddServiceCard());
+}
+
+async function loadServices(){
+  if(!servicesGrid) return;
+
+  // nincs Firebase → demo
+  if(!firebaseEnabled || !fs){
+    renderServices(demoServices, {admin:false});
+    renderServices(demoServices, {admin:isAdminPreview});
+    return;
+  }
+
+  try{
+    const snap = await getDocs(collection(fs,"services"));
+    if(snap.empty){
+      // ha még üres a kollekció, maradjon a demo – adminPreview-ben megjelenik a + kártya
+      renderServices(demoServices, {admin:isAdminPreview});
+      return;
+    }
+
+    const items = snap.docs.map(d => ({ id:d.id, ...(d.data() || {}) }));
+    renderServices(items, {admin:isAdminPreview});
+  }catch(err){
+    console.warn("[services] betöltés hiba:", err);
+    renderServices(demoServices, {admin:false});
+    renderServices(demoServices, {admin:isAdminPreview});
+  }
+}
+
+
+
+
+
+function buildNavFromBoard(board) {
+  if (!navLinksEl || !board || !Array.isArray(board.lists) || !board.lists.length) return;
+
+  // Eredeti CTA felirat elmentése, mielőtt töröljük a navot
+  const existingCtaBtn = document.querySelector(".nav-cta");
+  const ctaText = existingCtaBtn?.textContent?.trim() || "Ajánlatkérés";
+
+  // Statikus nav kiürítése
+  navLinksEl.innerHTML = "";
+
+  // Path → melyik nav szöveg mezőhöz tartozzon
+  const resolveNavFieldForPath = (path) => {
+    const p = (path || "/").toLowerCase().trim();
+
+    if (p === "/" || p === "/index" || p === "/fooldal") return "navHome";
+    if (p.startsWith("/termek")) return "navProducts";
+    if (p.startsWith("/szolgal")) return "navServices";
+    if (p.startsWith("/miert") || p.startsWith("/rolunk")) return "navWhyUs";
+    if (p.startsWith("/refer")) return "navReferences";
+    if (p.startsWith("/kapcsolat") || p.startsWith("/contact")) return "navContact";
+
+    return null;
+  };
+
+  board.lists.forEach((list) => {
+    const cards = Array.isArray(list.cards) ? list.cards : [];
+    const listTitle = list.title || "Oldal";
+    const path = (list.path || "/").trim();
+    const navField = resolveNavFieldForPath(path);
+
+    const navItem = document.createElement("div");
+    navItem.className = "nav-item";
+
+    const primaryCard = cards[0];
+    const primaryKey = primaryCard?.key || "";
+
+    const topLink = document.createElement("a");
+    topLink.href = "#";
+    topLink.textContent = listTitle;
+
+    // ide ugrik a fő menüpont kattintáskor
+    if (primaryKey) {
+      topLink.dataset.sectionKey = primaryKey;
+    }
+
+    // adminPreview módhoz
+    if (navField) {
+      topLink.dataset.section = "site";
+      topLink.dataset.field = navField;
+    }
+
+    navItem.appendChild(topLink);
+
+    // Kapcsolat lista: ne legyen dropdown
+    const isContactList =
+      navField === "navContact" ||
+      cards.some((c) => c.key === "kapcsolat-form" || c.key === "kapcsolat-map");
+
+    // Többi listánál, ha több kártya van → dropdown
+    if (!isContactList && cards.length > 1) {
+      navItem.classList.add("has-dropdown");
+
+      const dd = document.createElement("div");
+      dd.className = "nav-dropdown";
+
+      cards.forEach((card) => {
+        const key = card.key || "";
         if (!key) return;
 
-        e.preventDefault();
+        // hero/footer NE jelenjen meg a dropdownban
+        if (NAV_DROPDOWN_HIDDEN_KEYS.has(key)) return;
 
-        const secEl = findSectionByKey(key);
-        if (secEl) {
-          secEl.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
-    }
+        const meta = NAV_CARD_META[key] || {};
 
-    function buildNavFromBoard(board) {
-      if (!navLinksEl || !board?.lists?.length) return;
+        const a = document.createElement("a");
+        a.href = meta.path || "#";
+        a.addEventListener("click", (e) => {
+          e.preventDefault(); // ne kövesse a href-et
+          const target = document.getElementById(meta.path  );
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth" });
+          }
+        });
+        a.className = "nav-dd-item";
+        a.dataset.sectionKey = key;
 
-      // Eredeti CTA felirat elmentése, mielőtt töröljük a navot
-      const existingCtaBtn = document.querySelector(".nav-cta");
-      const ctaText = existingCtaBtn?.textContent?.trim() || "Ajánlatkérés";
+        const iconSpan = document.createElement("span");
+        iconSpan.className = "nav-dd-icon";
+        iconSpan.textContent = meta.icon || "•";
 
-      // kiürítjük a statikus navot
-      navLinksEl.innerHTML = "";
+        const mainSpan = document.createElement("span");
+        mainSpan.className = "nav-dd-main";
 
-      board.lists.forEach((list) => {
-        const cards = Array.isArray(list.cards) ? list.cards : [];
-        const listTitle = list.title || "Oldal";
+        const titleSpan = document.createElement("span");
+        titleSpan.className = "nav-dd-title";
+        // ha van meta label, azt használjuk, különben a kártya címét
+        titleSpan.textContent = meta.label || card.title || card.key || "";
 
-        const navItem = document.createElement("div");
-        navItem.className = "nav-item";
+        mainSpan.appendChild(titleSpan);
 
-        const firstKey = cards[0]?.key || "";
-
-        const topLink = document.createElement("a");
-        topLink.href = "#";
-        topLink.textContent = listTitle;
-        if (firstKey) topLink.dataset.sectionKey = firstKey;
-        navItem.appendChild(topLink);
-
-        if (cards.length > 1) {
-          navItem.classList.add("has-dropdown");
-          const dd = document.createElement("div");
-          dd.className = "nav-dropdown";
-
-          cards.forEach((card) => {
-            const a = document.createElement("a");
-            a.href = "#";
-            a.textContent = card.title || card.key || "";
-            if (card.key) a.dataset.sectionKey = card.key;
-            dd.appendChild(a);
-          });
-
-          navItem.appendChild(dd);
+        if (meta.sub) {
+          const subSpan = document.createElement("span");
+          subSpan.className = "nav-dd-sub";
+          subSpan.textContent = meta.sub;
+          mainSpan.appendChild(subSpan);
         }
 
-        navLinksEl.appendChild(navItem);
+        a.appendChild(iconSpan);
+        a.appendChild(mainSpan);
+
+        dd.appendChild(a);
       });
 
-      // CTA gomb a végére (kapcsolat szekcióra ugorva)
-      const ctaBtn = document.createElement("button");
-      ctaBtn.type = "button";
-      ctaBtn.className = "nav-cta";
-      ctaBtn.textContent = ctaText;
-      // fallback a contact szekcióra:
-      ctaBtn.dataset.sectionKey = "kapcsolat-form";
-      navLinksEl.appendChild(ctaBtn);
-
-      attachNavClickHandler();
+      navItem.appendChild(dd);
     }
+
+    navLinksEl.appendChild(navItem);
+  });
+
+  // CTA gomb a nav végén – ez is kap data-section / data-field-et
+  const ctaBtn = document.createElement("button");
+  ctaBtn.type = "button";
+  ctaBtn.className = "nav-cta";
+  ctaBtn.textContent = ctaText;
+  ctaBtn.dataset.sectionKey = "kapcsolat-form";
+  ctaBtn.dataset.section = "site";
+  ctaBtn.dataset.field = "navCtaText";
+
+  navLinksEl.appendChild(ctaBtn);
+
+  attachNavClickHandler();
+  attachDropdownHoverFix();
+}
+
+
 
     // A főoldali szekciók sorrendjének igazítása a "/" path-ú lista alapján
     function reorderSectionsFromBoard(board) {
@@ -1669,13 +3516,13 @@
     }
 
     async function initLayoutNav() {
-      if (!firebaseEnabled || !db || !navLinksEl) return;
+      if (!firebaseEnabled || !fs || !navLinksEl) return;
       try {
         // Itt volt a bug: /board végű útvonalat olvastunk,
         // de az admin közvetlenül settings/layoutBoards alá menti a boardot.
-        const snap = await get(ref(db, "settings/layoutBoards"));
+        const snap = await getDoc(doc(fs, "settings", "layoutBoards"));
         if (!snap.exists()) return;
-        const board = snap.val();
+        const board = snap.data();
         if (board && Array.isArray(board.lists) && board.lists.length) {
           buildNavFromBoard(board);
           reorderSectionsFromBoard(board);
@@ -1695,10 +3542,12 @@
     let sectionsCache = {};
 
     async function loadContentSections() {
-      if (!firebaseEnabled || !db) return;
+      if (!firebaseEnabled || !fs) return;
       try {
-        const snap = await get(ref(db, "content/sections"));
-        sectionsCache = snap.exists() ? (snap.val() || {}) : {};
+        const snap = await getDocs(collection(fs, "contentSections"));
+        const tmp = {};
+        snap.forEach(d => { tmp[d.id] = d.data() || {}; });
+        sectionsCache = tmp;
       } catch (err) {
         console.warn("[content] betöltés hiba:", err);
         sectionsCache = {};
@@ -1757,7 +3606,7 @@
           sectionsCache[section].updatedAt = Date.now();
 
           try {
-            await set(ref(db, `content/sections/${section}`), sectionsCache[section]);
+            await setDoc(doc(fs, "contentSections", section), sectionsCache[section]);
             el.style.outlineColor = "#16a34a";
             setTimeout(() => { el.style.outlineColor = ""; }, 800);
           } catch (err) {
@@ -1774,11 +3623,133 @@
       if (!firebaseEnabled || !db) return;
       await loadContentSections();
       applyContentSectionsToDom();
+      applyHeroImageFromContent(); 
       initInlineEditing();
+      setupHeroImageAdminEdit();
     }
 
+            /* ------------ Referencia kép modal (csak desktopon) ------------ */
+    const referenceModalBackdrop = document.getElementById("reference-modal");
+    const referenceModalImage    = document.getElementById("reference-modal-image");
+    const referenceModalCloseBtn = document.getElementById("reference-modal-close");
+    const referenceModalPrevBtn  = document.getElementById("reference-modal-prev");
+    const referenceModalNextBtn  = document.getElementById("reference-modal-next");
+    const referenceModalTitleEl  = document.getElementById("reference-modal-title");
+    const referenceModalCountEl  = document.getElementById("reference-modal-counter");
 
-    /* ------------ REFERENCIÁK – Realtime Database-ből ------------ */
+    function isDesktop() {
+      return window.matchMedia("(min-width: 801px)").matches;
+    }
+
+    // A modalban lapozható referencia-galéria (csak képpel rendelkező elemek)
+    let referenceGallery = [];
+    let referenceGalleryIndex = 0;
+
+    function isReferenceModalOpen() {
+      return !!referenceModalBackdrop && referenceModalBackdrop.classList.contains("open");
+    }
+
+    function mod(n, m) {
+      return ((n % m) + m) % m;
+    }
+
+    function setReferenceGallery(items) {
+      referenceGallery = (Array.isArray(items) ? items : []).filter(it => it && it.imageUrl);
+      referenceGalleryIndex = 0;
+    }
+
+    function updateReferenceModal() {
+      if (!referenceModalImage) return;
+      if (!referenceGallery.length) return;
+
+      const item = referenceGallery[referenceGalleryIndex];
+
+      referenceModalImage.src = item.imageUrl || "";
+      referenceModalImage.alt = item.title || "Referencia fotó";
+
+      if (referenceModalTitleEl) {
+        referenceModalTitleEl.textContent = item.title || "";
+      }
+      if (referenceModalCountEl) {
+        referenceModalCountEl.textContent = `${referenceGalleryIndex + 1}/${referenceGallery.length}`;
+      }
+
+      const canNav = referenceGallery.length > 1;
+      if (referenceModalPrevBtn) referenceModalPrevBtn.style.display = canNav ? "" : "none";
+      if (referenceModalNextBtn) referenceModalNextBtn.style.display = canNav ? "" : "none";
+    }
+
+    function openReferenceModalAt(index) {
+      if (!isDesktop()) return; // csak asztali nézetben
+      if (!referenceModalBackdrop || !referenceModalImage) return;
+      if (!referenceGallery.length) return;
+
+      referenceGalleryIndex = mod(Number(index) || 0, referenceGallery.length);
+      referenceModalBackdrop.classList.add("open");
+      referenceModalBackdrop.setAttribute("aria-hidden", "false");
+      updateReferenceModal();
+    }
+
+    function stepReference(delta) {
+      if (!referenceGallery.length) return;
+      referenceGalleryIndex = mod(referenceGalleryIndex + delta, referenceGallery.length);
+      updateReferenceModal();
+    }
+
+    function closeReferenceModal() {
+      if (!referenceModalBackdrop || !referenceModalImage) return;
+      referenceModalBackdrop.classList.remove("open");
+      referenceModalBackdrop.setAttribute("aria-hidden", "true");
+      referenceModalImage.src = "";
+      if (referenceModalTitleEl) referenceModalTitleEl.textContent = "";
+      if (referenceModalCountEl) referenceModalCountEl.textContent = "";
+    }
+
+    if (referenceModalBackdrop) {
+      // háttérre kattintás = bezárás
+      referenceModalBackdrop.addEventListener("click", (e) => {
+        if (e.target === referenceModalBackdrop) {
+          closeReferenceModal();
+        }
+      });
+    }
+
+    if (referenceModalCloseBtn) {
+      referenceModalCloseBtn.addEventListener("click", () => {
+        closeReferenceModal();
+      });
+    }
+
+    if (referenceModalPrevBtn) {
+      referenceModalPrevBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        stepReference(-1);
+      });
+    }
+
+    if (referenceModalNextBtn) {
+      referenceModalNextBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        stepReference(+1);
+      });
+    }
+
+    // Billentyűk: ESC = zárás, nyilak = lapozás (csak ha a modal nyitva van)
+    document.addEventListener("keydown", (e) => {
+      if (!isReferenceModalOpen()) return;
+
+      if (e.key === "Escape") {
+        closeReferenceModal();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        stepReference(-1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        stepReference(+1);
+      }
+    });
+
+/* ------------ REFERENCIÁK – Realtime Database-ből ------------ */
 
     const demoItems = [
       {
@@ -1798,6 +3769,18 @@
       }
     ];
 
+    const demoSuppliers = [
+      { name: "Hörmann Hungária Kft." },
+      { name: "Automata Bejáratok Specialistája Kft." },
+      { name: "Roll-N Kft." },
+      { name: "Overgate Kft." },
+      { name: "Overgate Kft." },
+      { name: "Motors For Gate Kft." },
+      { name: "Kapuker Kft." },
+      { name: "Gal-La Bt." }
+    ];
+
+
     function renderReferences(items) {
       if (!gridEl) return;
 
@@ -1805,9 +3788,14 @@
 
       if (!items || !items.length) {
         if (emptyEl) emptyEl.style.display = "block";
+        // modal lapozólista is ürül
+        if (typeof setReferenceGallery === "function") setReferenceGallery([]);
         return;
       }
       if (emptyEl) emptyEl.style.display = "none";
+
+      // A modalhoz: csak a képpel rendelkező referenciák listája, ugyanabban a sorrendben
+      const gallery = [];
 
       items.forEach(item => {
         const card = document.createElement("article");
@@ -1819,8 +3807,18 @@
         if (item.imageUrl) {
           const img = document.createElement("img");
           img.src = item.imageUrl;
-          img.alt = item.title || "Referencia fotó";
+          img.alt = item.title || "Referencia";
           img.loading = "lazy";
+
+          // felvesszük a galériába, és eltesszük az indexét a lapozáshoz
+          const galleryIndex = gallery.length;
+          gallery.push(item);
+
+          // Kattintásra nagy kép modal – csak desktopon nyit ki
+          img.addEventListener("click", () => {
+            openReferenceModalAt(galleryIndex);
+          });
+
           imgWrap.appendChild(img);
         }
 
@@ -1842,28 +3840,31 @@
         card.appendChild(info);
         gridEl.appendChild(card);
       });
+
+      // frissítjük a modal lapozható listáját
+      if (typeof setReferenceGallery === "function") setReferenceGallery(gallery);
     }
 
     async function loadReferences() {
       if (!gridEl) return;
 
-      if (!firebaseEnabled || !db) {
+      if (!firebaseEnabled || !fs) {
         renderReferences(demoItems);
         return;
       }
 
       try {
-        const snap = await get(ref(db, "references"));
-        if (!snap.exists()) {
+        const snap = await getDocs(collection(fs, "references"));
+        if (snap.empty) {
           renderReferences(demoItems);
           return;
         }
 
-        const val = snap.val() || {};
-        const items = Object.entries(val)
-          .map(([key, d]) => ({
+        const items = snap.docs
+          .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() || {}) }))
+          .map((d) => ({
             title: d.title || "",
-            description: d.description || "",
+            description: d.description || d.desc || "",
             imageUrl: d.imageUrl || d.imageDataUrl || "",
             createdAt: d.createdAt || 0
           }))
@@ -1878,8 +3879,186 @@
     }
 
     loadReferences();
+    loadHeroSlider();
 
-    
+        function renderSuppliers(items) {
+      if (!suppliersGrid) return;
+
+      if (!items || !items.length) {
+        suppliersGrid.innerHTML = "";
+        if (suppliersEmpty) suppliersEmpty.style.display = "block";
+        return;
+      }
+
+      if (suppliersEmpty) suppliersEmpty.style.display = "none";
+
+      suppliersGrid.innerHTML = items.map((item) => {
+        const name = item.name || "";
+        const subtitle = item.subtitle || "";
+        const imgSrc = item.imageUrl || item.imageDataUrl || "";
+        const first = name.trim().charAt(0).toUpperCase() || "M";
+
+        const logoHtml = imgSrc
+          ? `<img src="${imgSrc}" alt="${name || "Beszállító"} logója" loading="lazy" />`
+          : `<div class="partner-logo-placeholder">${first}</div>`;
+
+        return `
+          <div class="partner-card">
+            <div class="partner-logo">
+              ${logoHtml}
+            </div>
+            <div class="partner-name">${name}</div>
+            ${subtitle ? `<div class="partner-subtitle">${subtitle}</div>` : ""}
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadSuppliers() {
+      if (!suppliersGrid) return;
+
+      // Ha nincs Firebase (demo mód), akkor csak a neveket mutatjuk
+      if (!firebaseEnabled || !fs) {
+        renderSuppliers(demoSuppliers);
+        return;
+      }
+
+      try {
+        const snap = await getDocs(collection(fs, "suppliers"));
+        if (snap.empty) {
+          renderSuppliers(demoSuppliers);
+          return;
+        }
+
+        const items = snap.docs
+          .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() || {}) }))
+          .map((d) => ({
+            id: d.id,
+            name: d.name || "",
+            subtitle: d.subtitle || "",
+            imageUrl: d.imageUrl || d.imageDataUrl || "",
+            orderIndex: typeof d.orderIndex === "number" ? d.orderIndex : 0,
+            createdAt: d.createdAt || 0
+          }))
+          .sort((a, b) => {
+            if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
+            return (b.createdAt || 0) - (a.createdAt || 0);
+          });
+
+        renderSuppliers(items);
+      } catch (err) {
+        console.warn("[suppliers] Realtime DB hiba – demo lista:", err);
+        renderSuppliers(demoSuppliers);
+      }
+    }
+
+    /* ------------ TERMÉKVÁLASZTÉK – termékek listázása ------------ */
+
+    const termekGrid = document.getElementById("termekvalasztek-grid");
+    const termekEmpty = document.getElementById("termekvalasztek-empty");
+
+    function renderProducts(items) {
+      if (!termekGrid) return;
+
+      termekGrid.innerHTML = "";
+
+      if (!items || !items.length) {
+        if (termekEmpty) termekEmpty.style.display = "block";
+        return;
+      }
+
+      if (termekEmpty) termekEmpty.style.display = "none";
+
+      items.forEach((item) => {
+        const card = document.createElement("article");
+        card.className = "product-grid-card";
+
+        const goToDetails = () => {
+          if (!item.id) return;
+          window.location.href = `details.html?id=${encodeURIComponent(item.id)}`;
+        };
+
+        card.addEventListener("click", goToDetails);
+
+        if (item.imageUrl) {
+          const imgWrap = document.createElement("div");
+          imgWrap.className = "product-grid-card-image";
+
+          const img = document.createElement("img");
+          img.src = item.imageUrl;
+          img.alt = item.name || "Termék fotója";
+          img.loading = "lazy";
+
+          imgWrap.appendChild(img);
+          card.appendChild(imgWrap);
+        }
+
+        const titleEl = document.createElement("h3");
+        titleEl.className = "product-grid-card-title";
+        titleEl.textContent = item.name || "Termék";
+        card.appendChild(titleEl);
+
+        if (item.shortDescription) {
+          const shortEl = document.createElement("p");
+          shortEl.className = "product-grid-card-desc";
+          shortEl.textContent = item.shortDescription;
+          card.appendChild(shortEl);
+        }
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-primary";
+        btn.textContent = "Részletek";
+        btn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          goToDetails();
+        });
+        card.appendChild(btn);
+
+        termekGrid.appendChild(card);
+      });
+    }
+
+    async function loadProducts() {
+      if (!termekGrid) return;
+
+      // Ha nincs Firebase (demo mód), csak üres lista
+      if (!firebaseEnabled || !fs) {
+        renderProducts([]);
+        return;
+      }
+
+      try {
+        const snap = await getDocs(collection(fs, "products"));
+        if (snap.empty) {
+          renderProducts([]);
+          return;
+        }
+
+        const items = snap.docs
+          .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() || {}) }))
+          .map((d) => ({
+            id: d.id,
+            name: d.name || "",
+            shortDescription: d.shortDescription || d.tagline || "",
+            longDescription: d.longDescription || d.description || "",
+            imageUrl: d.imageUrl || d.imageDataUrl || "",
+            createdAt: d.createdAt || 0
+          }))
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        renderProducts(items);
+      } catch (err) {
+        console.warn("[products] Realtime DB hiba:", err);
+        renderProducts([]);
+      }
+    }
+
+
+    loadSuppliers();
+    loadProducts();
+    loadServices();
+    loadWhyUs();
 
     /* ------------ ANALITIKA – ugyanaz a logika, mint eddig ------------ */
 
@@ -1950,7 +4129,6 @@
         userAgent: navigator.userAgent || ""
       }).catch(err => console.warn("[analytics] set hiba:", err));
 
-      // periodikus frissítés
       sendSnapshot();
       const intId = setInterval(sendSnapshot, 15000);
 
@@ -1961,8 +4139,6 @@
     }
   </script>
 
-
-
   <script>
     const navToggle = document.querySelector(".nav-toggle");
     const navLinks  = document.querySelector(".nav-links");
@@ -1972,7 +4148,6 @@
         navLinks.classList.toggle("open");
       });
 
-      // delegált kattintás, minden A/BUTTON-ra
       navLinks.addEventListener("click", (e) => {
         const t = e.target;
         if (!(t instanceof HTMLElement)) return;
@@ -1984,6 +4159,196 @@
       });
     }
   </script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // --- EmailJS azonosítók (IDE ÍRD BE A SAJÁTJAID) ---
+  const EMAILJS_PUBLIC_KEY  = "tTB4VQzyRgCLmFqu_";
+  const EMAILJS_SERVICE_ID  = "service_kmotyjg";
+  const EMAILJS_TEMPLATE_ID = "template_yuao2x9";
+
+  // --- Form elemek megfogása ---
+  const formWrap = document.querySelector(".form-container");
+  if (!formWrap) return;
+
+  const nameEl  = formWrap.querySelector('input[placeholder="Név"]') || formWrap.querySelector("#name");
+  const mailEl  = formWrap.querySelector("#mail") || formWrap.querySelector('input[type="email"]');
+  const msgEl   = formWrap.querySelector("#message") || formWrap.querySelector("textarea");
+  const sendBtn = formWrap.querySelector(".send-button");
+  const resetBtn = formWrap.querySelector("#reset-btn");
+
+  // Ha a "Küldés" div, legyen keyboard-barát is
+  if (sendBtn) {
+    sendBtn.setAttribute("role", "button");
+    sendBtn.tabIndex = 0;
+  }
+
+  // Státusz sor
+  let statusEl = formWrap.querySelector(".form-status");
+  if (!statusEl) {
+    statusEl = document.createElement("div");
+    statusEl.className = "form-status";
+    statusEl.style.cssText = "margin-top:10px;font-size:14px;";
+    formWrap.appendChild(statusEl);
+  }
+
+  // Honeypot (alap spam ellen)
+  const hp = document.createElement("input");
+  hp.type = "text";
+  hp.name = "company";
+  hp.autocomplete = "off";
+  hp.tabIndex = -1;
+  hp.style.cssText = "position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;";
+  formWrap.appendChild(hp);
+
+  const setStatus = (txt, kind = "info") => {
+    statusEl.textContent = txt || "";
+    statusEl.style.color =
+      kind === "ok"  ? "#16a34a" :
+      kind === "err" ? "#dc2626" : "#475569";
+  };
+
+  const disableSend = (disabled) => {
+    if (!sendBtn) return;
+    sendBtn.style.pointerEvents = disabled ? "none" : "auto";
+    sendBtn.style.opacity = disabled ? "0.6" : "1";
+  };
+
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  async function emailjsSend(templateParams) {
+    // EmailJS REST API (nincs külső lib)
+    const payload = {
+      service_id: EMAILJS_SERVICE_ID,
+      template_id: EMAILJS_TEMPLATE_ID,
+      user_id: EMAILJS_PUBLIC_KEY,
+      template_params: templateParams
+    };
+
+    const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      throw new Error("EmailJS HTTP " + res.status);
+    }
+  }
+
+  async function handleSend() {
+    // bot check
+    if (hp.value && hp.value.trim()) return;
+
+    const from_name = (nameEl?.value || "").trim();
+    const reply_to  = (mailEl?.value || "").trim();
+    const message   = (msgEl?.value || "").trim();
+
+    if (!from_name || !reply_to || !message) {
+      setStatus("Kérlek töltsd ki a Név, Email és Üzenet mezőket.", "err");
+      return;
+    }
+    if (!isValidEmail(reply_to)) {
+      setStatus("Kérlek érvényes email címet adj meg.", "err");
+      return;
+    }
+
+    // egyszerű throttle (1 üzenet / 60 mp / böngésző)
+    const key = "contact_last_send_ts";
+    const last = Number(localStorage.getItem(key) || 0);
+    if (Date.now() - last < 60_000) {
+      setStatus("Kérlek várj egy percet két üzenet között.", "err");
+      return;
+    }
+
+    if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
+      setStatus("Hiányzik az EmailJS PUBLIC_KEY / SERVICE_ID / TEMPLATE_ID a kódból.", "err");
+      return;
+    }
+
+    disableSend(true);
+    setStatus("Küldés folyamatban…");
+
+    try {
+      await emailjsSend({
+        from_name,
+        reply_to,
+        message,
+        page_url: location.href,
+        sent_at: new Date().toISOString()
+      });
+
+      localStorage.setItem(key, String(Date.now()));
+      setStatus("Elküldve ✅ Köszönjük! Hamarosan jelentkezünk.", "ok");
+
+      if (nameEl) nameEl.value = "";
+      if (mailEl) mailEl.value = "";
+      if (msgEl) msgEl.value = "";
+    } catch (e) {
+      console.warn("[contactForm] küldés hiba:", e);
+      setStatus("Sikertelen küldés. Próbáld újra, vagy írj e-mailt közvetlenül.", "err");
+    } finally {
+      disableSend(false);
+    }
+  }
+
+  // kattintás + billentyű
+  sendBtn?.addEventListener("click", (e) => { e.preventDefault(); handleSend(); });
+  sendBtn?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSend(); }
+  });
+
+  resetBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (nameEl) nameEl.value = "";
+    if (mailEl) mailEl.value = "";
+    if (msgEl) msgEl.value = "";
+    setStatus("");
+  });
+});
+</script>
+
+
+  <!-- Referencia kép nagy nézet (csak desktopon) -->
+  <div id="reference-modal" class="reference-modal-backdrop" aria-hidden="true">
+    <div class="reference-modal" role="dialog" aria-modal="true" aria-label="Referencia fotó">
+      <button
+        type="button"
+        id="reference-modal-close"
+        class="reference-modal-close"
+        aria-label="Bezárás"
+      >
+        ×
+      </button>
+
+      <button
+        type="button"
+        id="reference-modal-prev"
+        class="reference-modal-nav reference-modal-prev"
+        aria-label="Előző referencia"
+        title="Előző (←)"
+      >
+        ‹
+      </button>
+
+      <button
+        type="button"
+        id="reference-modal-next"
+        class="reference-modal-nav reference-modal-next"
+        aria-label="Következő referencia"
+        title="Következő (→)"
+      >
+        ›
+      </button>
+
+      <div class="reference-modal-meta" aria-live="polite">
+        <div id="reference-modal-title" class="reference-modal-title"></div>
+        <div id="reference-modal-counter" class="reference-modal-counter"></div>
+      </div>
+
+      <img id="reference-modal-image" src="" alt="Referencia nagyban" />
+    </div>
+  </div>
 
 </body>
 </html>
