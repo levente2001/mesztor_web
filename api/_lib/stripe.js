@@ -6,6 +6,7 @@ const MAX_BODY = 1024 * 1024;
 async function stripeRequest(method, path, params = null, extraHeaders = {}) {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key || !/^sk_(test|live)_/.test(key)) throw new Error("Stripe server configuration missing");
+  if (key.startsWith("sk_live_") && process.env.STRIPE_ENABLE_LIVE !== "true") throw new Error("Live Stripe charges are disabled until explicitly enabled");
   const response = await fetch(API_BASE + path, {
     method,
     headers: {
