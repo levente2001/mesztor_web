@@ -56,3 +56,5 @@ npm run build
 - A teljes fizetési folyamatot manuálisan is végig kell tesztelni **test módban**, a megfelelő titkok beállítása után. Sikeres Vercel build nem helyettesíti a fizetés működési tesztjét.
 
 **Egyelőre sem éles Stripe-kulcsot, sem terhelést, sem Production deployt nem állítottunk be.**
+
+**Éles fizetés biztonsági kapcsoló:** a szerver kifejezetten elutasítja a `sk_live_...` kulccsal indított kéréseket, amíg a `STRIPE_ENABLE_LIVE=true` környezeti változó nincs beállítva. Ezt csak a teljes tesztelés, céges Stripe-aktiválás, adózási/jogi tájékoztatás, rendelésfeldolgozás és szerveroldali jogosultságellenőrzés után állítsd be a Production környezetben. A Preview alatt maradjon kikapcsolva.
