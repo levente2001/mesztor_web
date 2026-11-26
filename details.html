@@ -302,6 +302,7 @@
             >
               Ajánlatkérés e-mailben
             </button>
+            <a href="./shop.html" class="btn-primary" style="display:inline-block;text-align:center;text-decoration:none;background:#D96C06;">Webshop és kosár megnyitása →</a>
           </div>
         </div>
 
@@ -321,6 +322,7 @@
   <script type="module">
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZUGCJkn9L4xH_M8L0fZYTUresZ9qYPqo",
@@ -374,16 +376,26 @@
       }
 
       try {
-        const snap = await get(ref(db, "products/" + id));
-        if (!snap.exists()) {
+        // A meglévő termékadatok elsődleges forrása Firestore.
+        // A korábbi Realtime Database útvonal megtartva visszafelé kompatibilitásként.
+        let data = null;
+        try {
+          const firestoreSnap = await getDoc(doc(getFirestore(app), "products", id));
+          if (firestoreSnap.exists()) data = firestoreSnap.data();
+        } catch (firestoreError) {
+          console.warn("[details] Firestore olvasási hiba, RTDB tartalék:", firestoreError);
+        }
+        if (!data) {
+          const snap = await get(ref(db, "products/" + id));
+          if (snap.exists()) data = snap.val();
+        }
+        if (!data) {
           statusEl.textContent = "A keresett termék nem található.";
           statusEl.classList.add("error");
           if (noImgEl) noImgEl.textContent = "Nincs ilyen termék.";
           titleEl.textContent = "Ismeretlen termék";
           return;
         }
-
-        const data = snap.val() || {};
         const name = data.name || "Termék";
         const short = data.shortDescription || data.tagline || "";
         const long = data.longDescription || data.description || "";
