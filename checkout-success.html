@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fizetés állapota – MESZ-TOR Kft.</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{background:#eee;color:#222;font-family:Montserrat,system-ui,sans-serif;margin:0;min-height:100vh;display:flex;flex-direction:column}
+header{background:#fff;padding:20px max(20px,calc((100vw - 1150px)/2));border-bottom:1px solid #ddd;font-weight:700}header a{text-decoration:none;color:#222}
+main{flex:1;max-width:700px;margin:60px auto;padding:0 20px;width:100%}.panel{background:#fff;border-radius:18px;padding:34px 28px}h1{font-size:clamp(23px,4vw,32px);margin:0 0 16px}.muted{color:#6b7280;line-height:1.7}.btn{display:inline-block;border-radius:10px;background:#222;color:#fff;text-decoration:none;padding:12px 18px;font-weight:600;margin-top:15px}.small{font-size:12px}footer{text-align:center;padding:22px;background:#222;color:#fff;font-size:12px}
+</style></head><body><header><a href="./index.html">MESZ-TOR Kft. – Kaputechnikai szaküzlet</a></header>
+<main><section class="panel"><h1 id="title">Fizetés ellenőrzése...</h1><p id="message" class="muted">A Stripe visszaigazolását kérdezzük le.</p>
+<a href="./shop.html" class="btn">Vissza a webshopba</a></section></main><footer>© MESZ-TOR Kft.</footer>
+<script>
+(async()=>{
+ const title=document.getElementById("title"),message=document.getElementById("message");
+ const sessionId=new URLSearchParams(location.search).get("session_id");
+ if(!sessionId){title.textContent="Nincs fizetési azonosító";message.textContent="Ezt az oldalt a Stripe-fizetési folyamat után lehet megnyitni.";return}
+ try{
+  const response=await fetch("/api/payment-status?session_id="+encodeURIComponent(sessionId),{cache:"no-store"});
+  if(!response.ok)throw new Error("Status request failed");
+  const status=(await response.json()).status;
+  if(status==="paid"){
+    title.textContent="Sikeres fizetés!";
+    message.textContent="A Stripe visszaigazolta a bankkártyás fizetést. A rendelés feldolgozása megkezdődhet. A fizetésről szóló bizonylatot a Stripe küldheti el a megadott e-mail-címre.";
+    sessionStorage.removeItem("mesztor_webshop_cart");
+  } else if(status==="expired"){
+    title.textContent="A fizetési folyamat lejárt";
+    message.textContent="A fizetés nem fejeződött be. A webshopban új fizetést indíthatsz.";
+  } else {
+    title.textContent="A fizetés feldolgozás alatt van";
+    message.textContent="Még nincs végleges Stripe-visszaigazolás. Ne indíts új fizetést, amíg az állapot nem tisztázódik.";
+  }
+ }catch{
+  title.textContent="A fizetés állapota nem ellenőrizhető";
+  message.textContent="Ne fizess újra automatikusan! A Stripe terhelését és a fizetés státuszát előbb ellenőrizni kell.";
+ }
+})();
+</script></body></html>

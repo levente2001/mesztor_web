@@ -9,7 +9,8 @@ export default defineConfig({
         admin: resolve(import.meta.dirname, 'admin.html'),
         details: resolve(import.meta.dirname, 'details.html'),
         login: resolve(import.meta.dirname, 'login.html'),
-        shop: resolve(import.meta.dirname, 'shop.html')
+        shop: resolve(import.meta.dirname, 'shop.html'),
+        checkoutSuccess: resolve(import.meta.dirname, 'checkout-success.html')
       }
     }
   }
